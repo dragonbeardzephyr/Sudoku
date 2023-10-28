@@ -15,6 +15,8 @@ def server_run():
     # configure how many client the server can listen simultaneously
     server_socket.listen(1)
     conn, address = server_socket.accept()  # accept new connection
+
+    
     print("Connection from: " + str(address))
     while True:
         # receive data stream. it won't accept data packet greater than 1024 bytes
