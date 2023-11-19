@@ -15,9 +15,6 @@ class puzzle:
                         [9, 0, 4, 0, 8, 0, 7, 0, 5],
                         [6, 0, 0, 1, 0, 7, 0, 0, 3] ]
                     
-        self.__emptySpaces = []
-
-
 
     def show_grid(self):
         for i in self.__grid:
@@ -31,14 +28,11 @@ class puzzle:
         self.__grid[row][col] = n
         
 
-    def find_Empty_Spaces(self):
-        for y in range(9):
-            for x in range(9):
-                if self.__grid[y][x] == 0:
-                    self.__emptySpaces.append((y, x))
-
-    def getEmpty(self):
-        return self.__emptySpaces
+    def find_Empty_Space(self):
+        for row in range(9):
+            for col in range(9):
+                if self.__grid[row][col] == 0:
+                    return (row, col)
 
     def check(self, row, col, num):#return false if there are any mistakes
 
@@ -63,15 +57,18 @@ class puzzle:
     def solve(self):
 
         #x = input()#used as next button as i am testign right now
-        self.show_grid()
         
-        self.find_Empty_Spaces()
-        if len(self.__emptySpaces) == 0:
+        
+        pos = self.find_Empty_Space()
+        if pos == None:
             return True
-        
-        pos = self.__emptySpaces[0]
-        self.__emptySpaces.remove(pos)
+    
+
         row, col = pos[0], pos[1]
+
+        self.show_grid()
+        print(f"Pos: {pos}")
+        print()
 
         for n in range(1, 10):
 
@@ -80,9 +77,10 @@ class puzzle:
                 
                 if self.solve():
                     return True
-                #self.insert(row, col, 0)#if a solve does not happen then position goes back to zero in case further backtracking needed
-        
+                
+                self.insert(row, col, 0)#if a solve does not happen then position goes back to zero in case further backtracking needed
 
+        return False
 
     def generate(self):
         pass
@@ -90,7 +88,7 @@ class puzzle:
 
 
 puzzle1 = puzzle()
-puzzle1.find_Empty_Spaces()
-print(puzzle1.getEmpty())
+puzzle1.find_Empty_Space()
 puzzle1.show_grid()
 puzzle1.solve()
+puzzle.show_grid()
