@@ -1,5 +1,7 @@
 import socket
 
+#EXAMPLE CODE
+
 def client_run():
     host = socket.gethostname()  # as both code is running on same pc
     port = 5000  # socket server port number

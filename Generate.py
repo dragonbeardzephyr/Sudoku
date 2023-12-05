@@ -5,7 +5,7 @@ import time
 class puzzle:
     def __init__(self):
         #self.__grid = [[0 for i in range(9)]for j in range(9)]
-        """self.__grid = [ [3, 0, 0, 8, 0, 1, 0, 0, 2],
+        """self.__grid = [ [3, 0, 0, 8, 0, 1, 0, 0, 2],#Test GRID
                         [2, 0, 1, 0, 3, 0, 6, 0, 4],
                         [0, 0, 0, 2, 0, 4, 0, 0, 0],
                         [8, 0, 9, 0, 0, 0, 1, 0, 6],
@@ -16,6 +16,8 @@ class puzzle:
                         [6, 0, 0, 1, 0, 7, 0, 0, 3] ]"""
         self.grid = [[0 for i in range(9)] for j in range(9)]
         self.emptySpaces = []
+        self.rowDensity = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}#Rows/Cols with higher densities would be filled up first,
+        self.colDensity = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}# in the heuristic solve function
 
     def show_grid(self):
         for i in self.grid:
@@ -36,9 +38,6 @@ class puzzle:
                     return (row, col)
                 
     def find_Empty_Spaces(self):
-        self.rowDensity = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
-        self.colDensity = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
-
         for row in range(9):
             for col in range(9):
                 if self.grid[row][col] == 0:
@@ -51,7 +50,7 @@ class puzzle:
             
 
     def check(self, row, col, num):#return false if there are any mistakes
-
+        """COMPLETE"""
         if num in self.grid[row]:
             return False
         
@@ -71,8 +70,8 @@ class puzzle:
 
 
     def solve(self):
-
-        #x = input()#used as next button as i am testign right now
+        """COMPLETE"""
+        #x = input()#used as next button as to slow down and inspect algorithm
         
         pos = self.find_Empty_Space()
         if pos == None:
