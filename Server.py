@@ -13,7 +13,7 @@ def server_run():
     server_socket.bind((host, port))  # bind host address and port together
 
     # configure how many client the server can listen simultaneously
-    server_socket.listen(1)
+    server_socket.listen(2)
     conn, address = server_socket.accept()  # accept new connection
 
     
