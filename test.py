@@ -1,5 +1,6 @@
 import time
-
+import timeit
+import cProfile
 
 def time_taken(func = lambda x: x):
     st = time.time()
@@ -7,10 +8,11 @@ def time_taken(func = lambda x: x):
     et = time.time()
     print(et-st)
 
-def fart(x):
-    print("frpppp")
 
-def nothing():
-    return 
 
-time_taken(fart)
+
+cProfile.run("")
+#timeit.timeit("")
+
+
+
