@@ -124,9 +124,8 @@ class Puzzle:
 
     def generate(self):
         self.fill_Grid()
-        clues = self.remove_digits()
+        self.clues = self.remove_digits()
         self.show_grid()
-        print(clues)
 
 ##############################################################################################################################
 
@@ -190,8 +189,19 @@ print("2", y-x)
 print(puzzle3.solveH())
 puzzle3.show_grid()"""
 
+n = 10
+easy = []
+normal = []
+hard = []
+extra_hard = []
+listOfPuzzles = [Puzzle() for i in range(n)]
+for p in listOfPuzzles:
+    if p.clues in range(17, 28):
+        extra_hard.append(p)
+    elif p.clues in range(28, 32):
+        hard.append(p)
+    elif p.clues in range(32, 36):
+        normal.append(p)
+    elif p.clues in range(36, 46):
+        easy.append(p)
 
-p4 = Puzzle()
-#l = [Puzzle() for i in range(10)]
-#for i in l:
-#    l.show_grid()
