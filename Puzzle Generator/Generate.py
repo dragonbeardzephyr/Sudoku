@@ -46,7 +46,7 @@ class Puzzle:
 
         return True
 
-
+    """
     def solve(self):
 
         pos = self.find_Empty_Space()
@@ -57,23 +57,74 @@ class Puzzle:
 
         for n in range(1, 10):
 
+                if self.check(row, col, n):
+                    self.insert(row, col, n)
+                    
+                    if self.solve():
+                        return True
+                    
+                    self.insert(row, col, 0)#if a solve does not happen then position goes back to zero in case further backtracking needed
+
+            return False
+        """
+
+    def eliminate(self):
+        self.candidates = [[set(range(1, 10))for i in range(9)]for j in range(9)]
+        for row in range(9):
+            for col in range(9):
+
+                if self.grid[row][col] == 0:
+
+                    self.candidates[row][col] -= set(self.grid[row])
+
+                    self.candidates[row][col] -= set(self.grid[i][col] for i in range(9))
+
+                    boxRow = row // 3 * 3
+                    boxCol = col // 3 * 3
+
+                    self.candidates[row][col] -= set(self.grid[i][j] for j in range(boxCol, boxCol+3) for i in range(boxRow, boxRow+3)) 
+
+        if len(self.candidates[row][col]) == 1:
+            self.grid[row][col] = self.candidates[row][col].pop()
+
+    def dfs(self):
+
+        #x = input()#used as next button as to slow down and inspect algorithm
+        pos = self.find_Empty_Space()
+        if pos == None:
+            return True
+        row, col = pos[0],pos[1]
+
+        #self.show_grid()
+        #print(f"Pos: {pos}")
+        #print()
+
+        for n in self.candidates[row][col]:
+
             if self.check(row, col, n):
                 self.insert(row, col, n)
+                self.candidates[row][col].remove(n)
                 
-                if self.solve():
+                if self.dfs():
                     return True
-                
-                self.insert(row, col, 0)#if a solve does not happen then position goes back to zero in case further backtracking needed
+
+                self.insert(row, col, 0)
+                self.candidates[row][col].add(n)
 
         return False
-    
+
+    def solve(self):
+        self.eliminate()
+        self.dfs()
+
 ##############################################################################################################################
 
     def fill_Grid(self):
         solved = False
 
         while solved == False:
-            self.grid = [[0 for col in range(9)] for row in range(9)]
+            
+            self.grid = [[0 for col in range(9)] for row in range(9)]#Wipes grid clean
 
             count = {}
             for n in range(1, 10):
@@ -85,17 +136,19 @@ class Puzzle:
                 x = random.randint(1, 9)
                 row = random.randint(0, 8)
                 col = random.randint(0, 8)
-                if self.check(row, col, x) and count[x]<10:#Mkaes sure that no more than 9 
-                    self.insert(row, col, x)
-                    count[x] += 1
+                if self.grid[row][col] == 0:
+                    if self.check(row, col, x) and count[x]<9:#Mkaes sure that no more than 9 
+                        self.insert(row, col, x)
+                        count[x] += 1
 
-                n -= 1
+                        n -= 1
 
             solved = self.solve()
 
-    def remove_digits(self, k = random.randint(35, 64)):
-        print("remove_digits")
-        print(k)
+    def remove_digits(self):
+        #print("remove_digits")
+        #print(k)
+        k = random.randint(36, 64)
         x = k#x id constant for future calculations
         prime = copy.deepcopy(self.grid)#Original grid
         change = copy.deepcopy(self.grid)#Will store up to date grid, as self.solve() affects self.grid
@@ -120,12 +173,18 @@ class Puzzle:
                     k -= 1
 
         self.grid = copy.deepcopy(change)
-        return 81-(x-k)#number of cells removed
+        return 81-x#number of cells removed
 
     def generate(self):
+        print("fill grid")
         self.fill_Grid()
+        print("remove digits")
         self.clues = self.remove_digits()
+
         self.show_grid()
+        print(self.clues)
+        print()
+
 
 ##############################################################################################################################
 
@@ -137,13 +196,12 @@ class Puzzle:
 
         return string
     
-    def string_To_Grid(self):
+    def string_To_Grid(self, string):
         #the if statement accounts for some Sudoku grids that have a dot representing the empty space instead of 0
         self.grid = [[item if item != "." else "0" for item in string[9*row:9*(row+1)]] for row in range(len(string)//9)]
 
 ##############################################################################################################################
 
-difficulty = {1:"easy.txt",2:"normal.txt",3:"hard.txt",4:"extra_hard.txt"}
 
 class PuzzleFile:
     def __init__(self, file, mode, data = None):
@@ -159,7 +217,7 @@ class PuzzleFile:
 
             for puzzleString in data:
                 if not puzzleString in self.contents:
-                    self.file.append(puzzleString)
+                    self.file.write(f"{puzzleString}\n")
             
             self.file.close()
 
@@ -189,19 +247,44 @@ print("2", y-x)
 print(puzzle3.solveH())
 puzzle3.show_grid()"""
 
-n = 10
+n = 100
 easy = []
 normal = []
 hard = []
 extra_hard = []
-listOfPuzzles = [Puzzle() for i in range(n)]
+outliers = []
+
+listOfPuzzles = []
+
+y = time.time()
+
+for i in range(n):
+    print(f"Puzzle {i+1}")
+    listOfPuzzles.append(Puzzle())
+
+x = time.time()
+
+print(f"{x-y} seconds to generate {n} puzzles")
+
 for p in listOfPuzzles:
     if p.clues in range(17, 28):
-        extra_hard.append(p)
+        extra_hard.append(p.grid_To_String())
     elif p.clues in range(28, 32):
-        hard.append(p)
+        hard.append(p.grid_To_String())
     elif p.clues in range(32, 36):
-        normal.append(p)
+        normal.append(p.grid_To_String())
     elif p.clues in range(36, 46):
-        easy.append(p)
+        easy.append(p.grid_To_String())
+    else:
+        outliers.append(p.grid_To_String())
 
+print(f"easy        {len(easy)}")
+print(f"normal      {len(normal)}")
+print(f"hard        {len(hard)}")
+print(f"extra hard  {len(extra_hard)}")
+print(f"outliers    {len(outliers)}")
+
+easyFile = PuzzleFile("easy.txt", "append", easy)
+normalFile = PuzzleFile("normal.txt", "append", normal)
+hardFile = PuzzleFile("hard.txt", "append", hard)
+extra_HardFile = PuzzleFile("extra_hard.txt", "append", extra_hard)
