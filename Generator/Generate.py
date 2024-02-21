@@ -247,7 +247,7 @@ print("2", y-x)
 print(puzzle3.solveH())
 puzzle3.show_grid()"""
 
-n = 100
+n = 200
 easy = []
 normal = []
 hard = []
@@ -284,7 +284,7 @@ print(f"hard        {len(hard)}")
 print(f"extra hard  {len(extra_hard)}")
 print(f"outliers    {len(outliers)}")
 
-easyFile = PuzzleFile("easy.txt", "append", easy)
-normalFile = PuzzleFile("normal.txt", "append", normal)
-hardFile = PuzzleFile("hard.txt", "append", hard)
-extra_HardFile = PuzzleFile("extra_hard.txt", "append", extra_hard)
+easyFile = PuzzleFile("Generator/easy.txt", "append", easy)
+normalFile = PuzzleFile("Generator/normal.txt", "append", normal)
+hardFile = PuzzleFile("Generator/hard.txt", "append", hard)
+extra_HardFile = PuzzleFile("Generator/extra_hard.txt", "append", extra_hard)
