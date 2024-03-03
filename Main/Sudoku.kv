@@ -1,0 +1,83 @@
+MainMenuManager:
+    MainMenu:
+    ClassicMenu:
+    MultiplayerMenu:
+    AccountMenu:
+    BestTimesMenu:
+
+
+
+<MainMenu>:
+    name : "MainMenu"
+    BoxLayout:
+
+        Button:
+            text: "BestTimes"
+            on_release: 
+                app.root.current = "BestTimes"
+                root.manager.transition.direction = "right"
+
+        Button:
+            text: "Classic"
+            on_release: 
+                app.root.current = "Classic"
+                root.manager.transition.direction = "up"
+
+        Button:
+            text: "Multiplayer"
+            on_release: 
+                app.root.current = "Multiplayer"
+                root.manager.transition.direction = "down"
+
+        Button:
+            text: "Account"
+            on_release: 
+                app.root.current = "Account"
+                root.manager.transition.direction = "left"
+
+    
+
+<ClassicMenu>:
+    name : "Classic"
+    GridLayout:
+        Label:
+            text : "Classic"
+        Button:
+            text: "Return"
+            on_release: 
+                app.root.current = "MainMenu"
+                root.manager.transition.direction = "down"
+
+<MultiplayerMenu>:
+    name : "Multiplayer"
+    GridLayout:
+        Label:
+            text : "Multiplayer"
+        Button:
+            text: "Return"
+            on_release: 
+                app.root.current = "MainMenu"
+                root.manager.transition.direction = "up"
+
+<AccountMenu>:
+    name : "Account"
+    GridLayout:
+        Label:
+            text : "Account"
+        Button:
+            text: "Return"
+            on_release: 
+                app.root.current = "MainMenu"
+                root.manager.transition.direction = "right"
+
+<BestTimesMenu>:
+    name : "BestTimes"
+    GridLayout:
+        Label:
+            text : "BestTimes"
+        Button:
+            text: "Return"
+            on_release: 
+                app.root.current = "MainMenu"
+                root.manager.transition.direction = "left"
+

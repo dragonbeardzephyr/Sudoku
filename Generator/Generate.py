@@ -4,10 +4,13 @@ import copy
 
 class Puzzle:
 
-    def __init__(self, string = None):
-        if string:#For importing grids
-            self.string_To_Grid(string) # Converts a string representation of a puzzle into a 2d array
+    def __init__(self, data = None):
+        if type(data) == str:#For importing grids
+            self.string_To_Grid(data) # Converts a string representation of a puzzle into a 2d array
             self.get_All_Candidates() # Sets candidates for all cells
+            
+        elif type(data) == list: # For importing grid as 2d array, no checks made as this is intednign for testing
+             self.grid = data
         else: # Default
             self.generate()
 
@@ -154,24 +157,16 @@ class Puzzle:
         
         row, col = pos[0],pos[1]
 
-        #self.show_grid()
-        #print(f"Pos: {pos}")
-        #print()
-        #candidates = copy.deepcopy(self.candidates[row][col])
         for n in self.candidates[row][col]:
 
             if self.check(row, col, n):
 
                 self.insert(row, col, n)
-
-                #self.update_Peers_Remove_Candidates(row, col ,n)
                 
                 if self.dfs(): #Causes all the recursion to unwind
                     return True
 
                 self.insert(row, col, 0)
-
-                #self.update_Peers_Insert_Candidates(row, col, n)
 
         return False
 
@@ -181,6 +176,7 @@ class Puzzle:
         return self.dfs()#Return is used to just cehck for the true false part of statement
 
 ##############################################################################################################################
+
 
     def fill_Grid(self):
         print("Filling Grid")
@@ -222,12 +218,10 @@ class Puzzle:
         
         row, col = pos[0],pos[1]
 
-        #candidates = copy.deepcopy(self.candidates[row][col])
         for n in range(1, 10):
             if self.check(row, col, n):
 
                 self.insert(row, col, n)
-                #self.update_Peers_Remove_Candidates(row, col , n)
 
                 self.count_Solutions()
 
@@ -235,22 +229,18 @@ class Puzzle:
                     return
                 
                 self.insert(row, col, 0)
-                #self.update_Peers_Insert_Candidates(row, col, n)
-
-
-
         
 
     def remove_digits(self):
+        print("Removing Digits")
         self.solutions = 0
-        #k = random.randint(36, 64)
         k = int(random.triangular(36, 64, 50))#Randomly generates between 36 and 64 and is weighted to generate closer to 50.
         x = 0 #Used to count how many digits have been removed
         change = copy.deepcopy(self.grid)#Will store up to date grid, as self.solve() affects self.grid
-        cells = [(row, col) for col in range(9) for row in range(9)]*3#All locations
+        cells = [(row, col) for col in range(9) for row in range(9)]*3#All locations three times so that algortihm does not end too soon
         random.shuffle(cells)
 
-        for row, col in cells:#While all cells haven't been visited
+        for row, col in cells:#While all cells haven't been visited thrice
 
             n = self.grid[row][col]
             self.insert(row, col, 0)
@@ -259,7 +249,7 @@ class Puzzle:
 
             self.count_Solutions()
 
-            if self.solutions > 1:#If more than one solutions are found, undo removal of digit and break loop
+            if self.solutions > 1:#If more than one solutions are found, undo removal of digit
                 self.grid = copy.deepcopy(change)
                 self.insert(row, col, n)
                 self.solutions = 0
@@ -277,28 +267,22 @@ class Puzzle:
 
     def generate(self):
         self.fill_Grid()
-        #self.show_grid()
         self.clues = self.remove_digits()
         #print(f"Clues: {self.clues}")
-        #self.show_grid()
-
-    def rotate_FLip_grid(self):#Fucntion to make more grids out of already existing ones via rotating and flipping them, not neccessary.
-        pass
 
 ##############################################################################################################################
 
     def grid_To_String(self):#Will convert the grid into a string that can be saved on a file
         return "".join( ["".join( [str(item) for item in row] ) for row in self.grid] )
-    
+
     def string_To_Grid(self, string):
         #the if statement accounts for some Sudoku grids that have a dot representing the empty space instead of 0
         self.grid = [[int(item) if item != "." else 0 for item in string[9*row:9*(row+1)]] for row in range(len(string)//9)]
 
 ##############################################################################################################################
 
-
 class PuzzleFile:
-    def __init__(self, file, mode, data = None):
+    def __init__(self, file, mode, data = []):
         if mode == "read":
             self.file = open(file, "r")
             self.contents = self.file.readlines()
@@ -317,6 +301,49 @@ class PuzzleFile:
 
         else:
             return ValueError
+        
+################################################################################################
+class Node:
+	def __init__(self, data = None):
+		self.__data = data
+		#self.__next = None
+
+	def setData(self, data):
+		self.__data = data
+
+	def getData(self):
+		return self.__data
+
+class Stack(Node):
+	def __init__(self, size = 10):
+		self.__stack = [Node() for i in range(size)]
+		self.__top = -1
+		self.__maxSize = size
+
+	def isFull(self):
+		return True if self.__top == self.__maxSize - 1 else False
+
+	def isEmpty(self):
+		return True if self.__top == -1 else False
+		
+	def pushToStack(self, item):
+		if self.isFull():
+			print("Stack Full")
+		else:
+			self.__top += 1
+			self.__stack[self.__top].setData(item)
+
+	def popFromStack(self):
+		if self.isEmpty():
+			print("Stack Empty")
+			return None
+		else:
+			item = self.__stack[self.__top].getData()
+			self.__top -= 1
+			return item
+
+	def show(self):
+		print( list(map(lambda x : x.getData(), self.__stack)) )
 
 ###############################################################################################################################
 """puzzle1 = Puzzle()
@@ -341,38 +368,83 @@ print("2", y-x)
 print(puzzle3.solveH())
 puzzle3.show_grid()"""
 
-"""MAIN PROGRAM"""
+def flip_Vertical(grid):
+    a = Stack(9)
+    for row in grid:
+        a.pushToStack(row)
+    return [a.popFromStack() for i in range(9)]
 
-n = 10
-easy = []
+def rotate_90(grid):
+    a = [[], [], [], [], [], [], [], [], []]
+    for col in range(9):#for each column
+         for row in range(8, -1, -1):#for each item in column, going down to up, this transposes the first column to frist row, with the bottom of the column aligned with the start of the row
+              a[col].append(grid[row][col])
+    return a
+
+
+def make_More(grid):
+    a = []
+    a.append(grid)
+
+    flipped = flip_Vertical(grid)
+    a.append(flipped)
+
+    for i in range(3): # 90, 180, 270
+        grid = rotate_90(grid)
+        a.append(grid)
+
+        flipped = rotate_90(flipped)
+        a.append(flipped)
+
+    return a
+
+
+
+"MAIN PROGRAM"""
+
+n = 100 # Number of Puzzle to generate
+easy = [] 
 normal = []
 hard = []
 extra_hard = []
 outliers = []
-
 listOfPuzzles = []
 
 y = time.time()
-
 for i in range(n):
     print(f"Puzzle {i+1}")
     listOfPuzzles.append(Puzzle())
-
 x = time.time()
 
 print(f"{x-y} seconds to generate {n} puzzles")
 
 for p in listOfPuzzles:
     if p.clues in range(17, 28):
-        extra_hard.append(p.grid_To_String())
+        a = make_More(p.grid)
+        for i in a:
+            extra_hard.append(Puzzle(i).grid_To_String())
+
     elif p.clues in range(28, 32):
-        hard.append(p.grid_To_String())
+        a = make_More(p.grid)
+        for i in a:
+            hard.append(Puzzle(i).grid_To_String())
+
+
     elif p.clues in range(32, 36):
-        normal.append(p.grid_To_String())
+        a = make_More(p.grid)
+        for i in a:
+            normal.append(Puzzle(i).grid_To_String())
+
+
     elif p.clues in range(36, 45):
-        easy.append(p.grid_To_String())
+        a = make_More(p.grid)
+        for i in a:
+            easy.append(Puzzle(i).grid_To_String())
+            
+
     else:
         outliers.append(p.grid_To_String())
+
 
 print(f"easy        {len(easy)}")
 print(f"normal      {len(normal)}")

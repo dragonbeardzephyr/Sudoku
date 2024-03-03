@@ -2,14 +2,9 @@ import hashlib
 import secrets
 import random
 
-class Account():
-    def __init__(self):
-        self.__username = ""   #3 < size < 15
-        self.__password = ""   #7 < size
-        self.__salt = ""
-        self.loggedIn = False
+        
 
-    def register(self):
+    def Register(self):
         #Open Connection
         #Send details to server 
         #Check that there are no existing record of same username
@@ -21,7 +16,7 @@ class Account():
     def verify(self):#This will check with the Accounts database if username and password are correct, return true if so
         pass
 
-    def login(self):
+    def Login(self):
         #Open connection
         #Send detaisl to server
         #Server will check username and passwrod
@@ -51,6 +46,4 @@ class Account():
         #Convert password into hash
 
         self.__username = username
-        self.__salt = random.sample(username+"QAZWSXEDCRFVTGBYHNUJMIKOLPthnyjmukiloprgbefvwdcqsxaz\/.,<>!£$%^&*()", 5)
-        self.__password = hashedPassword = hashlib.sha256(password+salt)
-        
+        self.__password = hashlib.sha256(password.encode()).hexdigest()        
