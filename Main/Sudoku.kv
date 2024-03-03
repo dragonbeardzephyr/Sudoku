@@ -9,31 +9,36 @@ MainMenuManager:
 
 <MainMenu>:
     name : "MainMenu"
-    BoxLayout:
+     
+    AnchorLayout:
+        size_hint : 0.9, 0.1
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
 
-        Button:
-            text: "BestTimes"
-            on_release: 
-                app.root.current = "BestTimes"
-                root.manager.transition.direction = "right"
+        BoxLayout:
 
-        Button:
-            text: "Classic"
-            on_release: 
-                app.root.current = "Classic"
-                root.manager.transition.direction = "up"
+            Button:
+                text: "BestTimes"
+                on_release: 
+                    app.root.current = "BestTimes"
+                    root.manager.transition.direction = "right"
 
-        Button:
-            text: "Multiplayer"
-            on_release: 
-                app.root.current = "Multiplayer"
-                root.manager.transition.direction = "down"
+            Button:
+                text: "Classic"
+                on_release: 
+                    app.root.current = "Classic"
+                    root.manager.transition.direction = "up"
 
-        Button:
-            text: "Account"
-            on_release: 
-                app.root.current = "Account"
-                root.manager.transition.direction = "left"
+            Button:
+                text: "Multiplayer"
+                on_release: 
+                    app.root.current = "Multiplayer"
+                    root.manager.transition.direction = "down"
+
+            Button:
+                text: "Account"
+                on_release: 
+                    app.root.current = "Account"
+                    root.manager.transition.direction = "left"
 
     
 

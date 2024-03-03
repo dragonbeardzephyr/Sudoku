@@ -2,16 +2,17 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
-from kivy.lang import Builder
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 
 import sys
-sys.path.append("../Sudoku_Code")
+sys.path.append("../Sudoku")
 import time
 import random
 
-
+#from ..Generator import Generate
 #from Account import Account
 
 
