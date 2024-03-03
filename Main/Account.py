@@ -1,10 +1,12 @@
 import hashlib
 import secrets
+import random
 
 class Account():
     def __init__(self):
-        self.__username = ""   """3 < size < 15"""
-        self.__password = ""   """7 < size"""
+        self.__username = ""   #3 < size < 15
+        self.__password = ""   #7 < size
+        self.__salt = ""
         self.loggedIn = False
 
     def register(self):
@@ -16,7 +18,7 @@ class Account():
         #close connection
         pass
 
-    def verify(self):#This will check if username and password are correct, return true if so
+    def verify(self):#This will check with the Accounts database if username and password are correct, return true if so
         pass
 
     def login(self):
@@ -40,13 +42,15 @@ class Account():
         username = ""
         password = ""
 
-        while len(username) in range(3, 6):
+        while not len(username) in range(5, 21):
             username = input()
 
-        while len(password) >= 7:
+        while not len(password) >= 7:
             password = input()
 
         #Convert password into hash
 
-
-
+        self.__username = username
+        self.__salt = random.sample(username+"QAZWSXEDCRFVTGBYHNUJMIKOLPthnyjmukiloprgbefvwdcqsxaz\/.,<>!£$%^&*()", 5)
+        self.__password = hashedPassword = hashlib.sha256(password+salt)
+        
