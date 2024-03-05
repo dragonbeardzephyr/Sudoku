@@ -5,13 +5,14 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.image import Image
 
 
 import time
 import random
 
 from Generator.Generate import Puzzle
-#from Account import Account
+from networking import Client
 
 
 # Function to pull base puzzles from file store,
@@ -22,9 +23,17 @@ class Game:
 
         self.online = False
         self.rememberLogin = False
-
+        self.boot()
         self.load_Game_Data()
 
+    def boot(self):
+        self.load_Game_Data()
+        if len(self.username) > 0 and len(self.password) > 0:
+            pass
+            #do some login stuff
+
+        else:
+            pass
 
     def load_Game_Data(self):
         with open("Game Data.txt", "r") as file:
@@ -62,30 +71,60 @@ class SudokuApp(App):
 class MainMenu(Screen):
     pass
 
+class PauseScreen(Widget):
+    pass
+
 class ClassicMenu(Screen):
+    pass
+
+class ClassicGame(Screen):
+    pass
+
+class ClassicPause(PauseScreen):
     pass
 
 class MultiplayerMenu(Screen):
     pass
 
+class MultiplayerGame(Screen):
+    pass
+
+class MultiplayerPause(PauseScreen):
+    pass
+
 class AccountMenu(Screen):
     pass
 
+class Login(Screen):
+    pass
+
+class Register(Screen):
+    pass
+
 class BestTimesMenu(Screen):
+    pass
+
+class BestTimes(Screen):
     pass
 
 class MainMenuManager(ScreenManager):
     pass
 
 
+
+
+
+
+
+
 ########################
 ########################
-                    ####
                     ####
 SudokuApp().run()   ####
                     ####
 ########################
 ########################
+
 """
 MainMenu
     AccountMenu

@@ -1,6 +1,5 @@
 import socket
 import hashlib
-from Account import Account
 #Make connection with server
 #Select if you want to play against a random
 #get added to queue of players
@@ -13,11 +12,8 @@ class Account():
     def __init__(self):
         self.__username = ""   #3 < size < 15
         self.__password = ""   #7 < size
-        self.loggedIn = False
 
     def enter_Details(self):
-        username = ""
-        password = ""
 
         while not len(username) in range(5, 21):
             username = input("Enter Username: ")
@@ -39,10 +35,10 @@ class Client:
         self.__port = 7777
         self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        self.__account = Account()
+        self.account = Account()
         self.request = ""
 
-        options = {"login": self.login,
+        self.options = {"login": self.login,
         "register": self.register,
         "match_Players": self.match_Players,
         "play_Multiplayer": self.play_Multiplayer}
@@ -50,9 +46,9 @@ class Client:
 
     def handle(self, request):
         self.request = request
-        if request in options:
+        if request in self.options:
             self.__client.sendall(self.request.encode())
-            options[request]
+            self.options[request]
         else:
             print("Inavlid request")
 
@@ -69,7 +65,7 @@ class Client:
         proceed = self.__client.recv(1024).decode()
 
         if proceed == "proceed":
-            self.__account.enter_Details()
+            self.account.enter_Details()
             self.__client.send((username+","+password).encode())
 
             if self.__client.recv(1024).decode() == "valid":
@@ -94,7 +90,7 @@ class Client:
         if proceed == "proceed":
             valid = False
             while valid == False:
-                self.__account.enter_Details()
+                self.account.enter_Details()
 
                 self.__client.send((username+","+password).encode())
 

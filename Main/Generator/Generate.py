@@ -401,61 +401,61 @@ def make_More(grid):
 
 
 "MAIN PROGRAM"""
+if __name__ == "__main__":
+    n = 100 # Number of Puzzle to generate
+    easy = [] 
+    normal = []
+    hard = []
+    extra_hard = []
+    outliers = []
+    listOfPuzzles = []
 
-n = 100 # Number of Puzzle to generate
-easy = [] 
-normal = []
-hard = []
-extra_hard = []
-outliers = []
-listOfPuzzles = []
+    y = time.time()
+    for i in range(n):
+        print(f"Puzzle {i+1}")
+        listOfPuzzles.append(Puzzle())
+    x = time.time()
 
-y = time.time()
-for i in range(n):
-    print(f"Puzzle {i+1}")
-    listOfPuzzles.append(Puzzle())
-x = time.time()
+    print(f"{x-y} seconds to generate {n} puzzles")
 
-print(f"{x-y} seconds to generate {n} puzzles")
+    for p in listOfPuzzles:
+        if p.clues in range(17, 28):
+            a = make_More(p.grid)
+            for i in a:
+                extra_hard.append(Puzzle(i).grid_To_String())
 
-for p in listOfPuzzles:
-    if p.clues in range(17, 28):
-        a = make_More(p.grid)
-        for i in a:
-            extra_hard.append(Puzzle(i).grid_To_String())
-
-    elif p.clues in range(28, 32):
-        a = make_More(p.grid)
-        for i in a:
-            hard.append(Puzzle(i).grid_To_String())
-
-
-    elif p.clues in range(32, 36):
-        a = make_More(p.grid)
-        for i in a:
-            normal.append(Puzzle(i).grid_To_String())
+        elif p.clues in range(28, 32):
+            a = make_More(p.grid)
+            for i in a:
+                hard.append(Puzzle(i).grid_To_String())
 
 
-    elif p.clues in range(36, 45):
-        a = make_More(p.grid)
-        for i in a:
-            easy.append(Puzzle(i).grid_To_String())
-            
-
-    else:
-        outliers.append(p.grid_To_String())
+        elif p.clues in range(32, 36):
+            a = make_More(p.grid)
+            for i in a:
+                normal.append(Puzzle(i).grid_To_String())
 
 
-print(f"easy        {len(easy)}")
-print(f"normal      {len(normal)}")
-print(f"hard        {len(hard)}")
-print(f"extra hard  {len(extra_hard)}")
-print(f"outliers    {len(outliers)}")
+        elif p.clues in range(36, 45):
+            a = make_More(p.grid)
+            for i in a:
+                easy.append(Puzzle(i).grid_To_String())
+                
 
-easyFile = PuzzleFile("Generator/easy.txt", "append", easy)
-normalFile = PuzzleFile("Generator/normal.txt", "append", normal)
-hardFile = PuzzleFile("Generator/hard.txt", "append", hard)
-extra_HardFile = PuzzleFile("Generator/extra_hard.txt", "append", extra_hard)
+        else:
+            outliers.append(p.grid_To_String())
 
-print(outliers)
+
+    print(f"easy        {len(easy)}")
+    print(f"normal      {len(normal)}")
+    print(f"hard        {len(hard)}")
+    print(f"extra hard  {len(extra_hard)}")
+    print(f"outliers    {len(outliers)}")
+
+    easyFile = PuzzleFile("Generator/easy.txt", "append", easy)
+    normalFile = PuzzleFile("Generator/normal.txt", "append", normal)
+    hardFile = PuzzleFile("Generator/hard.txt", "append", hard)
+    extra_HardFile = PuzzleFile("Generator/extra_hard.txt", "append", extra_hard)
+
+    print(outliers)
 

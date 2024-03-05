@@ -5,11 +5,12 @@ MainMenuManager:
     AccountMenu:
     BestTimesMenu:
 
-
+    
 
 <MainMenu>:
     name : "MainMenu"
-     
+
+
     AnchorLayout:
         size_hint : 0.9, 0.1
         pos_hint : {"center_x": 0.5, "center_y":0.5}
@@ -40,48 +41,96 @@ MainMenuManager:
                     app.root.current = "Account"
                     root.manager.transition.direction = "left"
 
-    
 
 <ClassicMenu>:
     name : "Classic"
-    GridLayout:
+    canvas.after:
+        Rectangle:
+            size: self.size
+            source: "graphics\Sudoku_App_Border.png"
+    FloatLayout:
         Label:
             text : "Classic"
         Button:
             text: "Return"
+            size_hint : 0.07, 0.04
+            pos_hint : {"x":0.005, "top": 0.99}
             on_release: 
                 app.root.current = "MainMenu"
                 root.manager.transition.direction = "down"
 
+        BoxLayout:
+            size_hint : 0.9, 0.1
+            pos_hint : {"center_x": 0.5, "center_y":0.5}
+
+            Button:
+                text: "Easy"
+                on_release: 
+                    app.root.current = "BestTimes"
+                    root.manager.transition.direction = "right"
+            
+            Button:
+                text: "Normal"
+                on_release: 
+                    app.root.current = "BestTimes"
+                    root.manager.transition.direction = "right"
+
+            Button:
+                text: "Hard"
+                on_release: 
+                    app.root.current = "BestTimes"
+                    root.manager.transition.direction = "right"
+            
+            Button:
+                text: "Ectra Hard"
+                on_release: 
+                    app.root.current = "BestTimes"
+                    root.manager.transition.direction = "right"
+
+<ClassicGame>:
+    name : "ClassicGame"
+    AnchorLayout:
+        GridLayout:
+            rows = 9
+            cols = 9
+            
+
+
 <MultiplayerMenu>:
     name : "Multiplayer"
-    GridLayout:
+    FloatLayout:
         Label:
             text : "Multiplayer"
         Button:
             text: "Return"
+            size_hint : 0.07, 0.04
+            pos_hint : {"x":0.005, "top": 0.99}
             on_release: 
                 app.root.current = "MainMenu"
                 root.manager.transition.direction = "up"
 
 <AccountMenu>:
     name : "Account"
-    GridLayout:
+    FloatLayout:
         Label:
             text : "Account"
         Button:
             text: "Return"
+            size_hint : 0.07, 0.04
+            pos_hint : {"x":0.005, "top": 0.99}
             on_release: 
                 app.root.current = "MainMenu"
                 root.manager.transition.direction = "right"
 
 <BestTimesMenu>:
     name : "BestTimes"
-    GridLayout:
+    FloatLayout:
         Label:
             text : "BestTimes"
         Button:
             text: "Return"
+            size_hint : 0.07, 0.04
+            pos_hint : {"x":0.005, "top": 0.99}
             on_release: 
                 app.root.current = "MainMenu"
                 root.manager.transition.direction = "left"
