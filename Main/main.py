@@ -7,12 +7,10 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 
-import sys
-sys.path.append("../Sudoku")
 import time
 import random
 
-#from ..Generator import Generate
+from Generator.Generate import Puzzle
 #from Account import Account
 
 
@@ -22,61 +20,39 @@ import random
 class Game:
     def __init__(self):
 
-        
-        self.modes = {"Classic": self.classic(),
-                      "Multiplayer": self.multiplayer(),
-                      "Account": self.manage_Account(),
-                      "Best Times": self.best_Times() }
-        
-        #self.__account = Account()
+        self.online = False
+        self.rememberLogin = False
 
+        self.load_Game_Data()
 
 
     def load_Game_Data(self):
         with open("Game Data.txt", "r") as file:
-            details = file.readlines
+            details = file.readlines()
+
+            self.username = details[0]
+            self.password = details[1]
+            self.topTimes = details[2:7]
 
 
-    def save_Game_Data(self, data):
+    def save_Game_Data(self):
         with open("Game Data.txt", "w") as file:
+            if self.rememberLogin:
+                data = f"\n{self.username}\n{self.password}"
+            else:
+                data = "\n"
+
+            data = "\n".join(self.topTimes)
             file.write(data)
 
-
-    def manage_Account(self):
-        if not self.__account.loggedIn:
-            #prompt user to register or log in
-            self.__account.enter_Details()
-            pass
-        else:
-            #prompt user if they would like to log out
-            pass
-
-    def classic(self):
-        #Choose Difficulty
-        #open corresponding puzzle file
-        #Pull puzzle randomly from file
-        #PLay the GaME
-        #Finish
-        pass
-
-    def multiplayer(self):
-        #Check if logged in, if not prompt to do so
-        #otherwise connect to server
-        #select how you want to match
-        #play the game
-        pass
-
-    def best_Times(self):
-        #Open best Times.txt
-        #read data
-        #sort to top 10 scores for each difficulty
-        pass
-
     def import_Puzzle(self, difficulty):
+
+        with open(f"Generator/{difficulty}.txt", "r") as file:
+            puzzles = file.readlines()
+            puzzle = Puzzle(random.choice(puzzles))
+        
         pass
 
-    def select_Mode(self):
-        pass
 
 
  
@@ -101,8 +77,15 @@ class BestTimesMenu(Screen):
 class MainMenuManager(ScreenManager):
     pass
 
-SudokuApp().run()
 
+########################
+########################
+                    ####
+                    ####
+SudokuApp().run()   ####
+                    ####
+########################
+########################
 """
 MainMenu
     AccountMenu

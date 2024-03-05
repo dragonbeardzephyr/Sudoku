@@ -9,8 +9,8 @@ class Puzzle:
             self.string_To_Grid(data) # Converts a string representation of a puzzle into a 2d array
             self.get_All_Candidates() # Sets candidates for all cells
             
-        elif type(data) == list: # For importing grid as 2d array, no checks made as this is intednign for testing
-             self.grid = data
+        #elif type(data) == list: # For importing grid as 2d array, no checks made as this is intednign for testing
+             #self.grid = data
         else: # Default
             self.generate()
 
