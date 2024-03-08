@@ -5,9 +5,6 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.image import Image
-
-
 import time
 import random
 
@@ -23,25 +20,26 @@ class Game:
 
         self.online = False
         self.rememberLogin = False
+        self.client = Client()
         self.boot()
-        self.load_Game_Data()
+
 
     def boot(self):
         self.load_Game_Data()
         if len(self.username) > 0 and len(self.password) > 0:
-            pass
-            #do some login stuff
+            self.client.connect()
+            if self.client.login(self.username, self.password):
+                self.online = True
+                self.rememberLogin = True
 
-        else:
-            pass
 
     def load_Game_Data(self):
-        with open("Game Data.txt", "r") as file:
+        with open("Main\Game Data.txt", "r") as file:
             details = file.readlines()
 
-            self.username = details[0]
-            self.password = details[1]
-            self.topTimes = details[2:7]
+            self.username = details[0].strip("\n")
+            self.password = details[1].strip("\n")
+            self.topTimes = [deets.strip("\n") for deets in details[2:7]]
 
 
     def save_Game_Data(self):
@@ -49,7 +47,7 @@ class Game:
             if self.rememberLogin:
                 data = f"\n{self.username}\n{self.password}"
             else:
-                data = "\n"
+                data = "\n\n"
 
             data = "\n".join(self.topTimes)
             file.write(data)
@@ -59,60 +57,66 @@ class Game:
         with open(f"Generator/{difficulty}.txt", "r") as file:
             puzzles = file.readlines()
             puzzle = Puzzle(random.choice(puzzles))
-        
-        pass
+            return puzzle
 
 
+class SudokuApp(App, Game):
+    def __init__(self):
+        super(SudokuApp, self).__init__()
+        self.game = Game()
 
- 
-class SudokuApp(App):
+    def on_stop(self):
+        self.game.save_Game_Data()
+        print("Goodbye World")
+
+class BaseScreen(Screen):
+    def set_Border(self):
+        app = SudokuApp.get_running_app()
+        if app.game.online: # Ignore red underline code works
+            return "graphics\Sudoku_App_Border_Logged_In.png"
+        else:
+            return "graphics\Sudoku_App_Border_Logged_Out.png"
+
+
+class MainMenu(BaseScreen):
     pass
 
-class MainMenu(Screen):
+class Menu(BaseScreen):
     pass
 
-class PauseScreen(Widget):
+class GameScreen(BaseScreen):
     pass
 
-class ClassicMenu(Screen):
+class ClassicMenu(Menu):
     pass
 
-class ClassicGame(Screen):
+class ClassicGame(GameScreen):
     pass
 
-class ClassicPause(PauseScreen):
+
+class MultiplayerMenu(Menu):
     pass
 
-class MultiplayerMenu(Screen):
+class MultiplayerGame(GameScreen):
     pass
 
-class MultiplayerGame(Screen):
+class AccountMenu(Menu):
     pass
 
-class MultiplayerPause(PauseScreen):
+class Login(BaseScreen):
     pass
 
-class AccountMenu(Screen):
+class Register(BaseScreen):
     pass
 
-class Login(Screen):
+class BestTimesMenu(Menu):
     pass
 
-class Register(Screen):
-    pass
-
-class BestTimesMenu(Screen):
-    pass
-
-class BestTimes(Screen):
+class BestTimes(BaseScreen):
     pass
 
 class MainMenuManager(ScreenManager):
     pass
-
-
-
-
 
 
 
@@ -125,38 +129,3 @@ SudokuApp().run()   ####
 ########################
 ########################
 
-"""
-MainMenu
-    AccountMenu
-
-    ModeSelectScreen
-        ClassicSudokuDifficultySelect
-
-        MultiplayerModeSelect#match + Difficulty
-
-        BestTimesDifficultySelect
-
-GameScreen
-    ClassicGameScreen
-
-    MultiplayerGameScreen
-
-
-PauseScreen
-    ClassicPauseScreen
-
-    MultiplayerPauseScreen
-
-
-AccountScreen
-    RegisterScreen
-
-    LoginScreen
-
-
-BestTimesScreen
-
-
-
-
-"""

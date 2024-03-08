@@ -13,10 +13,11 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 server.bind((host, port))
 
-server.listen()
+server.listen(50) #Limit of 50 connections
+
 def check(username, cursor):
-    res = cursor.execute(f"SELECT Username FROM Accounts WHERE Username = '{username}'")
-    if res == username:
+    result = cursor.execute(f"SELECT Username FROM Accounts WHERE Username = ?", username)
+    if result == username:
         return True
     else:
         return False
@@ -24,8 +25,8 @@ def check(username, cursor):
 
 def verify(username, password, cursor):#Checks if username an dpassword match
     if check(username, cursor):
-        usernameResult = cursor.execute()
-        passwordResult = cursor.execute()
+        result = cursor.execute(f"SELECT Username, Password FROM Accounts WHERE Username = '{username} AND Password = '{password}")
+        usernameResult, passwordResult = result.fetchone()
         if usernameResult == username and passwordResult == password:
             return True
         else:

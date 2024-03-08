@@ -36,7 +36,6 @@ class Client:
         self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.account = Account()
-        self.request = ""
 
         self.options = {"login": self.login,
         "register": self.register,
@@ -45,9 +44,8 @@ class Client:
 
 
     def handle(self, request):
-        self.request = request
         if request in self.options:
-            self.__client.sendall(self.request.encode())
+            self.__client.sendall(request.encode())
             self.options[request]
         else:
             print("Inavlid request")
@@ -79,29 +77,26 @@ class Client:
     
 
 
-    def login(self):
+    def login(self, username, password):
         print("doing login stuff on client")
 
-        self.__client.sendall(self.request.encode())
+        self.__client.sendall("login".encode())
 
         proceed = self.__client.recv(1024).decode()
 
+        valid = False
 
         if proceed == "proceed":
-            valid = False
-            while valid == False:
-                self.account.enter_Details()
+        
+            self.__client.send((username+","+password).encode())
 
-                self.__client.send((username+","+password).encode())
-
-                if self.__client.recv(1024).decode() == "valid":
-                    valid = True
-
-                
+            if self.__client.recv(1024).decode() == "valid":
+                valid = True
 
         else:
             print("No proceed")
-            return #connection no go
+
+        return valid
 
 
 

@@ -1,15 +1,51 @@
+#: import WipeTransition kivy.uix.screenmanager.WipeTransition
+#: import SwapTransition kivy.uix.screenmanager.SwapTransition
+#: import SlideTransition kivy.uix.screenmanager.SlideTransition
+#: import FadeTransition kivy.uix.screenmanager.FadeTransition
+
+
 MainMenuManager:
     MainMenu:
-    ClassicMenu:
-    MultiplayerMenu:
-    AccountMenu:
-    BestTimesMenu:
 
+    ClassicMenu:
+    ClassicGame:
+
+    MultiplayerMenu:
+    MultiplayerGame:
+
+    AccountMenu:
+    Login:
+    Register:
+
+    BestTimesMenu:
+    BestTimes:
     
+
+<MainMenuManager>:
+
+
+<BaseScreen>:
+    name : "BaseScreen"
+    canvas.after:
+        Rectangle:
+            size: self.size
+            source : root.set_Border()
+
+<Menu>:
+    Button:
+        name : "ReturnToMainMenu"
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = FadeTransition()
+            app.root.current = "MainMenu"
+
+<GameScreen>:
+
 
 <MainMenu>:
     name : "MainMenu"
-
 
     AnchorLayout:
         size_hint : 0.9, 0.1
@@ -19,45 +55,36 @@ MainMenuManager:
 
             Button:
                 text: "Best Times"
-                on_release: 
-                    app.root.current = "BestTimes"
+                on_release:
+                    root.manager.transition = SlideTransition()
                     root.manager.transition.direction = "right"
+                    root.manager.current = "BestTimes"
 
             Button:
                 text: "Classic"
                 on_release: 
-                    app.root.current = "Classic"
-                    root.manager.transition.direction = "up"
+                    root.manager.transition = WipeTransition()
+                    root.manager.current = "ClassicMenu"
 
             Button:
                 text: "Multiplayer"
-                on_release: 
-                    app.root.current = "Multiplayer"
-                    root.manager.transition.direction = "down"
+                on_release:
+                    root.manager.transition = WipeTransition()
+                    root.manager.current = "Multiplayer"
 
             Button:
                 text: "Account"
-                on_release: 
-                    app.root.current = "Account"
+                on_release:
+                    root.manager.transition = SlideTransition()
                     root.manager.transition.direction = "left"
-
+                    root.manager.current = "AccountMenu"
 
 <ClassicMenu>:
-    name : "Classic"
-    canvas.after:
-        Rectangle:
-            size: self.size
-            source: "graphics\Sudoku_App_Border.png"
+    name : "ClassicMenu"
+    
     FloatLayout:
         Label:
             text : "Classic"
-        Button:
-            text: "Return"
-            size_hint : 0.07, 0.04
-            pos_hint : {"x":0.005, "top": 0.99}
-            on_release: 
-                app.root.current = "MainMenu"
-                root.manager.transition.direction = "down"
 
         BoxLayout:
             size_hint : 0.9, 0.1
@@ -65,73 +92,173 @@ MainMenuManager:
 
             Button:
                 text: "Easy"
-                on_release: 
-                    app.root.current = "BestTimes"
+                on_release:
+                    #root.manager.get_screen("ClassicGame").ids.difficulty = text
+                    root.manager.transition = FadeTransition()
+                    root.manager.current = "ClassicGame"
                     root.manager.transition.direction = "right"
             
             Button:
                 text: "Normal"
-                on_release: 
-                    app.root.current = "BestTimes"
+                on_release:
+                    root.manager.transition = FadeTransition()
+                    root.manager.current = "ClassicGame"
                     root.manager.transition.direction = "right"
 
             Button:
                 text: "Hard"
-                on_release: 
-                    app.root.current = "BestTimes"
+                on_release:
+                    root.manager.transition = FadeTransition()
+                    root.manager.current = "ClassicGame"
                     root.manager.transition.direction = "right"
             
             Button:
-                text: "Ectra Hard"
-                on_release: 
-                    app.root.current = "BestTimes"
+                text: "Extra Hard"
+                on_release:
+                    root.manager.transition = FadeTransition()
+                    root.manager.current = "ClassicGame"
                     root.manager.transition.direction = "right"
-
-<ClassicGame>:
-    name : "ClassicGame"
-    AnchorLayout:
-        GridLayout:
-            rows = 9
-            cols = 9
-            
-
 
 <MultiplayerMenu>:
     name : "Multiplayer"
-    FloatLayout:
-        Label:
-            text : "Multiplayer"
-        Button:
-            text: "Return"
-            size_hint : 0.07, 0.04
-            pos_hint : {"x":0.005, "top": 0.99}
-            on_release: 
-                app.root.current = "MainMenu"
-                root.manager.transition.direction = "up"
+    AnchorLayout:
+        size_hint : 0.9, 0.1
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+
+
 
 <AccountMenu>:
-    name : "Account"
-    FloatLayout:
-        Label:
-            text : "Account"
-        Button:
-            text: "Return"
-            size_hint : 0.07, 0.04
-            pos_hint : {"x":0.005, "top": 0.99}
-            on_release: 
-                app.root.current = "MainMenu"
-                root.manager.transition.direction = "right"
+    name : "AccountMenu"
+    AnchorLayout:
+        size_hint : 0.9, 0.1
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+
+        BoxLayout:
+
+            Button:
+                text: "Login"
+                on_release: 
+                    root.manager.current = "Login"
+            
+            Button:
+                text: "Register"
+                on_release: 
+                    root.manager.current = "Register"
 
 <BestTimesMenu>:
     name : "BestTimes"
-    FloatLayout:
-        Label:
-            text : "BestTimes"
-        Button:
-            text: "Return"
-            size_hint : 0.07, 0.04
-            pos_hint : {"x":0.005, "top": 0.99}
-            on_release: 
-                app.root.current = "MainMenu"
-                root.manager.transition.direction = "left"
+    
 
+
+
+<ClassicGame>:
+    name : "ClassicGame"
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release: 
+            root.manager.transition.direction = "down"
+            root.manager.current = "ClassicMenu"
+
+    
+
+<MultiplayerGame>:
+    name : "MultiplayerGame"
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition.direction = "down"
+            root.manager.current = "MultiplayerMenu"
+
+    
+
+            
+<Login>:
+    name : "Login"
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = FadeTransition()
+            app.root.current = "AccountMenu"
+
+    AnchorLayout:
+        size_hint : 0.6, 0.1
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+
+        BoxLayout:
+            orientation : "vertical"
+            BoxLayout:
+                Label:
+                    text : "Username"
+                    color : 0, 1, 1, 1
+                TextInput:
+                    id: username
+                    hint_text : "username"
+                    multiline : False
+
+            BoxLayout:
+                Label:
+                    text : "Password"
+                    color : 0, 1, 1, 1
+                TextInput:
+                    id : password
+                    hint_text : "password"
+                    multiline : False
+
+    
+
+
+<Register>:
+    name : "Register"
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = FadeTransition()
+            app.root.current = "AccountMenu"
+
+    AnchorLayout:
+        size_hint : 0.6, 0.15
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+
+        BoxLayout:
+            orientation : "vertical"
+            BoxLayout:
+                Label:
+                    text : "Username"
+                    color : 0, 1, 1, 1
+                TextInput:
+                    id: username
+                    hint_text : "Enter username"
+                    multiline : False
+
+            BoxLayout:
+                Label:
+                    text : "Password"
+                    color : 0, 1, 1, 1
+                TextInput:
+                    id : password1
+                    hint_text : "Enter password"
+                    multiline : False
+
+            BoxLayout:
+                Label:
+                    text : "Re-Enter Password"
+                    color : 0, 1, 1, 1
+                TextInput:
+                    id : password2
+                    hint_text : "Re-enter password"
+                    multiline : False
+
+    
+
+
+
+
+   
