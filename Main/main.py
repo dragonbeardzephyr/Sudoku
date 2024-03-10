@@ -28,9 +28,10 @@ class Game:
         self.load_Game_Data()
         if len(self.username) > 0 and len(self.password) > 0:
             self.client.connect()
-            if self.client.login(self.username, self.password):
-                self.online = True
-                self.rememberLogin = True
+            if self.client.connected:
+                if self.client.login(self.username, self.password):
+                    self.online = True
+                    self.rememberLogin = True
 
 
     def load_Game_Data(self):

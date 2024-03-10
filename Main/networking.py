@@ -1,5 +1,6 @@
 import socket
 import hashlib
+
 #Make connection with server
 #Select if you want to play against a random
 #get added to queue of players
@@ -34,36 +35,42 @@ class Client:
         self.__host = "127.0.0.1"
         self.__port = 7777
         self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        self.account = Account()
-
+        self.connected = False
+        
+        """
         self.options = {"login": self.login,
         "register": self.register,
         "match_Players": self.match_Players,
         "play_Multiplayer": self.play_Multiplayer}
-
-
+        """
+    """
     def handle(self, request):
         if request in self.options:
             self.__client.sendall(request.encode())
             self.options[request]
         else:
             print("Inavlid request")
-
+    """
     def connect(self):
         try:
             self.__client.connect((self.__host, self.__port))
+            self.connected = True
         except:
             print("Connection could not be made")
+            return False
+
+    def disconnect(self):
+        self.__client.close()
 
 
-    def register(self):
+
+    def register(self, username, password):
         print("Doing register stuff on client")
 
+        self.__client.sendall("register".encode())
         proceed = self.__client.recv(1024).decode()
 
         if proceed == "proceed":
-            self.account.enter_Details()
             self.__client.send((username+","+password).encode())
 
             if self.__client.recv(1024).decode() == "valid":
@@ -79,7 +86,7 @@ class Client:
 
     def login(self, username, password):
         print("doing login stuff on client")
-
+        
         self.__client.sendall("login".encode())
 
         proceed = self.__client.recv(1024).decode()
@@ -99,7 +106,7 @@ class Client:
         return valid
 
 
-
+    """
     def match_Players(self):
         print("Doing login stuff on client")
         self.__client.sendall(self.request.encode())
@@ -108,8 +115,9 @@ class Client:
             pass
         else:
             return #connection no go
-
-
+    """
+    
+    """
     def play_Multiplayer(self):
         print("Doing login stuff on client")
         self.__client.sendall(self.request.encode())
@@ -119,8 +127,7 @@ class Client:
             pass
         else:
             return #connection no go
-
-
+    """
 
 
 

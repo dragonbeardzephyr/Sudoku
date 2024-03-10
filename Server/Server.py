@@ -7,7 +7,7 @@ import time
 host = "127.0.0.1"
 port = 7777
 
-username, password = "heehee", "ohoo"
+DATABASE = "Server\Sudoku_Online.db"
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -15,8 +15,10 @@ server.bind((host, port))
 
 server.listen(50) #Limit of 50 connections
 
+
+
 def check(username, cursor):
-    result = cursor.execute(f"SELECT Username FROM Accounts WHERE Username = ?", username)
+    result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", username)
     if result == username:
         return True
     else:
@@ -25,7 +27,7 @@ def check(username, cursor):
 
 def verify(username, password, cursor):#Checks if username an dpassword match
     if check(username, cursor):
-        result = cursor.execute(f"SELECT Username, Password FROM Accounts WHERE Username = '{username} AND Password = '{password}")
+        result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", username, password)
         usernameResult, passwordResult = result.fetchone()
         if usernameResult == username and passwordResult == password:
             return True
@@ -38,10 +40,12 @@ def register(server):
     print("Doing register stuff on server")
     server.sendall("proceed".encode())
     details = server.recv(1024).decode().split(",")
-    conn = sqlite3.connect("")
+    conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     if check(details[0], conn):
-        cursor.execute("INSERT")
+        server.sendall("invalid".encode())#USername already exists
+    else:
+        cursor.execute("INSERT INTO Accounts (Username, Password) VALUES (?, ?)", details) # Tuple unpacking if not obvious
     
     conn.close()
 
@@ -52,7 +56,7 @@ def login(server):
     server.sendall("proceed".encode())
     details = server.recv(1024).decode().split(",")
 
-    conn = sqlite3.connect("")
+    conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
     if verify(details[0], details[1], cursor):
