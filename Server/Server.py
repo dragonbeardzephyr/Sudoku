@@ -17,60 +17,91 @@ server.listen(50) #Limit of 50 connections
 
 
 
+
+
+
 def check(username, cursor):
-    result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", username)
-    if result == username:
-        return True
-    else:
+    result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
+    print(result)   
+    if username is None:
+        print("check bad")
         return False
+    else:
+        print("Check good")
+        return True
+        
 
 
 def verify(username, password, cursor):#Checks if username an dpassword match
     if check(username, cursor):
-        result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", username, password)
-        usernameResult, passwordResult = result.fetchone()
-        if usernameResult == username and passwordResult == password:
-            return True
-        else:
+        print(username, password)
+        result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", (username, password)).fetchone()
+        print(result)
+        if result is None:
+            print("Result n0ne")
             return False
+            
+        else:
+            usernameResult, passwordResult = result
+            print(username, password)
+            print(usernameResult, passwordResult)
+            if usernameResult == username and passwordResult == password:
+                return True
+            else:
+                return False
     else:
         return False
   
-def register(server):
-    print("Doing register stuff on server")
-    server.sendall("proceed".encode())
-    details = server.recv(1024).decode().split(",")
+def register(client):
+    print("Doing register stuff on client")
+    client.sendall("proceed".encode())
+    details = client.recv(1024).decode().split(",")
+
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
+
     if check(details[0], conn):
-        server.sendall("invalid".encode())#USername already exists
+        client.sendall("invalid".encode())#USername already exists
+        conn.close()
+        return False
     else:
-        cursor.execute("INSERT INTO Accounts (Username, Password) VALUES (?, ?)", details) # Tuple unpacking if not obvious
+        cursor.execute("INSERT INTO Accounts (Username, Password) VALUES (?, ?)", (details)) # Tuple unpacking if not obvious
+        client.sendall("valid".encode())
+        conn.close()
+        return True
+
     
-    conn.close()
 
 
     
-def login(server):
-    print("doing login stuff on server")
-    server.sendall("proceed".encode())
-    details = server.recv(1024).decode().split(",")
+def login(client):
+    print("doing login stuff on sever")
+    client.sendall("proceed".encode())
+    details = client.recv(1024).decode().split(",")
 
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
     if verify(details[0], details[1], cursor):
-        pass#Login was good
+        print(f"Login good by {details[0]}")
+        client.sendall("valid".encode())
+        conn.close()
+        return True
     else:
-        pass # Login badd
+        client.sendall("invalid".encode())
+        print("Login bad")# Login badd
+        conn.close()
+        return False
 
-    conn.close()
+    
 
-def match_Players(server):
-    print("Doing login stuff on server")
 
-def play_Multiplayer(server):
-    print("Doing login stuff on server")
+def match_Players(client):
+    print("Doing login stuff on client")
+
+def play_Multiplayer(client):
+    print("Doing login stuff on client")
+
 
 
 options = {"login": login,
@@ -79,17 +110,28 @@ options = {"login": login,
         "play_Multiplayer": play_Multiplayer}
 
 
+
+def handle(client):
+    
+    while True:
+        request = client.recv(1024).decode()
+        print(request)
+        if request == "Logout":
+            break
+        elif request in options:
+            if options[request](client) is False:
+                return
+                print("Login or regsiter failed so temrinated connection")
+        else:
+            print("Inavlid request")
+
+
 print("Server")
+
 
 while True:
 
     client, address = server.accept()
-
     
-    request = client.recv(1024).decode()
-    print(request)
-
-    
-    if request in options:
-        Thread(options[request](client))
+    Thread(handle(client))
     

@@ -61,18 +61,21 @@ class Client:
 
     def disconnect(self):
         self.__client.close()
+        self.connected  = False
 
+    def hashPW(self, password):
+        return hashlib.sha256(password.encode()).hexdigest()
 
-
-    def register(self, username, password):
+    def register(self, username, password):#Password going through here is here unproccessed
         print("Doing register stuff on client")
 
         self.__client.sendall("register".encode())
         proceed = self.__client.recv(1024).decode()
 
-        if proceed == "proceed":
-            self.__client.send((username+","+password).encode())
+        valid = False
 
+        if proceed == "proceed":
+            self.__client.send((username+","+self.hashPW(password)).encode())
             if self.__client.recv(1024).decode() == "valid":
                     valid = True
 
@@ -80,11 +83,12 @@ class Client:
 
         else:
             print("No proceed")
-            return #connection no go
+
+        return valid
     
 
 
-    def login(self, username, password):
+    def login(self, username, password, hashed):
         print("doing login stuff on client")
         
         self.__client.sendall("login".encode())
@@ -94,11 +98,14 @@ class Client:
         valid = False
 
         if proceed == "proceed":
-        
-            self.__client.send((username+","+password).encode())
+            if hashed is True:
+                self.__client.send((username+","+password).encode())
+            else:
+                self.__client.send((username+","+self.hashPW(password)).encode())
 
             if self.__client.recv(1024).decode() == "valid":
                 valid = True
+                print("Login success")
 
         else:
             print("No proceed")

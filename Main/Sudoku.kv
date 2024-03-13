@@ -41,8 +41,26 @@ MainMenuManager:
             root.manager.transition = FadeTransition()
             app.root.current = "MainMenu"
 
-<GameScreen>:
+<Cell>:
+    Button:
+        background_color: 1, 0, 1, 1
+        size_hint : 1, 1
+        font_size : 20
+        color : 0, 1, 1, 1
+        on_release: root.click()
 
+
+<GameScreen>:
+    name : "GameScreen"
+    AnchorLayout:
+        anchor_x: "center"
+        anchor_y: "center"
+        size_hint : 0.8, 0.8
+        GridLayout:
+            id : grid
+            cols: 9
+            rows: 9
+       
 
 <MainMenu>:
     name : "MainMenu"
@@ -93,7 +111,7 @@ MainMenuManager:
             Button:
                 text: "Easy"
                 on_release:
-                    #root.manager.get_screen("ClassicGame").ids.difficulty = text
+                    root.setDifficulty("easy")
                     root.manager.transition = FadeTransition()
                     root.manager.current = "ClassicGame"
                     root.manager.transition.direction = "right"
@@ -101,6 +119,7 @@ MainMenuManager:
             Button:
                 text: "Normal"
                 on_release:
+                    root.setDifficulty("normal")
                     root.manager.transition = FadeTransition()
                     root.manager.current = "ClassicGame"
                     root.manager.transition.direction = "right"
@@ -108,6 +127,7 @@ MainMenuManager:
             Button:
                 text: "Hard"
                 on_release:
+                    root.setDifficulty("hard")
                     root.manager.transition = FadeTransition()
                     root.manager.current = "ClassicGame"
                     root.manager.transition.direction = "right"
@@ -115,6 +135,7 @@ MainMenuManager:
             Button:
                 text: "Extra Hard"
                 on_release:
+                    root.setDifficulty("extra_hard")
                     root.manager.transition = FadeTransition()
                     root.manager.current = "ClassicGame"
                     root.manager.transition.direction = "right"
@@ -145,6 +166,12 @@ MainMenuManager:
                 on_release: 
                     root.manager.current = "Register"
 
+
+            Button:
+                text: "Logout"
+                
+            
+
 <BestTimesMenu>:
     name : "BestTimes"
     
@@ -160,6 +187,8 @@ MainMenuManager:
         on_release: 
             root.manager.transition.direction = "down"
             root.manager.current = "ClassicMenu"
+
+    
 
     
 
@@ -187,28 +216,49 @@ MainMenuManager:
             app.root.current = "AccountMenu"
 
     AnchorLayout:
-        size_hint : 0.6, 0.1
-        pos_hint : {"center_x": 0.5, "center_y":0.5}
 
+        size_hint : 0.6, 0.2
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
         BoxLayout:
             orientation : "vertical"
             BoxLayout:
                 Label:
+                    size_hint : 0.25, 1
                     text : "Username"
                     color : 0, 1, 1, 1
+
                 TextInput:
+                    size_hint : 0.75, 1
                     id: username
                     hint_text : "username"
                     multiline : False
 
             BoxLayout:
                 Label:
+                    size_hint : 0.25, 1
                     text : "Password"
                     color : 0, 1, 1, 1
+
                 TextInput:
+                    size_hint : 0.5, 1
                     id : password
                     hint_text : "password"
                     multiline : False
+                    password : True
+
+                Button:
+                    size_hint : 0.25, 1
+                    text : "toggle mask"
+                    on_press: root.togglePW()
+
+            Label:
+                text : ""
+
+            Button:
+                text:"Login"
+                pos_hint: {"center_x" : 0.5}
+                size_hint : 0.3, 0.8
+                on_release : root.clickLogin()
 
     
 
@@ -224,37 +274,57 @@ MainMenuManager:
             app.root.current = "AccountMenu"
 
     AnchorLayout:
-        size_hint : 0.6, 0.15
+        size_hint : 0.6, 0.3
         pos_hint : {"center_x": 0.5, "center_y":0.5}
 
         BoxLayout:
             orientation : "vertical"
             BoxLayout:
                 Label:
+                    size_hint : 0.25, 1
                     text : "Username"
                     color : 0, 1, 1, 1
+
                 TextInput:
+                    size_hint : 0.75, 1
                     id: username
-                    hint_text : "Enter username"
+                    hint_text : "username"
                     multiline : False
 
             BoxLayout:
                 Label:
+                    size_hint : 0.25, 1
                     text : "Password"
                     color : 0, 1, 1, 1
+
                 TextInput:
+                    size_hint : 0.75, 1
                     id : password1
-                    hint_text : "Enter password"
+                    hint_text : "password"
                     multiline : False
+                    password : True
 
             BoxLayout:
                 Label:
+                    size_hint : 0.25, 1
                     text : "Re-Enter Password"
                     color : 0, 1, 1, 1
+
                 TextInput:
+                    size_hint : 0.75, 1
                     id : password2
-                    hint_text : "Re-enter password"
+                    hint_text : "password"
                     multiline : False
+                    password : True
+
+            Label:
+                text : ""
+
+            Button:
+                text:"Create Account"
+                pos_hint: {"center_x" : 0.5}
+                size_hint : 0.3, 0.8
+                on_release : root.clickRegister()
 
     
 
