@@ -28,7 +28,6 @@ class Account():
         self.__password = hashlib.sha256(password.encode()).hexdigest()
 
 
-username, password = "heehee", "boohoo"
 class Client:
 
     def __init__(self):
@@ -55,7 +54,7 @@ class Client:
         try:
             self.__client.connect((self.__host, self.__port))
             self.connected = True
-        except:
+        except :
             print("Connection could not be made")
             return False
 

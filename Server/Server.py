@@ -51,7 +51,8 @@ def verify(username, password, cursor):#Checks if username an dpassword match
                 return False
     else:
         return False
-  
+
+
 def register(client):
     print("Doing register stuff on client")
     client.sendall("proceed".encode())
@@ -67,6 +68,7 @@ def register(client):
     else:
         cursor.execute("INSERT INTO Accounts (Username, Password) VALUES (?, ?)", (details)) # Tuple unpacking if not obvious
         client.sendall("valid".encode())
+        conn.commit()
         conn.close()
         return True
 
@@ -114,24 +116,30 @@ options = {"login": login,
 def handle(client):
     
     while True:
-        request = client.recv(1024).decode()
-        print(request)
-        if request == "Logout":
+        try:
+            request = client.recv(1024).decode()
+            print(request)
+            if not request:
+                break
+            if request == "Logout":
+                print("Logoutheehehe")
+                break
+
+            elif request in options:
+                options[request](client)
+                
+        except Exception as e :
+            print(f"Inavlid request {e}")
             break
-        elif request in options:
-            if options[request](client) is False:
-                return
-                print("Login or regsiter failed so temrinated connection")
-        else:
-            print("Inavlid request")
+
+    client.close()
 
 
-print("Server")
 
 
 while True:
 
     client, address = server.accept()
     
-    Thread(handle(client))
-    
+    Thread(handle(client)).start()
+        

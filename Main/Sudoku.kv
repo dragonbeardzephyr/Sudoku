@@ -23,13 +23,15 @@ MainMenuManager:
 
 <MainMenuManager>:
 
-
 <BaseScreen>:
     name : "BaseScreen"
+    
     canvas.after:
         Rectangle:
             size: self.size
-            source : root.set_Border()
+            source : root.borderFile
+
+    
 
 <Menu>:
     Button:
@@ -41,25 +43,36 @@ MainMenuManager:
             root.manager.transition = FadeTransition()
             app.root.current = "MainMenu"
 
-<Cell>:
-    Button:
-        background_color: 1, 0, 1, 1
-        size_hint : 1, 1
-        font_size : 20
-        color : 0, 1, 1, 1
-        on_release: root.click()
-
 
 <GameScreen>:
     name : "GameScreen"
     AnchorLayout:
         anchor_x: "center"
         anchor_y: "center"
-        size_hint : 0.8, 0.8
         GridLayout:
+            width: 600
+            height: 600
+            size_hint_x : None
+            size_hint_y : None
             id : grid
             cols: 9
-            rows: 9
+            rows: 9 
+            spacing : 2
+
+            
+    GridLayout:
+        width: 175
+        height: 175
+        size_hint_x : None
+        size_hint_y : None
+        pos_hint : {"center_x": 0.9, "center_y":0.6}
+        id : numberGrid
+        cols : 3
+        rows : 3
+        spacing : 0.5
+        
+    
+    
        
 
 <MainMenu>:
@@ -169,6 +182,7 @@ MainMenuManager:
 
             Button:
                 text: "Logout"
+                on_release: root.clickLogout()
                 
             
 
