@@ -39,6 +39,8 @@ class Game:
         self.puzzle = None
         self.puzzleSolution = None
         self.holding_Number = 0
+        self.time = 0
+        
 
 
     def import_Puzzle(self, difficulty):
@@ -112,7 +114,7 @@ class SudokuApp(App):
 
 class BaseScreen(Screen):
     borderFile = StringProperty("graphics\Sudoku_App_Border_Logged_Out.png")
-
+    
     def __init__(self, **kwargs):
         super(BaseScreen, self).__init__(**kwargs)
 
@@ -205,6 +207,7 @@ class GameScreen(BaseScreen):
         super(GameScreen, self).__init__(**kwargs)
 
     def on_enter(self):
+        self.set_Border()
         self.load()
 
     def load(self):
