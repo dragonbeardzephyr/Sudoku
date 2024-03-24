@@ -9,8 +9,8 @@ class Puzzle:
             self.string_To_Grid(data) # Converts a string representation of a puzzle into a 2d array
             self.get_All_Candidates() # Sets candidates for all cells
 
-        #elif type(data) == list: # For importing grid as 2d array, no checks made as this is intednign for testing
-             #self.grid = data
+        elif type(data) == list: # For importing grid as 2d array, no checks made as this is intednign for testing
+            self.grid = data #used for converting list back to strng
         else: # Default
             self.generate()
 
@@ -402,7 +402,7 @@ def make_More(grid):
 
 "MAIN PROGRAM"""
 if __name__ == "__main__":
-    n = 100 # Number of Puzzle to generate
+    n = 10 # Number of Puzzle to generate
     easy = [] 
     normal = []
     hard = []
@@ -452,10 +452,10 @@ if __name__ == "__main__":
     print(f"extra hard  {len(extra_hard)}")
     print(f"outliers    {len(outliers)}")
 
-    easyFile = PuzzleFile("Generator/easy.txt", "append", easy)
-    normalFile = PuzzleFile("Generator/normal.txt", "append", normal)
-    hardFile = PuzzleFile("Generator/hard.txt", "append", hard)
-    extra_HardFile = PuzzleFile("Generator/extra_hard.txt", "append", extra_hard)
+    easyFile = PuzzleFile("Main/Generator/easy.txt", "append", easy)
+    normalFile = PuzzleFile("Main/Generator/normal.txt", "append", normal)
+    hardFile = PuzzleFile("Main/Generator/hard.txt", "append", hard)
+    extra_HardFile = PuzzleFile("Main/Generator/extra_hard.txt", "append", extra_hard)
 
     print(outliers)
 

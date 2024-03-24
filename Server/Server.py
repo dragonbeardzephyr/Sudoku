@@ -9,26 +9,18 @@ port = 7777
 
 DATABASE = "Server\Sudoku_Online.db"
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-server.bind((host, port))
-
-server.listen(50) #Limit of 50 connections
-
-
-
-
 
 
 def check(username, cursor):
     result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
-    print(result)   
-    if username is None:
-        print("check bad")
+    print(f"result: {result}")   
+    if result is None:
+        print("username not in database")
         return False
-    else:
-        print("Check good")
+    elif username in result:
+        print("username in database")
         return True
+    
         
 
 
@@ -57,20 +49,25 @@ def register(client):
     print("Doing register stuff on client")
     client.sendall("proceed".encode())
     details = client.recv(1024).decode().split(",")
-
+    print(details)
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
-    if check(details[0], conn):
+    if check(details[0], cursor):
         client.sendall("invalid".encode())#USername already exists
         conn.close()
         return False
+    
     else:
         cursor.execute("INSERT INTO Accounts (Username, Password) VALUES (?, ?)", (details)) # Tuple unpacking if not obvious
+        cursor.execute("INSERT INTO BestTimes (Username, Easy, Normal, Hard, 'Extra Hard') VALUES (?, NULL, NULL, NULL, NULL)", (details[0],)) # Tuple unpacking if not obvious
+
         client.sendall("valid".encode())
         conn.commit()
         conn.close()
+        print("INserted")
         return True
+    
 
     
 
@@ -95,6 +92,23 @@ def login(client):
         conn.close()
         return False
 
+def update_BestTimes(client):
+    client.sendall("proceed".encode())
+    times = client.recv(1024).decode().split(",")
+
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("UPDATE BestTimes SET Easy = ?, Normal = ?, Hard = ?, 'Extra Hard' = ? WHERE Username = ?", (times[1], times[2], times[3], times[4], times[0]))
+        client.sendall("valid".encode())
+        
+    except Exception as e:
+        print(f"Error updating best times {e}")
+        client.sendall("invalid".encode())
+
+    conn.commit()
+    conn.close()
     
 
 
@@ -109,17 +123,17 @@ def play_Multiplayer(client):
 options = {"login": login,
         "register": register,
         "match_Players": match_Players,
-        "play_Multiplayer": play_Multiplayer}
+        "play_Multiplayer": play_Multiplayer,
+        "update_BestTimes" : update_BestTimes}
 
-
-
-def handle(client):
+def handle(client, address):
     
     while True:
         try:
             request = client.recv(1024).decode()
             print(request)
             if not request:
+                print("not request")
                 break
             if request == "Logout":
                 print("Logoutheehehe")
@@ -132,14 +146,26 @@ def handle(client):
             print(f"Inavlid request {e}")
             break
 
+    print("Closing connection")
     client.close()
 
 
 
+def main():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((host, port))
+    server.listen()
 
-while True:
+    while True:
 
-    client, address = server.accept()
-    
-    Thread(handle(client)).start()
+        client, address = server.accept()
+        print(f"Connection from {address}")
+
+        thread = Thread(target = handle, args = (client, address))
+        thread.start()
+
+        print("pong")
         
+
+main()
+

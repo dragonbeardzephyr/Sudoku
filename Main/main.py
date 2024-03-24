@@ -1,11 +1,14 @@
-from kivy.app import App
+
 """from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.floatlayout import FloatLayout"""
+
+from kivy.app import App
+from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
-"""from kivy.uix.popup import Popup"""
+from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.clock import Clock
 from kivy.properties import StringProperty
@@ -39,8 +42,8 @@ class Game:
         self.puzzle = None
         self.puzzleSolution = None
         self.holding_Number = 0
-        self.time = 0
-        
+        self.finishTime = 0
+
 
 
     def import_Puzzle(self, difficulty):
@@ -66,20 +69,25 @@ class SudokuApp(App):
 
         self.online = False
         self.rememberLogin = False
-        self.client = Client()
+        self.client = None
         self.boot()
 
 
     def boot(self):
         self.load_Game_Data()
         if len(self.username) > 0 and len(self.password) > 0:
+            self.client = Client()
             self.client.connect()
             if self.client.connected is True:
                 if self.client.login(self.username, self.password, hashed = True):
                     self.online = True
+                    self.client.update_BestTimes(self.topTimes)
                 else:
                     print("Disconnected")
                     self.client.disconnect()
+                    self.client = None
+
+
 
             self.rememberLogin = True 
         
@@ -135,8 +143,6 @@ class Menu(BaseScreen):
     pass
 
 
-class Timer():
-    pass
 
 class Cell(Button):
     def __init__(self, row, col, n, **kwargs):
@@ -172,8 +178,6 @@ class Cell(Button):
 
         game.puzzle.insert(self.row, self.col, self.n)
 
-        if game.puzzle.grid == game.puzzleSolution.grid:
-            print("You Win")
         
     def clearCell(self):
         self.n = 0
@@ -202,13 +206,36 @@ class numberInput(Button):
     def on_press(self):
         game.holding_Number = self.n
 
+
+class Timer(Label):
+    def __init__(self, **kwargs):
+        super(Timer, self).__init__(**kwargs)
+
 class GameScreen(BaseScreen):
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
 
+    def checks(self, dt):
+        self.updateTimer()
+        if game.puzzle.grid == game.puzzleSolution.grid:
+            print("Player WINS!")
+            game.finishTime = self.saveTime
+            self.manager.current = "MainMenu"
+        
+
+    def updateTimer(self):
+        elapsedTime = time.time() - self.start
+        minutes = str(int(elapsedTime // 60))
+        seconds = str(int(elapsedTime % 60))
+        centiSeconds = str(int(round(elapsedTime % 60 - int(elapsedTime % 60), 2)*100))
+        #print(f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}.{'0'*(2-len(centiSeconds))+centiSeconds}")
+        self.ids.timer.text = f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
+        self.saveTime = [elapsedTime, self.ids.timer.text]
+
     def on_enter(self):
         self.set_Border()
         self.load()
+        Clock.schedule_interval(self.checks, 0.01)
 
     def load(self):
         game.import_Puzzle(game.difficulty)#assigns puzzle to game.puzzle
@@ -223,12 +250,18 @@ class GameScreen(BaseScreen):
         for n in range(1, 10):
             numGrid.add_widget(numberInput(n))
 
+        self.start = time.time()
+
     def on_leave(self):
         self.ids.grid.clear_widgets()
         self.ids.numberGrid.clear_widgets()
 
     def pause(self):
         pass
+
+class PauseScreen(Popup):
+    pass
+
 
 
 class ClassicMenu(Menu):
@@ -247,9 +280,11 @@ class MultiplayerGame(GameScreen):
 
 class AccountMenu(Menu):
     def clickLogout(self):
-        if app.online is True:
+        if app.client and app.online is True:
             app.client.disconnect()
+            app.client = None
             app.online = False
+            self.set_Border()
 
 
 class Login(BaseScreen):
@@ -259,31 +294,41 @@ class Login(BaseScreen):
     def clickLogin(self):
         print("button clicked")
         un, pw = self.ids.username.text, self.ids.password.text
-        rememberLogin = True
         print(un, pw)
-        
-        if app.client.connect():
-                
+        app.client = Client()
+        app.client.connect()
+ 
+        if app.client.connected:        
             if app.client.login(un, pw, hashed = False):
                 app.online = True
+                self.set_Border()
 
-                if rememberLogin is True:
+                if app.rememberLogin is True:
                     app.username = un
                     app.password = app.client.hashPW(pw)
+
+                app.client.update_BestTimes(app.topTimes)
+            
             else:
-                pass
+                app.client.disconnect()
+                app.client = None
         else:
+            app.client.disconnect()
+            app.client = None
             print("COuld not connect to server")
                 
-
+    def toggleRememberLogin(self):
+        app.rememberLogin = not(app.rememberLogin)
 
 class Register(BaseScreen):
     def clickRegister(self):
         print("Butoon CLicked")
         un , pw1, pw2 = self.ids.username.text, self.ids.password1.text, self.ids.password2.text
         if pw1 == pw2:
-            if app.client.connect():
-            
+            app.client = Client()
+            app.client.connect()
+ 
+            if app.client.connected: 
                 if app.client.register(un, pw1):
                     #register 
                     #display that registred
@@ -293,8 +338,12 @@ class Register(BaseScreen):
                     pass
                     #error or usern
             else:
+                app.client.disconnect()
+                app.client = None
                 print("Could not connect to server")
         else:
+            app.client.disconnect()
+            app.client = None
             print("Password do not match")
 
  

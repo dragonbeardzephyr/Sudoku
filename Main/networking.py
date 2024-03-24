@@ -35,7 +35,7 @@ class Client:
         self.__port = 7777
         self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connected = False
-        
+        self.username = ""
         """
         self.options = {"login": self.login,
         "register": self.register,
@@ -104,6 +104,7 @@ class Client:
 
             if self.__client.recv(1024).decode() == "valid":
                 valid = True
+                self.username = username
                 print("Login success")
 
         else:
@@ -111,29 +112,36 @@ class Client:
 
         return valid
 
+    def update_BestTimes(self, times):
+        print("Doing update best times stuff on client")
+        self.__client.sendall("update_BestTimes".encode())
+        proceed = self.__client.recv(1024).decode()
+        if proceed:
+            self.__client.send((f"{self.username}," + ",".join(times)).encode())
+        else:
+            return
 
-    """
     def match_Players(self):
         print("Doing login stuff on client")
-        self.__client.sendall(self.request.encode())
+        self.__client.sendall("match_Players".encode())
         proceed = self.__client.recv(1024).decode()
         if proceed:
             pass
         else:
             return #connection no go
-    """
     
-    """
+    
+    
     def play_Multiplayer(self):
         print("Doing login stuff on client")
-        self.__client.sendall(self.request.encode())
+        self.__client.sendall("play_Multiplayer".encode())
         proceed = self.__client.recv(1024).decode()
 
         if proceed:
             pass
         else:
             return #connection no go
-    """
+
 
 
 
