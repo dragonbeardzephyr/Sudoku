@@ -11,6 +11,8 @@ DATABASE = "Server\Sudoku_Online.db"
 
 
 
+
+
 def check(username, cursor):
     result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
     print(f"result: {result}")   
@@ -30,7 +32,7 @@ def verify(username, password, cursor):#Checks if username an dpassword match
         result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", (username, password)).fetchone()
         print(result)
         if result is None:
-            print("Result n0ne")
+            print("Result none")
             return False
             
         else:
@@ -67,11 +69,6 @@ def register(client):
         conn.close()
         print("INserted")
         return True
-    
-
-    
-
-
     
 def login(client):
     print("doing login stuff on sever")
@@ -114,6 +111,8 @@ def update_BestTimes(client):
 
 def match_Players(client):
     print("Doing login stuff on client")
+    client.sendall("proceed".encode())
+    difficulty = client.recv(1024).decode()
 
 def play_Multiplayer(client):
     print("Doing login stuff on client")
@@ -125,6 +124,7 @@ options = {"login": login,
         "match_Players": match_Players,
         "play_Multiplayer": play_Multiplayer,
         "update_BestTimes" : update_BestTimes}
+
 
 def handle(client, address):
     
@@ -155,6 +155,12 @@ def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen()
+    """
+    easyQueue
+    normalQueue
+    hardQueue
+    extraHardQueue
+    """
 
     while True:
 

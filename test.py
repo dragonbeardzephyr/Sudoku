@@ -1,3 +1,4 @@
+from re import I
 import time
 import timeit
 import cProfile
@@ -6,20 +7,21 @@ import copy
 import sys
 
 
-def time_taken(func = lambda x: x):
-    st = time.time()
+def time_taken(func):
+    st = time.perf_counter()
     func()
-    et = time.time()
+    et = time.perf_counter()
     print(et-st)
 
 
 
 ##print(sys.getsizeof(""))
 
-start = time.time()
-time.sleep(3.5)
-time = time.time() - start
-minutes = str(int(time // 60))
-seconds = str(int(time % 60))
-centiSeconds = str(int(round(time % 60 - int(time % 60), 2)*100))
-print(f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}.{centiSeconds}")
+#time_taken(lambda: print("Hello World!"))
+
+
+for i in range(3):
+    for j in (0, 3, 6):
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                print(f"{x},{y}")

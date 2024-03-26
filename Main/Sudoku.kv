@@ -17,7 +17,6 @@ MainMenuManager:
     Login:
     Register:
 
-    BestTimesMenu:
     BestTimes:
     
 
@@ -55,19 +54,102 @@ MainMenuManager:
         background_color : 0, 1, 0.5, 1
         size_hint : 0.1, 0.07
         pos_hint : {"center_x" : 0.5, "top": 0.99}
+        on_release: root.pauseGame()
 
     AnchorLayout:
         anchor_x: "center"
         anchor_y: "center"
         GridLayout:
-            width: 600
-            height: 600
             size_hint_x : None
             size_hint_y : None
+            width : 600
+            height : 600
             id : grid
-            cols: 9
-            rows: 9 
-            spacing : 2
+            cols: 3 
+            rows: 3
+            spacing : 8
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box1
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box2
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box3
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box4
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box5
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box6
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box7
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box8
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box9
+                cols: 3 
+                rows: 3
+                spacing : 2
+
 
             
     GridLayout:
@@ -82,9 +164,12 @@ MainMenuManager:
         spacing : 0.5
         
     
-<Pause>:
-    Label:
-        text: "Pause"
+<PauseScreen>:
+    title : "Pause"
+    size_hint : 0.6, 0.6
+    Button:
+        text: "Resume"
+        on_release: root.dismiss()
        
 
 <MainMenu>:
@@ -198,17 +283,57 @@ MainMenuManager:
                 
             
 
-<BestTimesMenu>:
+<BestTimes>:
     name : "BestTimes"
-    
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = FadeTransition()
+            app.root.current = "MainMenu"
+    AnchorLayout:
+        size_hint : 0.8, 0.5
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+        
+        #orientation : "horizontal"
+        BoxLayout:
+            spacing : 5
+            BoxLayout:
+                color: 1, 0, 0, 1
+                orientation : "vertical"
+                Label:
+                    text: "Easy"
+                Label:
+                    text : root.get_topTime(0)
+            BoxLayout:
+                orientation : "vertical"
+                Label:
+                    text: "Normal"
+                Label:
+                    text :  root.get_topTime(1)
+            BoxLayout:
+                orientation : "vertical"
+                Label:
+                    text: "Hard"
+                Label:
+                    text :  root.get_topTime(2)
+            BoxLayout:
+                orientation : "vertical"
+                Label:
+                    text: "Extra Hard"
+                Label:
+                    text : root.get_topTime(3)
+
+
 
 
 
 <ClassicGame>:
     name : "ClassicGame"
     Button:
-        text: "Return"
-        size_hint : 0.07, 0.04
+        text: "Exit Game"
+        size_hint : 0.08, 0.04
         pos_hint : {"x":0.005, "top": 0.99}
         on_release: 
             root.manager.transition.direction = "down"
@@ -221,8 +346,8 @@ MainMenuManager:
 <MultiplayerGame>:
     name : "MultiplayerGame"
     Button:
-        text: "Return"
-        size_hint : 0.07, 0.04
+        text: "Exit Game"
+        size_hint : 0.08, 0.04
         pos_hint : {"x":0.005, "top": 0.99}
         on_release:
             root.manager.transition.direction = "down"
@@ -337,7 +462,7 @@ MainMenuManager:
                     id : password1
                     hint_text : "password"
                     multiline : False
-                    password : True
+                    
 
             BoxLayout:
                 Label:
@@ -350,8 +475,9 @@ MainMenuManager:
                     id : password2
                     hint_text : "password"
                     multiline : False
-                    password : True
+                    
 
+        
             Label:
                 text : ""
 

@@ -35,6 +35,7 @@ import random
 from Generator.Generate import Puzzle
 from networking import Client
 
+difficulties = ["easy", "normal", "hard", "extra_hard"]
 class Game:
     def __init__(self):
 
@@ -43,8 +44,8 @@ class Game:
         self.puzzleSolution = None
         self.holding_Number = 0
         self.finishTime = 0
-
-
+        self.timer = False
+        
 
     def import_Puzzle(self, difficulty):
 
@@ -87,10 +88,8 @@ class SudokuApp(App):
                     self.client.disconnect()
                     self.client = None
 
-
-
             self.rememberLogin = True 
-        
+
 
     def load_Game_Data(self):
         with open("Main\Game Data.txt", "r") as file:
@@ -114,6 +113,12 @@ class SudokuApp(App):
             file.write(data)
 
 
+    def parse_Timer_to_String(self, timeFloat):
+        minutes = str(int(timeFloat // 60))
+        seconds = str(int(timeFloat % 60))
+        return f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
+    
+        
     def on_stop(self):
         self.save_Game_Data()
         print("Goodbye World")
@@ -148,7 +153,7 @@ class Cell(Button):
     def __init__(self, row, col, n, **kwargs):
         super(Cell, self).__init__(**kwargs)
 
-        self.neutral = (0, 1, 0.75, 0.75)
+        self.neutral = (0, 1, 0.75, 1)
         self.collision = (1, 1, 0.75, 0.5)
         self.clue = (0, 1, 0.75, 1)
 
@@ -216,53 +221,125 @@ class GameScreen(BaseScreen):
         super(GameScreen, self).__init__(**kwargs)
 
     def checks(self, dt):
-        self.updateTimer()
-        if game.puzzle.grid == game.puzzleSolution.grid:
+        if game.timer:
+            self.updateTimer()
+        else:
+            self.recentTime = time.time()
+
+        game.win = game.puzzle.grid == game.puzzleSolution.grid
+        if game.win:#check win
             print("Player WINS!")
+            game.timer = False
             game.finishTime = self.saveTime
+
+            topTime = app.topTimes[difficulties.index(game.difficulty)]
+            topTime = float(topTime) if len(topTime) > 0 else 0
+
+            if topTime == 0 or topTime > game.finishTime[0]:
+                app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
+
+            self.clock.cancel()
+            game.win = False
+            game.puzzle, game.puzzleSolution = None, None
             self.manager.current = "MainMenu"
         
 
     def updateTimer(self):
-        elapsedTime = time.time() - self.start
-        minutes = str(int(elapsedTime // 60))
-        seconds = str(int(elapsedTime % 60))
-        centiSeconds = str(int(round(elapsedTime % 60 - int(elapsedTime % 60), 2)*100))
+        self.elapsedTime += time.time() - self.recentTime
+        self.recentTime = time.time()
+        minutes = str(int(self.elapsedTime // 60))
+        seconds = str(int(self.elapsedTime % 60))
+        centiSeconds = str(int(round(self.elapsedTime % 60 - int(self.elapsedTime % 60), 2)*100))
         #print(f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}.{'0'*(2-len(centiSeconds))+centiSeconds}")
         self.ids.timer.text = f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
-        self.saveTime = [elapsedTime, self.ids.timer.text]
+        self.saveTime = [round(self.elapsedTime, 2), self.ids.timer.text]
 
     def on_enter(self):
         self.set_Border()
         self.load()
-        Clock.schedule_interval(self.checks, 0.01)
+        self.clock = Clock.schedule_interval(self.checks, 0.01)
 
     def load(self):
         game.import_Puzzle(game.difficulty)#assigns puzzle to game.puzzle
-        print(game.puzzle.grid)
+        game.puzzle.show_grid()
         grid = self.ids.grid
 
+        i = 0
+        j = 0
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box1.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 0
+        j = 3
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box2.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 0
+        j = 6
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box3.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 1
+        j = 0
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box4.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 1
+        j = 3
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box5.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 1
+        j = 6
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box6.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 2
+        j = 0
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box7.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 2
+        j = 3
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box8.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 2
+        j = 6
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box9.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+
+
+        """
         for row in range(9):
             for col in range(9):
                 grid.add_widget(Cell(row, col, game.puzzle.grid[row][col]))
+        """
 
         numGrid = self.ids.numberGrid
         for n in range(1, 10):
             numGrid.add_widget(numberInput(n))
 
-        self.start = time.time()
+        self.recentTime = time.time()
+        self.elapsedTime = 0
+        game.timer = True
 
     def on_leave(self):
         self.ids.grid.clear_widgets()
         self.ids.numberGrid.clear_widgets()
 
-    def pause(self):
-        pass
+    def pauseGame(self):
+        pause = PauseScreen()
+        pause.open()
+
 
 class PauseScreen(Popup):
-    pass
+    def on_open(self):
+        game.timer = False
 
-
+    def on_dismiss(self):
+        game.timer = True
 
 class ClassicMenu(Menu):
     def setDifficulty(self, difficulty):
@@ -285,11 +362,15 @@ class AccountMenu(Menu):
             app.client = None
             app.online = False
             self.set_Border()
+            app.rememberLogin = False
 
 
 class Login(BaseScreen):
     def togglePW(self):
         self.ids.password.password = not(self.ids.password.password)
+    
+    def toggleRememberLogin(self):
+        app.rememberLogin = not(app.rememberLogin)
 
     def clickLogin(self):
         print("button clicked")
@@ -317,12 +398,11 @@ class Login(BaseScreen):
             app.client = None
             print("COuld not connect to server")
                 
-    def toggleRememberLogin(self):
-        app.rememberLogin = not(app.rememberLogin)
+    
 
 class Register(BaseScreen):
     def clickRegister(self):
-        print("Butoon CLicked")
+        print("Butoon Clicked")
         un , pw1, pw2 = self.ids.username.text, self.ids.password1.text, self.ids.password2.text
         if pw1 == pw2:
             app.client = Client()
@@ -347,12 +427,10 @@ class Register(BaseScreen):
             print("Password do not match")
 
  
-
-class BestTimesMenu(Menu):
-    pass
-
 class BestTimes(BaseScreen):
-    pass
+    easy, normal, hard, extra_hard = "", "", "", ""
+    def get_topTime(self, index):
+        return app.topTimes[index]
 
 class MainMenuManager(ScreenManager):
     pass

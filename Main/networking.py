@@ -9,24 +9,6 @@ import hashlib
 #continue 
 #if dont continue exit mulitplayer
 #close connection
-class Account():
-    def __init__(self):
-        self.__username = ""   #3 < size < 15
-        self.__password = ""   #7 < size
-
-    def enter_Details(self):
-
-        while not len(username) in range(5, 21):
-            username = input("Enter Username: ")
-
-        while not len(password) >= 7:
-            password = input("Enter Password: ")
-
-        #Convert password into hash
-
-        self.__username = username
-        self.__password = hashlib.sha256(password.encode()).hexdigest()
-
 
 class Client:
 
@@ -42,6 +24,7 @@ class Client:
         "match_Players": self.match_Players,
         "play_Multiplayer": self.play_Multiplayer}
         """
+
     """
     def handle(self, request):
         if request in self.options:
@@ -116,17 +99,17 @@ class Client:
         print("Doing update best times stuff on client")
         self.__client.sendall("update_BestTimes".encode())
         proceed = self.__client.recv(1024).decode()
-        if proceed:
+        if proceed == "proceed":
             self.__client.send((f"{self.username}," + ",".join(times)).encode())
         else:
             return
 
-    def match_Players(self):
+    def match_Players(self, difficulty):
         print("Doing login stuff on client")
         self.__client.sendall("match_Players".encode())
         proceed = self.__client.recv(1024).decode()
-        if proceed:
-            pass
+        if proceed == "proceed":
+            self.__client.send(difficulty.encode())
         else:
             return #connection no go
     
