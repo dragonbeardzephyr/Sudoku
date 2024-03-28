@@ -1,5 +1,6 @@
+import queue
 import socket
-from threading import Thread
+import threading
 import sqlite3
 
 import time
@@ -10,9 +11,78 @@ port = 7777
 DATABASE = "Server\Sudoku_Online.db"
 
 
+class Queue():
+
+	def __init__(self, maxSize=10):
+		self.__queue = [None for i in range(maxSize)]
+		self.__front = 0
+		self.__rear = -1
+		self.__size = 0
+		self.__maxSize = maxSize
+		self.lock = threading.Lock()
+		
+	def isFull(self):
+		return self.__size == self.__maxSize
+			
+	def isEmpty(self):
+		return self.__size == 0
+		
+	def isEven(self):
+		with self.lock:
+			return self.__size %2 == 0
+				
+			
+	def enQueue(self, item):
+		with self.lock:
+			if self.isFull():
+				return item
+			else:
+				self.__rear = (self.__rear + 1) % self.__maxSize
+				self.__queue[self.__rear] = item
+				self.__size += 1
+				return True
+	
+			#print(self.__front, self.__rear)
+
+	def deQueue(self):
+		with self.lock:
+			if self.isEmpty():
+				return False
+			else:
+				data = self.__queue[self.__front]
+				self.__front = (self.__front + 1) % self.__maxSize
+				self.__size -= 1
+				return data
+	
+			#print(self.__front, self.__rear)
+	
+	def show(self):
+		print()
+		for i in range(self.__size):#prints in order
+			print(self.__queue[(self.__front + i) % self.__maxSize])
 
 
+class Game(threading.Thread):
+    def __init__(self, thread1, thread2):
+        super().__init__()
+        self.player1 = thread1
+        self.player2 = thread2
 
+    def start(self):
+        finished = False
+        while not finished:
+            pass
+            
+easyQ = Queue()
+normalQ = Queue()
+hardQ = Queue()
+extraHardQ = Queue()
+queueDict = {"easy": easyQ, "normal": normalQ, "hard": hardQ, "extraHard": extraHardQ}
+
+
+#######################################################################
+#Database Functions
+#######################################################################
 def check(username, cursor):
     result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
     print(f"result: {result}")   
@@ -22,8 +92,6 @@ def check(username, cursor):
     elif username in result:
         print("username in database")
         return True
-    
-        
 
 
 def verify(username, password, cursor):#Checks if username an dpassword match
@@ -45,8 +113,13 @@ def verify(username, password, cursor):#Checks if username an dpassword match
                 return False
     else:
         return False
+#######################################################################
 
 
+
+#######################################################################
+#Request Redirections
+#######################################################################
 def register(client):
     print("Doing register stuff on client")
     client.sendall("proceed".encode())
@@ -113,19 +186,35 @@ def match_Players(client):
     print("Doing login stuff on client")
     client.sendall("proceed".encode())
     difficulty = client.recv(1024).decode()
+    
+    if queueDict[difficulty].enQueue(client):
+        print("Enqueued")
+        return True
+    else:
+        print("Queue full")
+        client.sendall("Queue full".encode())
+        return False
 
-def play_Multiplayer(client):
+
+def play_Multiplayer():
+
     print("Doing login stuff on client")
 
+#######################################################################
 
-
+#######################################################################
 options = {"login": login,
         "register": register,
         "match_Players": match_Players,
         "play_Multiplayer": play_Multiplayer,
         "update_BestTimes" : update_BestTimes}
+#######################################################################
 
 
+
+#######################################################################
+#Handler
+#######################################################################
 def handle(client, address):
     
     while True:
@@ -148,30 +237,39 @@ def handle(client, address):
 
     print("Closing connection")
     client.close()
+#######################################################################
 
 
 
+
+
+
+
+
+
+
+#######################################################################
+#Main
+#######################################################################
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen()
-    """
-    easyQueue
-    normalQueue
-    hardQueue
-    extraHardQueue
-    """
 
     while True:
 
         client, address = server.accept()
         print(f"Connection from {address}")
 
-        thread = Thread(target = handle, args = (client, address))
+        thread = threading.Thread(target = handle, args = (client, address))
         thread.start()
 
         print("pong")
         
 
-main()
+
+
+
+if __name__ == "__main__":
+    main()
 
