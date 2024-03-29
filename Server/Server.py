@@ -198,7 +198,7 @@ def match_Players(client):
 
     if queueDict[difficulty].isEmpty():
         client.send("Queue empty".encode())
-        #prompt use that quee is empty so they mayhave to wait a while
+        #prompt use that queue is empty so they mayhave to wait a while
     
     if queueDict[difficulty].enQueue(client):
         print("Enqueued")
