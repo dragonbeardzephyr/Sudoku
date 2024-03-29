@@ -172,14 +172,27 @@ class Cell(Button):
             self.disabled = False
             self.background_color = self.neutral
 
+        Clock.schedule_interval(self.checkCell, 1)
+
+    def checkCell(self, dt):
+        if not self.disabled and self.n != 0:#Dont need to waste time checking clue cells
+            game.puzzle.insert(self.row, self.col, 0)#THis is so that it does not detect a collison with itself
+
+            if game.puzzle.check(self.row, self.col, self.n) is False:
+                self.background_color = self.collision
+            else:
+                self.background_color = self.neutral
+
+            game.puzzle.insert(self.row, self.col, self.n)
+
     def updateCell(self, n):
         self.n = n
         self.text = str(n)
-
+        """
         if game.puzzle.check(self.row, self.col, self.n) is False:
             self.background_color = self.collision
         else:
-            self.background_color = self.neutral
+            self.background_color = self.neutral"""
 
         game.puzzle.insert(self.row, self.col, self.n)
 
@@ -326,7 +339,15 @@ class GameScreen(BaseScreen):
         game.timer = True
 
     def on_leave(self):
-        self.ids.grid.clear_widgets()
+        self.ids.box1.clear_widgets()
+        self.ids.box2.clear_widgets()
+        self.ids.box3.clear_widgets()
+        self.ids.box4.clear_widgets()
+        self.ids.box5.clear_widgets()
+        self.ids.box6.clear_widgets()
+        self.ids.box7.clear_widgets()
+        self.ids.box8.clear_widgets()
+        self.ids.box9.clear_widgets()
         self.ids.numberGrid.clear_widgets()
 
     def pauseGame(self):

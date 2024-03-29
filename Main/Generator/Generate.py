@@ -1,7 +1,7 @@
 import random
 import time
 import copy
-
+#
 class Puzzle:
 
     def __init__(self, data = None):
@@ -24,7 +24,7 @@ class Puzzle:
     def insert(self, row, col, n):
         self.grid[row][col] = n
         
-    def find_Empty_Space(self):
+    def find_Empty_Space(self):#
         for row in range(9):
             for col in range(9):
                 if self.grid[row][col] == 0:
@@ -72,7 +72,7 @@ class Puzzle:
             return False
     """
 
-    def get_All_Candidates(self):
+    def get_All_Candidates(self):#
         self.candidates = [[set(range(1, 10))for i in range(9)]for j in range(9)]
 
         for row in range(9):
