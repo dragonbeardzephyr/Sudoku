@@ -68,7 +68,7 @@ class Game(threading.Thread):
         self.player1 = thread1
         self.player2 = thread2
 
-    def start(self):
+    def run(self):
         finished = False
         while not finished:
             pass
@@ -78,6 +78,15 @@ normalQ = Queue()
 hardQ = Queue()
 extraHardQ = Queue()
 queueDict = {"easy": easyQ, "normal": normalQ, "hard": hardQ, "extraHard": extraHardQ}
+
+
+def create_Match():
+    for difficulty in queueDict:
+        if queueDict[difficulty].isEven():
+            player1 = queueDict[difficulty].deQueue()
+            player2 = queueDict[difficulty].deQueue()
+            game = Game(player1, player2)
+            game.start()#--> This will start the game thread and execute game.run()
 
 
 #######################################################################
@@ -186,10 +195,15 @@ def match_Players(client):
     print("Doing login stuff on client")
     client.sendall("proceed".encode())
     difficulty = client.recv(1024).decode()
+
+    if queueDict[difficulty].isEmpty():
+        client.send("Queue empty".encode())
+        #prompt use that quee is empty so they mayhave to wait a while
     
     if queueDict[difficulty].enQueue(client):
         print("Enqueued")
         return True
+    
     else:
         print("Queue full")
         client.sendall("Queue full".encode())
