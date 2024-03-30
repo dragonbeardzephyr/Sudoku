@@ -4,6 +4,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.floatlayout import FloatLayout"""
+import random
+
 
 from kivy.app import App
 from kivy.uix.label import Label
@@ -14,6 +16,7 @@ from kivy.clock import Clock
 from kivy.properties import StringProperty
 
 from kivy.config import Config
+from pygame import CONTROLLERAXISMOTION
 
 Config.set("graphics", "width", "1024")
 Config.set("graphics", "height", "768")
@@ -46,6 +49,7 @@ class Game:
         self.finishTime = 0
         self.timer = False
         
+        self.opponentGrid = None
 
     def import_Puzzle(self, difficulty):
 
@@ -127,7 +131,7 @@ class SudokuApp(App):
 
 class BaseScreen(Screen):
     borderFile = StringProperty("graphics\Sudoku_App_Border_Logged_Out.png")
-    
+
     def __init__(self, **kwargs):
         super(BaseScreen, self).__init__(**kwargs)
 
@@ -147,16 +151,19 @@ class MainMenu(BaseScreen):
 class Menu(BaseScreen):
     pass
 
-
+#############################
+#Cell Colours
+NEUTRAL = (0, 1, 0.6, 1)
+COLLISION = (1, 0, 0.5, 1)
+CLUE = (0, 1, 0.6, 0.5)
+TEXT = (0.76, 0, 1, 1)
+#############################
 
 class Cell(Button):
     def __init__(self, row, col, n, **kwargs):
         super(Cell, self).__init__(**kwargs)
-
-        self.neutral = (0, 1, 0.75, 1)
-        self.collision = (1, 1, 0.75, 0.5)
-        self.clue = (0, 1, 0.75, 1)
-
+        self.color = TEXT
+        self.font_size = 20
         self.width = 10
         self.height = 10
         self.row = row
@@ -166,11 +173,11 @@ class Cell(Button):
         if self.n > 0:
             self.text = str(n)
             self.disabled = True
-            self.background_color = self.clue
+            self.background_color = CLUE
         else:
             self.text = ""
             self.disabled = False
-            self.background_color = self.neutral
+            self.background_color = NEUTRAL
 
         Clock.schedule_interval(self.checkCell, 1)
 
@@ -179,20 +186,15 @@ class Cell(Button):
             game.puzzle.insert(self.row, self.col, 0)#THis is so that it does not detect a collison with itself
 
             if game.puzzle.check(self.row, self.col, self.n) is False:
-                self.background_color = self.collision
+                self.background_color = COLLISION
             else:
-                self.background_color = self.neutral
+                self.background_color = NEUTRAL
 
             game.puzzle.insert(self.row, self.col, self.n)
 
     def updateCell(self, n):
         self.n = n
         self.text = str(n)
-        """
-        if game.puzzle.check(self.row, self.col, self.n) is False:
-            self.background_color = self.collision
-        else:
-            self.background_color = self.neutral"""
 
         game.puzzle.insert(self.row, self.col, self.n)
 
@@ -201,7 +203,7 @@ class Cell(Button):
         self.n = 0
         self.text = ""
         game.puzzle.insert(self.row, self.col, 0)
-        self.background_color = self.neutral
+        self.background_color = NEUTRAL
         
 
     def on_press(self):
@@ -354,6 +356,155 @@ class GameScreen(BaseScreen):
         pause = PauseScreen()
         pause.open()
 
+class ClassicGame(GameScreen):
+    pass
+
+
+
+
+
+class OpponentGridCell(Button):
+    def __init__(self, cellType, **kwargs):
+        super(OpponentGridCell, self).__init__(**kwargs)
+        self.width = 3
+        self.height = 3
+        self.text = ""
+        if cellType == "1":
+            self.background_color = (1, 1, 0, 1)
+        else:
+            self.background_color = NEUTRAL
+
+    def updateCell(self, cellType):
+        pass
+
+class MultiplayerGame(GameScreen):
+    def __init__(self, **kwargs):
+        super(GameScreen, self).__init__(**kwargs)
+
+    def checks(self, dt):
+        if game.timer:
+            self.updateTimer()
+        else:
+            self.recentTime = time.time()
+
+        game.win = game.puzzle.grid == game.puzzleSolution.grid
+
+        if game.win:#check win
+            print("Player WINS!")
+            game.timer = False
+            game.finishTime = self.saveTime
+
+            topTime = app.topTimes[difficulties.index(game.difficulty)]
+            topTime = float(topTime) if len(topTime) > 0 else 0
+
+            if topTime == 0 or topTime > game.finishTime[0]:
+                app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
+
+            self.clock.cancel()
+            game.win = False
+            game.puzzle, game.puzzleSolution, game.opponentGrid = None, None, None
+            self.manager.current = "MainMenu"
+
+        else:
+            if game.opponentGrid is not None:
+                for i in range(81):
+                    self.ids.opponentGrid.children[i].updateCell(game.opponentGrid[i])
+        
+
+    def updateTimer(self):
+        self.elapsedTime += time.time() - self.recentTime
+        self.recentTime = time.time()
+        minutes = str(int(self.elapsedTime // 60))
+        seconds = str(int(self.elapsedTime % 60))
+        centiSeconds = str(int(round(self.elapsedTime % 60 - int(self.elapsedTime % 60), 2)*100))
+        #print(f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}.{'0'*(2-len(centiSeconds))+centiSeconds}")
+        self.ids.timer.text = f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
+        self.saveTime = [round(self.elapsedTime, 2), self.ids.timer.text]
+
+    def on_enter(self):
+        self.set_Border()
+        self.load()
+        self.clock = Clock.schedule_interval(self.checks, 0.01)
+
+    def load(self):#########Change this for multiplayer
+        game.import_Puzzle(game.difficulty)#assigns puzzle to game.puzzle
+        game.puzzle.show_grid()
+        grid = self.ids.grid
+        game.opponentGrid = "".join(str(random.sample((0, 1), 1)) for i in range(81)) # Will be revced by server as astring of 1s and 0s, 1s for cells that are complete and 0s for cells that arent
+
+        i = 0
+        j = 0
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box1.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 0
+        j = 3
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box2.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 0
+        j = 6
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box3.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 1
+        j = 0
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box4.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 1
+        j = 3
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box5.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 1
+        j = 6
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box6.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 2
+        j = 0
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box7.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 2
+        j = 3
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box8.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+        i = 2
+        j = 6
+        for x in range(3*i, 3*i+3):
+            for y in range(j, j+3):
+                self.ids.box9.add_widget(Cell(x, y, game.puzzle.grid[x][y]))
+
+
+        numGrid = self.ids.numberGrid
+        for n in range(1, 10):
+            numGrid.add_widget(numberInput(n))
+
+        opponentGrid = self.ids.opponentGrid
+
+        for i in range(81):
+            opponentGrid.add_widget(OpponentGridCell(game.opponentGrid[i]))
+
+        self.recentTime = time.time()
+        self.elapsedTime = 0
+        game.timer = True
+
+    def on_leave(self):
+        self.ids.box1.clear_widgets()
+        self.ids.box2.clear_widgets()
+        self.ids.box3.clear_widgets()
+        self.ids.box4.clear_widgets()
+        self.ids.box5.clear_widgets()
+        self.ids.box6.clear_widgets()
+        self.ids.box7.clear_widgets()
+        self.ids.box8.clear_widgets()
+        self.ids.box9.clear_widgets()
+        self.ids.numberGrid.clear_widgets()
+        self.ids.opponentGrid.clear_widgets()
+
 
 class PauseScreen(Popup):
     def on_open(self):
@@ -366,15 +517,15 @@ class ClassicMenu(Menu):
     def setDifficulty(self, difficulty):
         game.difficulty = difficulty
 
-class ClassicGame(GameScreen):
-    pass
+
 
 
 class MultiplayerMenu(Menu):
-    pass
+    def setDifficulty(self, difficulty):
+        game.difficulty = difficulty
 
-class MultiplayerGame(GameScreen):
-    pass
+
+
 
 class AccountMenu(Menu):
     def clickLogout(self):
