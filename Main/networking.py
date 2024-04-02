@@ -45,6 +45,12 @@ class Client:
         self.__client.close()
         self.connected  = False
 
+    def send(self, message):
+        self.__client.send(message.encode())
+
+    def receive(self):
+        return self.__client.recv(1024).decode()
+    
     def hashPW(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
 
@@ -110,11 +116,14 @@ class Client:
         proceed = self.__client.recv(1024).decode()
         if proceed == "proceed":
             self.__client.send(difficulty.encode())
+
+
+            #Await response from serve
         else:
             return #connection no go
     
     
-    
+    """
     def play_Multiplayer(self):
         print("Doing login stuff on client")
         self.__client.sendall("play_Multiplayer".encode())
@@ -124,7 +133,7 @@ class Client:
             pass
         else:
             return #connection no go
-
+    """
 
 
 

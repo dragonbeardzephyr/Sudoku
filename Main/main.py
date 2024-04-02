@@ -5,7 +5,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.floatlayout import FloatLayout"""
 import random
-
+import os
 
 from kivy.app import App
 from kivy.uix.label import Label
@@ -34,7 +34,6 @@ return button
 
 import time
 import random
-
 from Generator.Generate import Puzzle
 from networking import Client
 
@@ -360,9 +359,6 @@ class ClassicGame(GameScreen):
     pass
 
 
-
-
-
 class OpponentGridCell(Button):
     def __init__(self, cellType, **kwargs):
         super(OpponentGridCell, self).__init__(**kwargs)
@@ -382,10 +378,7 @@ class MultiplayerGame(GameScreen):
         super(GameScreen, self).__init__(**kwargs)
 
     def checks(self, dt):
-        if game.timer:
-            self.updateTimer()
-        else:
-            self.recentTime = time.time()
+        self.updateTimer()
 
         game.win = game.puzzle.grid == game.puzzleSolution.grid
 
@@ -406,6 +399,7 @@ class MultiplayerGame(GameScreen):
             self.manager.current = "MainMenu"
 
         else:
+            #recieve opppoenent grid
             if game.opponentGrid is not None:
                 for i in range(81):
                     self.ids.opponentGrid.children[i].updateCell(game.opponentGrid[i])
@@ -423,6 +417,10 @@ class MultiplayerGame(GameScreen):
 
     def on_enter(self):
         self.set_Border()
+
+        #RECEIVE GRID
+        #initilaize stuff
+
         self.load()
         self.clock = Clock.schedule_interval(self.checks, 0.01)
 

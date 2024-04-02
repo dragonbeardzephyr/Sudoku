@@ -1,14 +1,16 @@
-import queue
 import socket
 import threading
 import sqlite3
-
+import random
 import time
 
 host = "127.0.0.1"
 port = 7777
 
 DATABASE = "Server\Sudoku_Online.db"
+
+Create an ACCCCOUNT CLASSS
+
 
 
 class Queue():
@@ -63,15 +65,23 @@ class Queue():
 
 
 class Game(threading.Thread):
-    def __init__(self, thread1, thread2):
+    def __init__(self, thread1, thread2, difficulty):
         super().__init__()
         self.player1 = thread1
         self.player2 = thread2
+        self.puzzleString = self.import_Puzzle(difficulty)
 
     def run(self):
         finished = False
+        self.player1.sendall("")
+        self.player2.sendall("")
         while not finished:
             pass
+
+    def import_Puzzle(self, difficulty):
+        with open(f"Main\Generator\{difficulty}.txt", "r") as file:
+            puzzles = file.readlines()
+            return random.choice(puzzles)
             
 easyQ = Queue()
 normalQ = Queue()
@@ -82,46 +92,50 @@ queueDict = {"easy": easyQ, "normal": normalQ, "hard": hardQ, "extraHard": extra
 
 def create_Match():
     for difficulty in queueDict:
-        if queueDict[difficulty].isEven():
+        if queueDict[difficulty].isEven() and not queueDict[difficulty].isEmpty():
             player1 = queueDict[difficulty].deQueue()
             player2 = queueDict[difficulty].deQueue()
-            game = Game(player1, player2)
+            game = Game(player1, player2, difficulty)
             game.start()#--> This will start the game thread and execute game.run()
 
 
 #######################################################################
 #Database Functions
 #######################################################################
+db_lock = threading.Lock()
+
 def check(username, cursor):
-    result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
-    print(f"result: {result}")   
-    if result is None:
-        print("username not in database")
-        return False
-    elif username in result:
-        print("username in database")
-        return True
+    with db_lock:
+        result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
+        print(f"result: {result}")   
+        if result is None:
+            print("username not in database")
+            return False
+        elif username in result:
+            print("username in database")
+            return True
 
 
 def verify(username, password, cursor):#Checks if username an dpassword match
-    if check(username, cursor):
-        print(username, password)
-        result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", (username, password)).fetchone()
-        print(result)
-        if result is None:
-            print("Result none")
-            return False
-            
-        else:
-            usernameResult, passwordResult = result
+    with db_lock:#ensures only on thread can
+        if check(username, cursor):
             print(username, password)
-            print(usernameResult, passwordResult)
-            if usernameResult == username and passwordResult == password:
-                return True
-            else:
+            result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", (username, password)).fetchone()
+            print(result)
+            if result is None:
+                print("Result none")
                 return False
-    else:
-        return False
+                
+            else:
+                usernameResult, passwordResult = result
+                print(username, password)
+                print(usernameResult, passwordResult)
+                if usernameResult == username and passwordResult == password:
+                    return True
+                else:
+                    return False
+        else:
+            return False
 #######################################################################
 
 
@@ -134,7 +148,7 @@ def register(client):
     client.sendall("proceed".encode())
     details = client.recv(1024).decode().split(",")
     print(details)
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, check_same_thread=False)
     cursor = conn.cursor()
 
     if check(details[0], cursor):
@@ -157,7 +171,7 @@ def login(client):
     client.sendall("proceed".encode())
     details = client.recv(1024).decode().split(",")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, check_same_thread=False)
     cursor = conn.cursor()
 
     if verify(details[0], details[1], cursor):
@@ -175,7 +189,7 @@ def update_BestTimes(client):
     client.sendall("proceed".encode())
     times = client.recv(1024).decode().split(",")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, check_same_thread=False)
     cursor = conn.cursor()
 
     try:
@@ -209,18 +223,17 @@ def match_Players(client):
         client.sendall("Queue full".encode())
         return False
 
-
+"""
 def play_Multiplayer():
 
     print("Doing login stuff on client")
-
+"""
 #######################################################################
 
 #######################################################################
 options = {"login": login,
         "register": register,
         "match_Players": match_Players,
-        "play_Multiplayer": play_Multiplayer,
         "update_BestTimes" : update_BestTimes}
 #######################################################################
 
@@ -249,17 +262,10 @@ def handle(client, address):
             print(f"Inavlid request {e}")
             break
 
+
     print("Closing connection")
     client.close()
 #######################################################################
-
-
-
-
-
-
-
-
 
 
 #######################################################################
@@ -280,6 +286,7 @@ def main():
 
         print("pong")
         
+        create_Match()
 
 
 
