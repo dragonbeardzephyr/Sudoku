@@ -350,6 +350,7 @@ class GameScreen(BaseScreen):
         self.ids.box8.clear_widgets()
         self.ids.box9.clear_widgets()
         self.ids.numberGrid.clear_widgets()
+        self.clock.cancel()
 
     def pauseGame(self):
         pause = PauseScreen()
@@ -371,14 +372,28 @@ class OpponentGridCell(Button):
             self.background_color = NEUTRAL
 
     def updateCell(self, cellType):
-        pass
-
+        if cellType == "1":
+            self.background_color = (1, 1, 0, 1)
+        else:
+            self.background_color = NEUTRAL
 class MultiplayerGame(GameScreen):
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
 
     def checks(self, dt):
-        self.updateTimer()
+
+        #GET OPPONENT GRID SOMEHOW
+        game.opponentGrid = "".join([str(random.randint(0,1)) for i in range(81)])
+        print(len(game.opponentGrid))
+        if game.timer:
+            self.updateTimer()
+
+            if game.opponentGrid is not None:
+                for i in range(81):
+                    print(i)
+                    self.ids.opponentGrid.children[i].updateCell(game.opponentGrid[i])
+        else:
+            self.recentTime = time.time()
 
         game.win = game.puzzle.grid == game.puzzleSolution.grid
 
@@ -398,11 +413,7 @@ class MultiplayerGame(GameScreen):
             game.puzzle, game.puzzleSolution, game.opponentGrid = None, None, None
             self.manager.current = "MainMenu"
 
-        else:
-            #recieve opppoenent grid
-            if game.opponentGrid is not None:
-                for i in range(81):
-                    self.ids.opponentGrid.children[i].updateCell(game.opponentGrid[i])
+
         
 
     def updateTimer(self):
@@ -428,7 +439,7 @@ class MultiplayerGame(GameScreen):
         game.import_Puzzle(game.difficulty)#assigns puzzle to game.puzzle
         game.puzzle.show_grid()
         grid = self.ids.grid
-        game.opponentGrid = "".join(str(random.sample((0, 1), 1)) for i in range(81)) # Will be revced by server as astring of 1s and 0s, 1s for cells that are complete and 0s for cells that arent
+        game.opponentGrid = "".join([str(random.randint(0,1)) for i in range(81)]) # Will be revced by server as astring of 1s and 0s, 1s for cells that are complete and 0s for cells that arent
 
         i = 0
         j = 0
@@ -502,7 +513,7 @@ class MultiplayerGame(GameScreen):
         self.ids.box9.clear_widgets()
         self.ids.numberGrid.clear_widgets()
         self.ids.opponentGrid.clear_widgets()
-
+        self.clock.cancel()
 
 class PauseScreen(Popup):
     def on_open(self):
