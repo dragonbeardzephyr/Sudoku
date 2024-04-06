@@ -30,6 +30,7 @@ MainMenuManager:
             rgba : 1, 1, 1, 0.07
         Rectangle:
             size: self.size
+            source : None
             
     
     canvas.after:
@@ -54,6 +55,12 @@ MainMenuManager:
 
 <GameScreen>:
     name : "GameScreen"
+    canvas.before:
+        #Color : 
+            #rgba : 1, 1, 1, 0.07
+        Rectangle:
+            size: self.size
+            source : "Main\graphics\Sudoku_App_Background.png"
 
     Button:
         id : timer
@@ -69,8 +76,8 @@ MainMenuManager:
         GridLayout:
             size_hint_x : None
             size_hint_y : None
-            width : 600
-            height : 600
+            width : "600dp"
+            height : "600dp"
             id : grid
             cols: 3 
             rows: 3
@@ -258,16 +265,48 @@ MainMenuManager:
 <MultiplayerMenu>:
     name : "MultiplayerMenu"
     AnchorLayout:
-        size_hint : 0.9, 0.1
+        size_hint : 0.9, 0.3
         pos_hint : {"center_x": 0.5, "center_y":0.5}
 
-    Button:
-        text: "Extra Hard"
-        on_release:
-            root.setDifficulty("extra_hard")
-            root.manager.transition = FadeTransition()
-            root.manager.current = "MultiplayerGame"
-            root.manager.transition.direction = "right"
+        BoxLayout:
+            orientation : "vertical"
+            BoxLayout:
+                ToggleButton:
+                    text: "Easy"
+                    group : "difficulty"
+                    state : "down"
+                    on_release:
+                        root.setDifficulty("easy")
+
+                ToggleButton:
+                    text: "Normal"
+                    group : "difficulty"
+                    on_release:
+                        root.setDifficulty("normal")
+
+
+                ToggleButton:
+                    text: "Hard"
+                    group : "difficulty"
+                    on_release:
+                        root.setDifficulty("hard")
+
+
+                ToggleButton:
+                    text: "Extra Hard"
+                    group : "difficulty"
+                    on_release:
+                        root.setDifficulty("extra_hard")
+
+            Label:
+                text : ""
+
+            Button:
+                text: "Match"
+                size_hint : 0.5, 1
+                pos_hint : {"center_x": 0.5}
+                on_release: root.match()
+           
 
 
 <AccountMenu>:

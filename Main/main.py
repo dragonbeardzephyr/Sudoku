@@ -128,6 +128,8 @@ class SudokuApp(App):
 
 
 
+buttonFile = "graphics\Sudoku_App_Button.png"
+
 class BaseScreen(Screen):
     borderFile = StringProperty("graphics\Sudoku_App_Border_Logged_Out.png")
 
@@ -142,7 +144,7 @@ class BaseScreen(Screen):
             self.borderFile = "graphics\Sudoku_App_Border_Logged_In.png"
         else:
             self.borderFile = "graphics\Sudoku_App_Border_Logged_Out.png"
-        
+    
     
 class MainMenu(BaseScreen):
     pass
@@ -154,7 +156,7 @@ class Menu(BaseScreen):
 #Cell Colours
 NEUTRAL = (0, 1, 0.6, 1)
 COLLISION = (1, 0, 0.5, 1)
-CLUE = (0, 1, 0.6, 0.5)
+CLUE = (0, 1, 0.6, 1)
 TEXT = (0.76, 0, 1, 1)
 #############################
 
@@ -178,10 +180,10 @@ class Cell(Button):
             self.disabled = False
             self.background_color = NEUTRAL
 
-        Clock.schedule_interval(self.checkCell, 1)
+        self.clock = Clock.schedule_interval(self.checkCell, 0.5)
 
     def checkCell(self, dt):
-        if not self.disabled and self.n != 0:#Dont need to waste time checking clue cells
+        if self.n != 0:
             game.puzzle.insert(self.row, self.col, 0)#THis is so that it does not detect a collison with itself
 
             if game.puzzle.check(self.row, self.col, self.n) is False:
@@ -212,7 +214,7 @@ class Cell(Button):
 
         elif self.last_touch.button == "right":
             self.clearCell()
-        
+    
         
 class numberInput(Button):
     def __init__(self, n, **kwargs):
@@ -261,12 +263,15 @@ class GameScreen(BaseScreen):
     def updateTimer(self):
         self.elapsedTime += time.time() - self.recentTime
         self.recentTime = time.time()
-        minutes = str(int(self.elapsedTime // 60))
+        hours = str(int(self.elapsedTime // 3600))
+        minutes = str(int(self.elapsedTime % 3600 // 60))
         seconds = str(int(self.elapsedTime % 60))
+
         centiSeconds = str(int(round(self.elapsedTime % 60 - int(self.elapsedTime % 60), 2)*100))
         #print(f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}.{'0'*(2-len(centiSeconds))+centiSeconds}")
-        self.ids.timer.text = f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
+        self.ids.timer.text = f"{'0'*(2-len(hours))+hours}:" if int(minutes) > 59 else "" + f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
         self.saveTime = [round(self.elapsedTime, 2), self.ids.timer.text]
+
 
     def on_enter(self):
         self.set_Border()
@@ -340,6 +345,25 @@ class GameScreen(BaseScreen):
         game.timer = True
 
     def on_leave(self):
+        for i in self.ids.box1.children:
+            i.clock.cancel()
+        for i in self.ids.box2.children:
+            i.clock.cancel()
+        for i in self.ids.box3.children:
+            i.clock.cancel()
+        for i in self.ids.box4.children:
+            i.clock.cancel()
+        for i in self.ids.box5.children:
+            i.clock.cancel()
+        for i in self.ids.box6.children:
+            i.clock.cancel()
+        for i in self.ids.box7.children:
+            i.clock.cancel()
+        for i in self.ids.box8.children:
+            i.clock.cancel()
+        for i in self.ids.box9.children:
+            i.clock.cancel()
+
         self.ids.box1.clear_widgets()
         self.ids.box2.clear_widgets()
         self.ids.box3.clear_widgets()
@@ -384,6 +408,7 @@ class MultiplayerGame(GameScreen):
 
         #GET OPPONENT GRID SOMEHOW
         game.opponentGrid = "".join([str(random.randint(0,1)) for i in range(81)])
+
         print(len(game.opponentGrid))
         if game.timer:
             self.updateTimer()
@@ -502,6 +527,25 @@ class MultiplayerGame(GameScreen):
         game.timer = True
 
     def on_leave(self):
+        for i in self.ids.box1.children:
+            i.clock.cancel()
+        for i in self.ids.box2.children:
+            i.clock.cancel()
+        for i in self.ids.box3.children:
+            i.clock.cancel()
+        for i in self.ids.box4.children:
+            i.clock.cancel()
+        for i in self.ids.box5.children:
+            i.clock.cancel()
+        for i in self.ids.box6.children:
+            i.clock.cancel()
+        for i in self.ids.box7.children:
+            i.clock.cancel()
+        for i in self.ids.box8.children:
+            i.clock.cancel()
+        for i in self.ids.box9.children:
+            i.clock.cancel()
+        
         self.ids.box1.clear_widgets()
         self.ids.box2.clear_widgets()
         self.ids.box3.clear_widgets()
@@ -514,6 +558,9 @@ class MultiplayerGame(GameScreen):
         self.ids.numberGrid.clear_widgets()
         self.ids.opponentGrid.clear_widgets()
         self.clock.cancel()
+
+    def pauseGame(self):
+        pass
 
 class PauseScreen(Popup):
     def on_open(self):
@@ -528,10 +575,18 @@ class ClassicMenu(Menu):
 
 
 
-
 class MultiplayerMenu(Menu):
     def setDifficulty(self, difficulty):
         game.difficulty = difficulty
+
+
+    def match(self):
+        if app.online:
+            app.client.match_Players(game.difficulty)
+        else:
+            popup = Popup(title = "Error", content = Label(text = "You need to login"), size_hint = (0.5, 0.5))
+            popup.open()
+            
 
 
 

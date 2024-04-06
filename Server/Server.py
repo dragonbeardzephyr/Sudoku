@@ -3,14 +3,18 @@ import threading
 import sqlite3
 import random
 import time
+from Generator.Generate import Puzzle
 
 host = "127.0.0.1"
 port = 7777
 
 DATABASE = "Server\Sudoku_Online.db"
 
-Create an ACCCCOUNT CLASSS
-
+class Account():
+     def __init__(self, client, username):
+            self.client = client
+            self.username = username
+            self.bestTimes = [None, None, None, None]
 
 
 class Queue():
@@ -31,7 +35,7 @@ class Queue():
 		
 	def isEven(self):
 		with self.lock:
-			return self.__size %2 == 0
+			return self.__size % 2 == 0
 				
 			
 	def enQueue(self, item):
@@ -69,7 +73,12 @@ class Game(threading.Thread):
         super().__init__()
         self.player1 = thread1
         self.player2 = thread2
+        
         self.puzzleString = self.import_Puzzle(difficulty)
+        p = Puzzle(puzzleString)
+        p.solve()
+        self.solutionString = p.grid_To_String()
+
 
     def run(self):
         finished = False
@@ -82,6 +91,8 @@ class Game(threading.Thread):
         with open(f"Main\Generator\{difficulty}.txt", "r") as file:
             puzzles = file.readlines()
             return random.choice(puzzles)
+        
+    def compare_Puzzles(self,)
             
 easyQ = Queue()
 normalQ = Queue()
@@ -216,18 +227,16 @@ def match_Players(client):
     
     if queueDict[difficulty].enQueue(client):
         print("Enqueued")
-        return True
+        #return True
     
     else:
         print("Queue full")
         client.sendall("Queue full".encode())
-        return False
+        #return False
 
-"""
-def play_Multiplayer():
-
+def play_Multiplayer(client):
     print("Doing login stuff on client")
-"""
+
 #######################################################################
 
 #######################################################################
@@ -257,7 +266,7 @@ def handle(client, address):
 
             elif request in options:
                 options[request](client)
-                
+
         except Exception as e :
             print(f"Inavlid request {e}")
             break
