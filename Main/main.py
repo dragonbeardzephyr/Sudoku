@@ -216,9 +216,9 @@ class Cell(Button):
             self.clearCell()
     
         
-class numberInput(Button):
+class NumberInput(Button):
     def __init__(self, n, **kwargs):
-        super(numberInput, self).__init__(**kwargs)
+        super(NumberInput, self).__init__(**kwargs)
         self.width = 5
         self.height = 5
         self.n = n
@@ -338,7 +338,7 @@ class GameScreen(BaseScreen):
 
         numGrid = self.ids.numberGrid
         for n in range(1, 10):
-            numGrid.add_widget(numberInput(n))
+            numGrid.add_widget(NumberInput(n))
 
         self.recentTime = time.time()
         self.elapsedTime = 0
@@ -515,7 +515,7 @@ class MultiplayerGame(GameScreen):
 
         numGrid = self.ids.numberGrid
         for n in range(1, 10):
-            numGrid.add_widget(numberInput(n))
+            numGrid.add_widget(NumberInput(n))
 
         opponentGrid = self.ids.opponentGrid
 
@@ -668,7 +668,7 @@ class BestTimes(BaseScreen):
     def get_topTime(self, index):
         return app.topTimes[index]
 
-class MainMenuManager(ScreenManager):
+class MenuManager(ScreenManager):
     pass
 
 

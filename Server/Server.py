@@ -63,9 +63,7 @@ class Queue():
 			#print(self.__front, self.__rear)
 	
 	def show(self):
-		print()
-		for i in range(self.__size):#prints in order
-			print(self.__queue[(self.__front + i) % self.__maxSize])
+		return [self.__queue[(self.__front + i) % self.__maxSize]for i in range(self.__size)]
 
 
 class Game(threading.Thread):
@@ -75,7 +73,7 @@ class Game(threading.Thread):
         self.player2 = thread2
         
         self.puzzleString = self.import_Puzzle(difficulty)
-        p = Puzzle(puzzleString)
+        p = Puzzle(self.puzzleString)
         p.solve()
         self.solutionString = p.grid_To_String()
 
@@ -92,7 +90,8 @@ class Game(threading.Thread):
             puzzles = file.readlines()
             return random.choice(puzzles)
         
-    def compare_Puzzles(self,)
+    def compare_Puzzles(self):
+         pass
             
 easyQ = Queue()
 normalQ = Queue()
@@ -116,37 +115,35 @@ def create_Match():
 db_lock = threading.Lock()
 
 def check(username, cursor):
-    with db_lock:
-        result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
-        print(f"result: {result}")   
-        if result is None:
-            print("username not in database")
-            return False
-        elif username in result:
-            print("username in database")
-            return True
+    result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
+    print(f"result: {result}")   
+    if result is None:
+        print("username not in database")
+        return False
+    elif username in result:
+        print("username in database")
+        return True
 
 
 def verify(username, password, cursor):#Checks if username an dpassword match
-    with db_lock:#ensures only on thread can
-        if check(username, cursor):
-            print(username, password)
-            result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", (username, password)).fetchone()
-            print(result)
-            if result is None:
-                print("Result none")
-                return False
-                
-            else:
-                usernameResult, passwordResult = result
-                print(username, password)
-                print(usernameResult, passwordResult)
-                if usernameResult == username and passwordResult == password:
-                    return True
-                else:
-                    return False
-        else:
+    if check(username, cursor):
+        print(username, password)
+        result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", (username, password)).fetchone()
+        print(result)
+        if result is None:
+            print("Result none")
             return False
+            
+        else:
+            usernameResult, passwordResult = result
+            print(username, password)
+            print(usernameResult, passwordResult)
+            if usernameResult == username and passwordResult == password:
+                return True
+            else:
+                return False
+    else:
+        return False
 #######################################################################
 
 
@@ -181,16 +178,18 @@ def login(client):
     print("doing login stuff on sever")
     client.sendall("proceed".encode())
     details = client.recv(1024).decode().split(",")
-
-    conn = sqlite3.connect(DATABASE, check_same_thread=False)
+    print("1")
+    conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-
+    print("2")
     if verify(details[0], details[1], cursor):
+        print("3")
         print(f"Login good by {details[0]}")
         client.sendall("valid".encode())
         conn.close()
         return True
     else:
+        print("4")
         client.sendall("invalid".encode())
         print("Login bad")# Login badd
         conn.close()
@@ -217,16 +216,18 @@ def update_BestTimes(client):
 
 
 def match_Players(client):
-    print("Doing login stuff on client")
+    print("Doing matching stuff on client")
     client.sendall("proceed".encode())
     difficulty = client.recv(1024).decode()
 
     if queueDict[difficulty].isEmpty():
-        client.send("Queue empty".encode())
+        pass
+        #client.send("Queue empty".encode())
         #prompt use that queue is empty so they mayhave to wait a while
     
     if queueDict[difficulty].enQueue(client):
         print("Enqueued")
+        client.sendall("Enqueued".encode())
         #return True
     
     else:
@@ -256,6 +257,7 @@ def handle(client, address):
     while True:
         try:
             request = client.recv(1024).decode()
+            print("Heeheefaplsianthearkofthceeheeseaps")
             print(request)
             if not request:
                 print("not request")

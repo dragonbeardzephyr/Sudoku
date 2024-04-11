@@ -1,3 +1,4 @@
+from email import message
 import socket
 import hashlib
 
@@ -116,9 +117,11 @@ class Client:
         proceed = self.__client.recv(1024).decode()
         if proceed == "proceed":
             self.__client.send(difficulty.encode())
-
-
-            #Await response from serve
+            message = self.__client.recv(1024).decode()
+            if message == "Enqueued":
+                return True
+            elif message == "Queue full":
+                return False    
         else:
             return #connection no go
     
