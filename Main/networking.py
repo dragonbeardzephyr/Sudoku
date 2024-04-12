@@ -121,7 +121,7 @@ class Client:
             if message == "Enqueued":
                 return True
             elif message == "Queue full":
-                return False    
+                return False
         else:
             return #connection no go
     

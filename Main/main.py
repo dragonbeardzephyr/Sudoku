@@ -580,9 +580,13 @@ class MultiplayerMenu(Menu):
         game.difficulty = difficulty
 
 
+
     def match(self):
         if app.online:
-            app.client.match_Players(game.difficulty)
+            if app.client.match_Players(game.difficulty):
+                popup = Popup(title = "Match Found", content = Label(text = "Matching"), size_hint = (0.5, 0.5))
+                popup.open()
+                
         else:
             popup = Popup(title = "Error", content = Label(text = "You need to login"), size_hint = (0.5, 0.5))
             popup.open()

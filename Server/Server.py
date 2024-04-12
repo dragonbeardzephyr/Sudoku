@@ -90,9 +90,9 @@ class Game(threading.Thread):
             puzzles = file.readlines()
             return random.choice(puzzles)
         
-    def compare_Puzzles(self):
-         pass
-            
+    def compare_Puzzles(self, puzzleString):#Makes a string of 1s and 0s, 1s showing correctly filled cells and 0s showing empty and incorrect cells
+        return "".join(["1" if puzzleString[i] == self.solutionString[i] else "0" for i in range(81)])
+           
 easyQ = Queue()
 normalQ = Queue()
 hardQ = Queue()
@@ -109,142 +109,171 @@ def create_Match():
             game.start()#--> This will start the game thread and execute game.run()
 
 
-#######################################################################
-#Database Functions
-#######################################################################
-db_lock = threading.Lock()
+######################################################################
 
-def check(username, cursor):
-    result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
-    print(f"result: {result}")   
-    if result is None:
-        print("username not in database")
-        return False
-    elif username in result:
-        print("username in database")
-        return True
+class Client(threading.Thread):
+    def __init__(self, client, address):
+        super().__init__()
+        self.client = client
+        self.address = address
+        self.username = None
+        self.bestTimes = [None, None, None, None]
+        self.lock = threading.Lock()
+        self.options = { "login": self.login,
+                    "register": self.register,
+                    "match_Players": self.match_Players,
+                    "update_BestTimes" : self.update_BestTimes}
+
+    def run(self):    
+        while True:
+            try:
+                request = self.client.recv(1024).decode()
+                print("Heeheefaplsianthearkofthceeheeseaps")
+                print(request)
+                if not request:
+                    print("not request")
+
+                if request == "Logout":
+                    print("Logoutheehehe")
+                    break
+
+                elif request in self.options:
+                    self.options[request]
+
+            except Exception as e :
+                print(f"Inavlid request {e}")
+                break
 
 
-def verify(username, password, cursor):#Checks if username an dpassword match
-    if check(username, cursor):
-        print(username, password)
-        result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", (username, password)).fetchone()
-        print(result)
+        print("Closing connection")
+        self.client.close()
+
+    def check(self, username, cursor):
+        result = cursor.execute("SELECT Username FROM Accounts WHERE Username = ?", (username,)).fetchone()
+        print(f"result: {result}")   
         if result is None:
-            print("Result none")
+            print("username not in database")
             return False
-            
-        else:
-            usernameResult, passwordResult = result
+        elif username in result:
+            print("username in database")
+            return True
+
+
+    def verify(self, username, password, cursor):#Checks if username an dpassword match
+        if self.check(username, cursor):
             print(username, password)
-            print(usernameResult, passwordResult)
-            if usernameResult == username and passwordResult == password:
-                return True
-            else:
+            result = cursor.execute("SELECT Username, Password FROM Accounts WHERE Username = ? AND Password = ?", (username, password)).fetchone()
+            print(result)
+            if result is None:
+                print("Result none")
                 return False
-    else:
-        return False
-#######################################################################
+                
+            else:
+                usernameResult, passwordResult = result
+                print(username, password)
+                print(usernameResult, passwordResult)
+                if usernameResult == username and passwordResult == password:
+                    return True
+                else:
+                    return False
+        else:
+            return False
+    #######################################################################
 
+    #######################################################################
+    #Request Redirections
+    #######################################################################
+    def register(self):
+        print("Doing register stuff on self.client")
+        self.client.sendall("proceed".encode())
+        details = self.client.recv(1024).decode().split(",")
+        print(details)
+        conn = sqlite3.connect(DATABASE, check_same_thread=False)
+        cursor = conn.cursor()
 
+        if check(details[0], cursor):
+            self.client.sendall("invalid".encode())#USername already exists
+            conn.close()
+            return False
+        
+        else:
+            cursor.execute("INSERT INTO Accounts (Username, Password) VALUES (?, ?)", (details)) # Tuple unpacking if not obvious
+            cursor.execute("INSERT INTO BestTimes (Username, Easy, Normal, Hard, 'Extra Hard') VALUES (?, NULL, NULL, NULL, NULL)", (details[0],)) # Tuple unpacking if not obvious
 
-#######################################################################
-#Request Redirections
-#######################################################################
-def register(client):
-    print("Doing register stuff on client")
-    client.sendall("proceed".encode())
-    details = client.recv(1024).decode().split(",")
-    print(details)
-    conn = sqlite3.connect(DATABASE, check_same_thread=False)
-    cursor = conn.cursor()
+            self.client.sendall("valid".encode())
+            conn.commit()
+            conn.close()
+            print("INserted")
+            return True
+        
+    def login(self):
+        print("doing login stuff on sever")
+        self.client.sendall("proceed".encode())
+        details = self.client.recv(1024).decode().split(",")
+        print("1")
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        print("2")
+        if self.verify(details[0], details[1], cursor):
+            print("3")
+            print(f"Login good by {details[0]}")
+            self.client.sendall("valid".encode())
+            conn.close()
+            return True
+        else:
+            print("4")
+            self.client.sendall("invalid".encode())
+            print("Login bad")# Login badd
+            conn.close()
+            return False
 
-    if check(details[0], cursor):
-        client.sendall("invalid".encode())#USername already exists
-        conn.close()
-        return False
-    
-    else:
-        cursor.execute("INSERT INTO Accounts (Username, Password) VALUES (?, ?)", (details)) # Tuple unpacking if not obvious
-        cursor.execute("INSERT INTO BestTimes (Username, Easy, Normal, Hard, 'Extra Hard') VALUES (?, NULL, NULL, NULL, NULL)", (details[0],)) # Tuple unpacking if not obvious
+    def update_BestTimes(self):
+        self.client.sendall("proceed".encode())
+        times = self.client.recv(1024).decode().split(",")
 
-        client.sendall("valid".encode())
+        conn = sqlite3.connect(DATABASE, check_same_thread=False)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("UPDATE BestTimes SET Easy = ?, Normal = ?, Hard = ?, 'Extra Hard' = ? WHERE Username = ?", (times[1], times[2], times[3], times[4], times[0]))
+            self.client.sendall("valid".encode())
+            
+        except Exception as e:
+            print(f"Error updating best times {e}")
+            self.client.sendall("invalid".encode())
+
         conn.commit()
         conn.close()
-        print("INserted")
-        return True
-    
-def login(client):
-    print("doing login stuff on sever")
-    client.sendall("proceed".encode())
-    details = client.recv(1024).decode().split(",")
-    print("1")
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    print("2")
-    if verify(details[0], details[1], cursor):
-        print("3")
-        print(f"Login good by {details[0]}")
-        client.sendall("valid".encode())
-        conn.close()
-        return True
-    else:
-        print("4")
-        client.sendall("invalid".encode())
-        print("Login bad")# Login badd
-        conn.close()
-        return False
-
-def update_BestTimes(client):
-    client.sendall("proceed".encode())
-    times = client.recv(1024).decode().split(",")
-
-    conn = sqlite3.connect(DATABASE, check_same_thread=False)
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute("UPDATE BestTimes SET Easy = ?, Normal = ?, Hard = ?, 'Extra Hard' = ? WHERE Username = ?", (times[1], times[2], times[3], times[4], times[0]))
-        client.sendall("valid".encode())
         
-    except Exception as e:
-        print(f"Error updating best times {e}")
-        client.sendall("invalid".encode())
-
-    conn.commit()
-    conn.close()
-    
 
 
-def match_Players(client):
-    print("Doing matching stuff on client")
-    client.sendall("proceed".encode())
-    difficulty = client.recv(1024).decode()
+    def match_Players(self):
+        print("Doing matching stuff on client")
+        self.client.sendall("proceed".encode())
+        difficulty = self.client.recv(1024).decode()
 
-    if queueDict[difficulty].isEmpty():
-        pass
-        #client.send("Queue empty".encode())
-        #prompt use that queue is empty so they mayhave to wait a while
-    
-    if queueDict[difficulty].enQueue(client):
-        print("Enqueued")
-        client.sendall("Enqueued".encode())
-        #return True
-    
-    else:
-        print("Queue full")
-        client.sendall("Queue full".encode())
-        #return False
+        if queueDict[difficulty].isEmpty():
+            pass
+            #client.send("Queue empty".encode())
+            #prompt use that queue is empty so they mayhave to wait a while
+        
+        if queueDict[difficulty].enQueue(self.client):
+            print("Enqueued")
+            self.client.sendall("Enqueued".encode())
+            #wait
+        
+        else:
+            print("Queue full")
+            self.client.sendall("Queue full".encode())
+            #return False
 
-def play_Multiplayer(client):
-    print("Doing login stuff on client")
+    def play_Multiplayer(self):
+        print("Doing login stuff on client")
 
 #######################################################################
 
 #######################################################################
-options = {"login": login,
-        "register": register,
-        "match_Players": match_Players,
-        "update_BestTimes" : update_BestTimes}
+
 #######################################################################
 
 
@@ -252,50 +281,26 @@ options = {"login": login,
 #######################################################################
 #Handler
 #######################################################################
-def handle(client, address):
-    
-    while True:
-        try:
-            request = client.recv(1024).decode()
-            print("Heeheefaplsianthearkofthceeheeseaps")
-            print(request)
-            if not request:
-                print("not request")
-                break
-            if request == "Logout":
-                print("Logoutheehehe")
-                break
 
-            elif request in options:
-                options[request](client)
-
-        except Exception as e :
-            print(f"Inavlid request {e}")
-            break
-
-
-    print("Closing connection")
-    client.close()
 #######################################################################
 
 
 #######################################################################
 #Main
 #######################################################################
+
+connections = []
+
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen()
-
+    
     while True:
-
+        
         client, address = server.accept()
         print(f"Connection from {address}")
 
-        thread = threading.Thread(target = handle, args = (client, address))
-        thread.start()
-
-        print("pong")
         
         create_Match()
 
