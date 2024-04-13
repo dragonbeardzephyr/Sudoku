@@ -19,7 +19,7 @@ class Puzzle:
         for row in self.grid:
             for item in row:
                 print(item, end = "  ")
-            print()
+            print()#newline
         print()
 
 
@@ -43,10 +43,9 @@ class Puzzle:
         for i in range(9):
             if num == self.grid[i][col]:
                 return False
-            
-        #Reduces numbers to either 0, 3 or 6 the starting indexes for a cells respective box 
-        boxRow = row // 3 * 3
-        boxCol = col // 3 * 3
+        
+        boxRow = row // 3 * 3 #Reduces numbers to either 0, 3 or 6 the
+        boxCol = col // 3 * 3 #starting indexes for a cells respective box
 
         for i in range(boxRow, boxRow+3):
             for j in range(boxCol, boxCol+3):
@@ -80,24 +79,27 @@ class Puzzle:
 
 
     def get_All_Candidates(self):#
-        self.candidates = [[set() for i in range(9)]for j in range(9)]#All cells start with empty candidates set
-        #Cells that are already filled will have empty sets
+        self.candidates = [[set() for i in range(9)]for j in range(9)]
+        #All cells start with empty candidates set
         for row in range(9):
             for col in range(9):
-                if self.grid[row][col] == 0:#If cell is empty then it will get all possible candidates
+                if self.grid[row][col] == 0:
+                    #If cell is empty then it will get all possible candidates
                     candidates = set(range(1,10))
                 
                     candidates -= set(self.grid[row])
             
                     candidates -= set(self.grid[i][col] for i in range(9))
-    
+
                     boxRow = row // 3 * 3
                     boxCol = col // 3 * 3
                     
-                    candidates -= set(self.grid[i][j] for j in range(boxCol, boxCol+3) for i in range(boxRow, boxRow+3))
+                    candidates -= set(self.grid[i][j] 
+                                    for j in range(boxCol, boxCol+3) 
+                                    for i in range(boxRow, boxRow+3))
 
                     self.candidates[row][col] = candidates
-
+                #Cells that are already filled will have empty sets
 
 ###########################_EXPERIMENTAL_CODE_NOT_NECESSARY_############################################################################################
 
@@ -154,14 +156,15 @@ class Puzzle:
         
         for row in range(9):
             for col in range(9):
-                if len(self.candidates[row][col]) == 1:#Meaning there is only one possible number that can be placed into the grid,
+                if len(self.candidates[row][col]) == 1:
+                    #Meaning there is only one possible number that can be placed into the grid,
                     self.insert(row, col, self.candidates[row][col].pop())
 
                 
     def dfs(self):
-        #x = input()#used as next button as to slow down and inspect algorithm
         pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
-        if pos == None:#Meaning the grid is full and solved
+        if pos == None:
+            #Meaning the grid is full and solved
             return True
         
         row, col = pos[0],pos[1]
@@ -172,7 +175,8 @@ class Puzzle:
 
                 self.insert(row, col, n)
                 
-                if self.dfs(): #Causes all the recursion to unwind
+                if self.dfs():
+                    #Causes all the recursion to unwind
                     return True
 
                 self.insert(row, col, 0)
@@ -182,24 +186,25 @@ class Puzzle:
 
     def solve(self):
         self.eliminate()
-        return self.dfs()#Return is used to just cehck for the true false part of statement
+        return self.dfs()
 
-##############################################################################################################################
+    ##############################################################################################################################
 
 
     def fill_Grid(self):
         print("Filling Grid")
-        solved = False#Initialises it for while loop
+        solved = False
 
         while solved == False:
             
-            self.grid = [[0 for col in range(9)] for row in range(9)]#Wipes grid clean
+            self.grid = [[0 for col in range(9)] for row in range(9)]
 
             count = {}
-            for i in range(1, 10):#Will be used to keep track of how many of each number is inserted
+            for i in range(1, 10):
+                #Will be used to keep track of how many of each number is inserted
                 count[i] = 0
 
-            numberOfCellsToInsert = random.randint(25, 35)#Not too low that it will take time to solve and not too high that it will take time to avoid duplicates
+            numberOfCellsToInsert = random.randint(25, 35)
 
             while numberOfCellsToInsert > 0 :
                 x = random.randint(1, 9)
@@ -207,7 +212,8 @@ class Puzzle:
                 col = random.randint(0, 8)
 
                 if self.grid[row][col] == 0:
-                    if count[x] < 9 and self.check(row, col, x):#Mkaes sure that no more than 9 copies of the same number are in the grid
+                    if count[x] < 9 and self.check(row, col, x):
+                        #Ensures that no more than 9 copies of the same number
                         self.insert(row, col, x)
                         count[x] += 1
 
@@ -216,13 +222,12 @@ class Puzzle:
             solved = self.solve()
 
 
-    def count_Solutions(self):#Copy of DFS solve function, but instead is designed to perform a full search for all solutions, however this version is capped to stop at two solutions
-        #print("Counting Solutions")
+    def count_Solutions(self):
         
         pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
 
         if pos == None:#Meaning the grid is full and solved
-            self.solutions += 1 #Just notes that it has reached a solotion and looks for others
+            self.solutions += 1 #Notes that it has found a solution
             return #Continues "EXPLORING" grid for more solutions
         
         row, col = pos[0],pos[1]
@@ -234,7 +239,8 @@ class Puzzle:
 
                 self.count_Solutions()
 
-                if self.solutions > 1:#As soon as more than one solution is found we know the grid isnt unique and stops searching
+                if self.solutions > 1:
+                    #More than one solution is found so we stop searching
                     return
                 
                 self.insert(row, col, 0)
@@ -243,11 +249,12 @@ class Puzzle:
     def remove_digits(self):
         print("Removing Digits")
         self.solutions = 0
-        digitsToRemove = int(random.triangular(36, 64, 50))#Randomly generates between 36 and 64 and is weighted to generate closer to 50.
+        digitsToRemove = int(random.triangular(36, 64, 50))# Weighted towards 50
         digitsRemoved = 0 #Used to count how many digits have been removed
-        change = copy.deepcopy(self.grid)#Will store up to date grid, as self.solve() affects self.grid
+        change = copy.deepcopy(self.grid)
 
-        cells = [(row, col) for col in range(9) for row in range(9)]*3 #All locations three times so that algortihm does not end too soon
+        cells = [(row, col) for col in range(9) for row in range(9)]*3 
+        #All locations are set three times so that algorithm does not end too soon
         random.shuffle(cells)
 
         for row, col in cells:#While all cells haven't been visited thrice
@@ -259,7 +266,8 @@ class Puzzle:
 
             self.count_Solutions()
 
-            if self.solutions > 1:#If more than one solutions are found, undo removal of digit
+            if self.solutions > 1:
+                #If more than one solutions are found, undo removal of digit
                 self.grid = copy.deepcopy(change)
                 self.insert(row, col, n)
                 self.solutions = 0
@@ -268,7 +276,8 @@ class Puzzle:
                 self.grid = copy.deepcopy(change)
                 digitsRemoved += 1
 
-            if digitsRemoved == digitsToRemove:#if all required number of cells to be removed have been removed
+            if digitsRemoved == digitsToRemove:
+                #if all required number of cells to be removed have been removed
                 break
 
         self.grid = copy.deepcopy(change)
@@ -282,12 +291,15 @@ class Puzzle:
 
 ##############################################################################################################################
 
-    def grid_To_String(self):#Will convert the grid into a string that can be saved on a file
-        return "".join( ["".join( [str(item) for item in row] ) for row in self.grid] )
+    def grid_To_String(self):
+        #Will convert the grid into a string that can be saved on a file
+        return "".join( ["".join([str(item) for item in row]) for row in self.grid] )
 
     def string_To_Grid(self, string):
-        #the if statement accounts for some Sudoku grids that have a dot representing the empty space instead of 0
-        self.grid = [[int(item) if item != "." else 0 for item in string[9*row:9*(row+1)]] for row in range(len(string)//9)]
+        #the if statement accounts for grids that use a dot instead of 0
+        self.grid = [[int(item) if item != "." else 0 
+                    for item in string[9*row:9*(row+1)]] 
+                    for row in range(9)]
 
 ##############################################################################################################################
 
