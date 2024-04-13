@@ -25,3 +25,6 @@ for i in range(3):
         for x in range(3*i, 3*i+3):
             for y in range(j, j+3):
                 print(f"{x},{y}")
+
+
+                

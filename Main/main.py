@@ -1,11 +1,4 @@
-
-"""from kivy.uix.widget import Widget
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.floatlayout import FloatLayout"""
 import random
-import os
 
 from kivy.app import App
 from kivy.uix.label import Label
@@ -16,7 +9,7 @@ from kivy.clock import Clock
 from kivy.properties import StringProperty
 
 from kivy.config import Config
-from pygame import CONTROLLERAXISMOTION
+
 
 Config.set("graphics", "width", "1024")
 Config.set("graphics", "height", "768")
@@ -69,7 +62,7 @@ game = Game()       ####
 
 class SudokuApp(App):
     def __init__(self):
-        super(SudokuApp, self).__init__()
+        super().__init__()
 
         self.online = False
         self.rememberLogin = False
@@ -106,6 +99,7 @@ class SudokuApp(App):
                 self.password = ""
                 self.topTimes = ["", "", "", ""]
 
+
     def save_Game_Data(self):
         with open("Main\Game Data.txt", "w") as file:
             if self.rememberLogin is True:
@@ -117,11 +111,13 @@ class SudokuApp(App):
 
 
     def parse_Timer_to_String(self, timeFloat):
-        minutes = str(int(timeFloat // 60))
+        hours = str(int(timeFloat // 3600))
+        minutes = str(int(timeFloat % 3600 // 60))
         seconds = str(int(timeFloat % 60))
-        return f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
+        #centiSeconds = str(int(round(self.elapsedTime % 60 - int(self.elapsedTime % 60), 2)*100))
+        #print(f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}.{'0'*(2-len(centiSeconds))+centiSeconds}")
+        return f"{'0'*(2-len(hours))+hours}:" if int(minutes) > 59 else "" + f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
     
-        
     def on_stop(self):
         self.save_Game_Data()
         print("Goodbye World")
@@ -134,7 +130,7 @@ class BaseScreen(Screen):
     borderFile = StringProperty("graphics\Sudoku_App_Border_Logged_Out.png")
 
     def __init__(self, **kwargs):
-        super(BaseScreen, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def on_enter(self):
         self.set_Border()
@@ -162,7 +158,7 @@ TEXT = (0.76, 0, 1, 1)
 
 class Cell(Button):
     def __init__(self, row, col, n, **kwargs):
-        super(Cell, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.color = TEXT
         self.font_size = 20
         self.width = 10
@@ -218,7 +214,7 @@ class Cell(Button):
         
 class NumberInput(Button):
     def __init__(self, n, **kwargs):
-        super(NumberInput, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.width = 5
         self.height = 5
         self.n = n
@@ -230,11 +226,11 @@ class NumberInput(Button):
 
 class Timer(Label):
     def __init__(self, **kwargs):
-        super(Timer, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 class GameScreen(BaseScreen):
     def __init__(self, **kwargs):
-        super(GameScreen, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def checks(self, dt):
         if game.timer:
@@ -263,13 +259,8 @@ class GameScreen(BaseScreen):
     def updateTimer(self):
         self.elapsedTime += time.time() - self.recentTime
         self.recentTime = time.time()
-        hours = str(int(self.elapsedTime // 3600))
-        minutes = str(int(self.elapsedTime % 3600 // 60))
-        seconds = str(int(self.elapsedTime % 60))
 
-        centiSeconds = str(int(round(self.elapsedTime % 60 - int(self.elapsedTime % 60), 2)*100))
-        #print(f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}.{'0'*(2-len(centiSeconds))+centiSeconds}")
-        self.ids.timer.text = f"{'0'*(2-len(hours))+hours}:" if int(minutes) > 59 else "" + f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
+        self.ids.timer.text = app.parse_Timer_to_String(self.elapsedTime)
         self.saveTime = [round(self.elapsedTime, 2), self.ids.timer.text]
 
 
@@ -386,7 +377,7 @@ class ClassicGame(GameScreen):
 
 class OpponentGridCell(Button):
     def __init__(self, cellType, **kwargs):
-        super(OpponentGridCell, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.width = 3
         self.height = 3
         self.text = ""
@@ -402,7 +393,7 @@ class OpponentGridCell(Button):
             self.background_color = NEUTRAL
 class MultiplayerGame(GameScreen):
     def __init__(self, **kwargs):
-        super(GameScreen, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def checks(self, dt):
 
@@ -439,16 +430,11 @@ class MultiplayerGame(GameScreen):
             self.manager.current = "MainMenu"
 
 
-        
-
     def updateTimer(self):
         self.elapsedTime += time.time() - self.recentTime
         self.recentTime = time.time()
-        minutes = str(int(self.elapsedTime // 60))
-        seconds = str(int(self.elapsedTime % 60))
-        centiSeconds = str(int(round(self.elapsedTime % 60 - int(self.elapsedTime % 60), 2)*100))
-        #print(f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}.{'0'*(2-len(centiSeconds))+centiSeconds}")
-        self.ids.timer.text = f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}"
+
+        self.ids.timer.text = app.parse_Timer_to_String(self.elapsedTime)
         self.saveTime = [round(self.elapsedTime, 2), self.ids.timer.text]
 
     def on_enter(self):
