@@ -80,8 +80,8 @@ class Game(threading.Thread):
 
     def run(self):
         finished = False
-        self.player1.sendall("")
-        self.player2.sendall("")
+        self.player1.send("")
+        self.player2.send("")
         while not finished:
             pass
 
@@ -122,19 +122,19 @@ class Client(threading.Thread):
         self.options = { "login": self.login,
                     "register": self.register,
                     "match_Players": self.match_Players,
-                    "update_BestTimes" : self.update_BestTimes}
+                    "update_BestTimes" : self.update_BestTimes,
+                    "play_Multiplayer": self.play_Multiplayer}
 
     def run(self):    
         while True:
             try:
                 request = self.client.recv(1024).decode()
-                print("Heeheefaplsianthearkofthceeheeseaps")
+
                 print(request)
                 if not request:
                     print("not request")
 
                 if request == "Logout":
-                    print("Logoutheehehe")
                     break
 
                 elif request in self.options:
@@ -185,14 +185,14 @@ class Client(threading.Thread):
     #######################################################################
     def register(self):
         print("Doing register stuff on self.client")
-        self.client.sendall("proceed".encode())
+        self.client.send("proceed".encode())
         details = self.client.recv(1024).decode().split(",")
         print(details)
         conn = sqlite3.connect(DATABASE, check_same_thread=False)
         cursor = conn.cursor()
 
-        if check(details[0], cursor):
-            self.client.sendall("invalid".encode())#USername already exists
+        if self.check(details[0], cursor):
+            self.client.send("invalid".encode())#USername already exists
             conn.close()
             return False
         
@@ -200,7 +200,7 @@ class Client(threading.Thread):
             cursor.execute("INSERT INTO Accounts (Username, Password) VALUES (?, ?)", (details)) # Tuple unpacking if not obvious
             cursor.execute("INSERT INTO BestTimes (Username, Easy, Normal, Hard, 'Extra Hard') VALUES (?, NULL, NULL, NULL, NULL)", (details[0],)) # Tuple unpacking if not obvious
 
-            self.client.sendall("valid".encode())
+            self.client.send("valid".encode())
             conn.commit()
             conn.close()
             print("INserted")
@@ -208,7 +208,7 @@ class Client(threading.Thread):
         
     def login(self):
         print("doing login stuff on sever")
-        self.client.sendall("proceed".encode())
+        self.client.send("proceed".encode())
         details = self.client.recv(1024).decode().split(",")
         print("1")
         conn = sqlite3.connect(DATABASE)
@@ -217,18 +217,18 @@ class Client(threading.Thread):
         if self.verify(details[0], details[1], cursor):
             print("3")
             print(f"Login good by {details[0]}")
-            self.client.sendall("valid".encode())
+            self.client.send("valid".encode())
             conn.close()
             return True
         else:
             print("4")
-            self.client.sendall("invalid".encode())
+            self.client.send("invalid".encode())
             print("Login bad")# Login badd
             conn.close()
             return False
 
     def update_BestTimes(self):
-        self.client.sendall("proceed".encode())
+        self.client.send("proceed".encode())
         times = self.client.recv(1024).decode().split(",")
 
         conn = sqlite3.connect(DATABASE, check_same_thread=False)
@@ -236,11 +236,11 @@ class Client(threading.Thread):
 
         try:
             cursor.execute("UPDATE BestTimes SET Easy = ?, Normal = ?, Hard = ?, 'Extra Hard' = ? WHERE Username = ?", (times[1], times[2], times[3], times[4], times[0]))
-            self.client.sendall("valid".encode())
+            self.client.send("valid".encode())
             
         except Exception as e:
             print(f"Error updating best times {e}")
-            self.client.sendall("invalid".encode())
+            self.client.send("invalid".encode())
 
         conn.commit()
         conn.close()
@@ -248,8 +248,8 @@ class Client(threading.Thread):
 
 
     def match_Players(self):
-        print("Doing matching stuff on client")
-        self.client.sendall("proceed".encode())
+        print("Doing matching stuff on server")
+        self.client.send("proceed".encode())
         difficulty = self.client.recv(1024).decode()
 
         if queueDict[difficulty].isEmpty():
@@ -257,18 +257,19 @@ class Client(threading.Thread):
             #client.send("Queue empty".encode())
             #prompt use that queue is empty so they mayhave to wait a while
         
-        if queueDict[difficulty].enQueue(self.client):
+        if queueDict[difficulty].enQueue(self):
             print("Enqueued")
-            self.client.sendall("Enqueued".encode())
+            self.client.send("Enqueued".encode())
             #wait
         
         else:
             print("Queue full")
-            self.client.sendall("Queue full".encode())
+            self.client.send("Queue full".encode())
             #return False
 
     def play_Multiplayer(self):
-        print("Doing login stuff on client")
+        print("Doing multiplayer stuff onserver")
+        self.client.send("proceed".encode())
 
 #######################################################################
 
@@ -289,7 +290,6 @@ class Client(threading.Thread):
 #Main
 #######################################################################
 
-connections = []
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -301,6 +301,8 @@ def main():
         client, address = server.accept()
         print(f"Connection from {address}")
 
+        connections.append(Client(client, address))
+        connections[-1].start()
         
         create_Match()
 

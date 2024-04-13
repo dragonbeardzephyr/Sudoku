@@ -18,22 +18,7 @@ class Client:
         self.__port = 7777
         self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connected = False
-        self.username = ""
-        """
-        self.options = {"login": self.login,
-        "register": self.register,
-        "match_Players": self.match_Players,
-        "play_Multiplayer": self.play_Multiplayer}
-        """
 
-    """
-    def handle(self, request):
-        if request in self.options:
-            self.__client.sendall(request.encode())
-            self.options[request]
-        else:
-            print("Inavlid request")
-    """
     def connect(self):
         try:
             self.__client.connect((self.__host, self.__port))
@@ -58,7 +43,7 @@ class Client:
     def register(self, username, password):#Password going through here is here unproccessed
         print("Doing register stuff on client")
 
-        self.__client.sendall("register".encode())
+        self.__client.send("register".encode())
         proceed = self.__client.recv(1024).decode()
 
         valid = False
@@ -67,8 +52,6 @@ class Client:
             self.__client.send((username+","+self.hashPW(password)).encode())
             if self.__client.recv(1024).decode() == "valid":
                     valid = True
-
-                    
 
         else:
             print("No proceed")
@@ -80,7 +63,7 @@ class Client:
     def login(self, username, password, hashed):
         print("doing login stuff on client")
         
-        self.__client.sendall("login".encode())
+        self.__client.send("login".encode())
 
         proceed = self.__client.recv(1024).decode()
 
@@ -104,16 +87,15 @@ class Client:
 
     def update_BestTimes(self, times):
         print("Doing update best times stuff on client")
-        self.__client.sendall("update_BestTimes".encode())
+        self.__client.send("update_BestTimes".encode())
         proceed = self.__client.recv(1024).decode()
         if proceed == "proceed":
             self.__client.send((f"{self.username}," + ",".join(times)).encode())
-        else:
-            return
+
 
     def match_Players(self, difficulty):
         print("Doing login stuff on client")
-        self.__client.sendall("match_Players".encode())
+        self.__client.send("match_Players".encode())
         proceed = self.__client.recv(1024).decode()
         if proceed == "proceed":
             self.__client.send(difficulty.encode())
@@ -129,7 +111,7 @@ class Client:
     """
     def play_Multiplayer(self):
         print("Doing login stuff on client")
-        self.__client.sendall("play_Multiplayer".encode())
+        self.__client.send("play_Multiplayer".encode())
         proceed = self.__client.recv(1024).decode()
 
         if proceed:

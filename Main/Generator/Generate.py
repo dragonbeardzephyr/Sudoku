@@ -3,7 +3,6 @@ import time
 import copy
 
 class Puzzle:
-
     def __init__(self, data = None):
         if type(data) == str:#For importing grids
             self.string_To_Grid(data) # Converts a string representation of a puzzle into a 2d array
@@ -15,6 +14,7 @@ class Puzzle:
         else: # Default
             self.generate()
 
+
     def show_grid(self):
         for row in self.grid:
             for item in row:
@@ -22,15 +22,18 @@ class Puzzle:
             print()
         print()
 
+
     def insert(self, row, col, n):
         self.grid[row][col] = n
         
+
     def find_Empty_Space(self):
         for row in range(9):
             for col in range(9):
                 if self.grid[row][col] == 0:
                     return (row, col)
         return None
+
 
     def check(self, row, col, num):#return false if there are any mistakes
 
@@ -51,6 +54,7 @@ class Puzzle:
                     return False
 
         return True
+
 
     """
     def solve(self):#Basic DFS Solve function
@@ -73,6 +77,7 @@ class Puzzle:
 
             return False
     """
+
 
     def get_All_Candidates(self):#
         self.candidates = [[set() for i in range(9)]for j in range(9)]#All cells start with empty candidates set
@@ -293,7 +298,6 @@ class PuzzleFile:
             self.contents = self.file.readlines()
             self.file.close()
 
-
         elif mode == "append":
             self.file = open(file, "a+")
             self.contents = self.file.readlines()
@@ -314,18 +318,22 @@ class Stack():
 		self.__top = -1
 		self.__maxSize = size
 
+
 	def isFull(self):
 		return True if self.__top == self.__maxSize - 1 else False
+
 
 	def isEmpty(self):
 		return True if self.__top == -1 else False
 		
+
 	def pushToStack(self, item):
 		if self.isFull():
 			print("Stack Full")
 		else:
 			self.__top += 1
 			self.__stack[self.__top] = item
+
 
 	def popFromStack(self):
 		if self.isEmpty():
@@ -336,8 +344,10 @@ class Stack():
 			self.__top -= 1
 			return item
 
+
 	def show(self):
 		print(self.__stack) 
+
 
 ###############################################################################################################################
 """puzzle1 = Puzzle()
@@ -397,7 +407,7 @@ def make_More(grid):
 """MAIN PROGRAM"""
 if __name__ == "__main__":
     # n = Number of Puzzle to generate
-    n = 10 
+    n = 10
     easy = [] 
     normal = []
     hard = []

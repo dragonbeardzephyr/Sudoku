@@ -456,13 +456,20 @@ class MultiplayerGame(GameScreen):
 
         #RECEIVE GRID
         #initilaize stuff
-
         self.load()
         self.clock = Clock.schedule_interval(self.checks, 0.01)
 
     def load(self):#########Change this for multiplayer
         game.import_Puzzle(game.difficulty)#assigns puzzle to game.puzzle
         game.puzzle.show_grid()
+
+        proceed = app.client.receive()
+        if proceed == "proceed":
+            
+        game.puzzle = Puzzle(p)
+        game.puzzleSolution = Puzzle(p)
+        game.puzzleSolution.solve()
+
         grid = self.ids.grid
         game.opponentGrid = "".join([str(random.randint(0,1)) for i in range(81)]) # Will be revced by server as astring of 1s and 0s, 1s for cells that are complete and 0s for cells that arent
 
@@ -579,15 +586,15 @@ class MultiplayerMenu(Menu):
     def setDifficulty(self, difficulty):
         game.difficulty = difficulty
 
-
-
     def match(self):
         if app.online:
             if app.client.match_Players(game.difficulty):
-                popup = Popup(title = "Match Found", content = Label(text = "Matching"), size_hint = (0.5, 0.5))
-                popup.open()
+                
+            else:
+
                 
         else:
+            self.ids.matchButton.state = "normal"
             popup = Popup(title = "Error", content = Label(text = "You need to login"), size_hint = (0.5, 0.5))
             popup.open()
             
