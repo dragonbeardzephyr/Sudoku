@@ -127,6 +127,7 @@ class Client(threading.Thread):
 
     def run(self):    
         while True:
+            print("Waiting for request")
             try:
                 request = self.client.recv(1024).decode()
 
@@ -138,7 +139,7 @@ class Client(threading.Thread):
                     break
 
                 elif request in self.options:
-                    self.options[request]
+                    self.options[request]()
 
             except Exception as e :
                 print(f"Inavlid request {e}")
@@ -291,18 +292,20 @@ class Client(threading.Thread):
 #######################################################################
 
 
+connections = []
+
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen()
     
     while True:
-        
+        print("Waiting for connection")
         client, address = server.accept()
         print(f"Connection from {address}")
 
-        connections.append(Client(client, address))
-        connections[-1].start()
+        Client(client, address).start()
+
         
         create_Match()
 

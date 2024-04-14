@@ -3,7 +3,7 @@ import time
 import copy
 
 class Puzzle:
-    def __init__(self, data = None):
+    def __init__(self, data : str | list | None = None):
         if type(data) == str:#For importing grids
             self.string_To_Grid(data) # Converts a string representation of a puzzle into a 2d array
             self.get_All_Candidates() # Sets candidates for all cells
@@ -27,7 +27,7 @@ class Puzzle:
         self.grid[row][col] = n
         
 
-    def find_Empty_Space(self):
+    def find_Empty_Space(self) -> tuple | None:
         for row in range(9):
             for col in range(9):
                 if self.grid[row][col] == 0:
@@ -35,7 +35,7 @@ class Puzzle:
         return None
 
 
-    def check(self, row, col, num):#return false if there are any mistakes
+    def check(self, row : int, col : int, num : int) -> bool:#return false if there are any mistakes
 
         if num in self.grid[row]:
             return False
@@ -103,7 +103,7 @@ class Puzzle:
 
 ###########################_EXPERIMENTAL_CODE_NOT_NECESSARY_############################################################################################
 
-    def update_Peers_Remove_Candidates(self, row, col):#When a number is inserted, the cells in the same row, column and box will have that number removed from their candidates
+    def update_Peers_Remove_Candidates(self, row : int, col : int):#When a number is inserted, the cells in the same row, column and box will have that number removed from their candidates
         for i in range(9):
             if n in self.candidates[row][i]:
                 self.candidates[row][i].remove(n)
@@ -120,7 +120,7 @@ class Puzzle:
                     self.candidates[i][j].remove(n)
 
 
-    def update_Peers_Insert_Candidates(self, row, col, n):
+    def update_Peers_Insert_Candidates(self, row : int, col : int, n : int):
         #For adding candidates back to a cell that was previously filled
         candidates = set(range(1,10))
     
@@ -161,13 +161,13 @@ class Puzzle:
                     self.insert(row, col, self.candidates[row][col].pop())
 
                 
-    def dfs(self):
+    def dfs(self) -> bool:#Named after Depth First Search, basic backtracking algorithm
         pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
         if pos == None:
             #Meaning the grid is full and solved
             return True
         
-        row, col = pos[0],pos[1]
+        row, col = pos
 
         for n in self.candidates[row][col]:
 
@@ -184,7 +184,7 @@ class Puzzle:
         return False
 
 
-    def solve(self):
+    def solve(self) -> bool:
         self.eliminate()
         return self.dfs()
 
@@ -230,7 +230,7 @@ class Puzzle:
             self.solutions += 1 #Notes that it has found a solution
             return #Continues "EXPLORING" grid for more solutions
         
-        row, col = pos[0],pos[1]
+        row, col = pos
 
         for n in range(1, 10):
             if self.check(row, col, n):
@@ -246,7 +246,7 @@ class Puzzle:
                 self.insert(row, col, 0)
         
 
-    def remove_digits(self):
+    def remove_digits(self) -> int:
         print("Removing Digits")
         self.solutions = 0
         digitsToRemove = int(random.triangular(36, 64, 50))# Weighted towards 50
@@ -291,11 +291,11 @@ class Puzzle:
 
 ##############################################################################################################################
 
-    def grid_To_String(self):
+    def grid_To_String(self) -> str:
         #Will convert the grid into a string that can be saved on a file
         return "".join( ["".join([str(item) for item in row]) for row in self.grid] )
 
-    def string_To_Grid(self, string):
+    def string_To_Grid(self, string : str):
         #the if statement accounts for grids that use a dot instead of 0
         self.grid = [[int(item) if item != "." else 0 
                     for item in string[9*row:9*(row+1)]] 
@@ -304,7 +304,7 @@ class Puzzle:
 ##############################################################################################################################
 
 class PuzzleFile:
-    def __init__(self, file, mode, data = []):
+    def __init__(self, file : str, mode : str, data : list = []):
         if mode == "read":
             self.file = open(file, "r")
             self.contents = self.file.readlines()
@@ -319,9 +319,6 @@ class PuzzleFile:
                     self.file.write(f"{puzzleString}\n")
             
             self.file.close()
-
-        else:
-            return ValueError
         
 ################################################################################################
 class Stack():
@@ -384,13 +381,13 @@ print("2", y-x)
 print(puzzle3.solveH())
 puzzle3.show_grid()"""
 
-def flip_Vertical(grid):
+def flip_Vertical(grid : list) -> list:
     a = Stack(9)
     for row in grid:
         a.pushToStack(row)
     return [a.popFromStack() for i in range(9)]
 
-def rotate_90(grid):
+def rotate_90(grid : list) -> list:
     a = [[], [], [], [], [], [], [], [], []]
     for col in range(9):#for each column
          for row in range(8, -1, -1):#for each item in column, going down to up, this transposes the first column to frist row, with the bottom of the column aligned with the start of the row
@@ -398,7 +395,7 @@ def rotate_90(grid):
     return a
 
 
-def make_More(grid):
+def make_More(grid : list) -> list:
     a = []
     a.append(grid)
 
