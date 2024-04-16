@@ -184,7 +184,7 @@ class AccountMenu(Menu):
 #Cell Colours
 NEUTRAL = (0, 1, 0.6, 1)
 COLLISION = (1, 0, 0.5, 1)
-CLUE = (0, 1, 0.6, 1)
+#CLUE = (0, 1, 0.6, 1)
 TEXT = (0.76, 0, 1, 1)
 #############################
 
@@ -198,15 +198,16 @@ class Cell(Button):
         self.row = row
         self.col = col
         self.n = n
+        self.background_color = NEUTRAL
 
         if self.n > 0:
             self.text = str(n)
             self.disabled = True
-            self.background_color = CLUE
+
         else:
             self.text = ""
             self.disabled = False
-            self.background_color = NEUTRAL
+            
 
         self.clock = Clock.schedule_interval(self.checkCell, 0.5)
 
@@ -263,43 +264,6 @@ class Timer(Label):
 class GameScreen(BaseScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-    def checks(self, dt):
-        if game.timerOn:
-            self.updateTimer()
-        else:
-            self.recentTime = time.time()
-
-        game.win = game.puzzle.grid == game.puzzleSolution.grid
-        if game.win:#check win
-            print("Player WINS!")
-            self.clock.cancel()
-            game.timerOn = False
-            game.finishTime = self.saveTime
-
-            topTime = app.topTimes[difficulties.index(game.difficulty)]
-            topTime = float(topTime) if len(topTime) > 0 else 0
-            
-            newRecord = False
-            if topTime == 0 or topTime > game.finishTime[0]:
-                newRecord = True
-                app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
-
-            game.win = False
-
-            p = Popup(title = "Congratulations", content = Label(text = f"{'New record!\n' if newRecord else ''}Complete Time: {game.finishTime[1]}"), size_hint = (0.6, 0.3))
-            p.open()
-
-            self.manager.current = "MainMenu"
-        
-
-    def updateTimer(self):
-        self.elapsedTime += time.time() - self.recentTime
-        self.recentTime = time.time()
-
-        self.ids.timer.text = game.parse_Timer_to_String(self.elapsedTime)
-        self.saveTime = [round(self.elapsedTime, 2), self.ids.timer.text]
-
 
     def on_enter(self):
         self.set_Border()
@@ -371,6 +335,45 @@ class GameScreen(BaseScreen):
         self.recentTime = time.time()
         self.elapsedTime = 0
         game.timerOn = True
+
+
+    def checks(self, dt):
+        if game.timerOn:
+            self.updateTimer()
+        else:
+            self.recentTime = time.time()
+
+        game.win = game.puzzle.grid == game.puzzleSolution.grid
+        if game.win:#check win
+            print("Player WINS!")
+            self.clock.cancel()
+            game.timerOn = False
+            game.finishTime = self.saveTime
+
+            topTime = app.topTimes[difficulties.index(game.difficulty)]
+            topTime = float(topTime) if len(topTime) > 0 else 0
+            
+            newRecord = False
+            if topTime == 0 or topTime > game.finishTime[0]:
+                newRecord = True
+                app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
+
+            game.win = False
+
+            p = Popup(title = "Congratulations", content = Label(text = f"{'New record!\n' if newRecord else ''}Complete Time: {game.finishTime[1]}"), size_hint = (0.6, 0.3))
+            p.open()
+
+            self.manager.current = "MainMenu"
+        
+
+    def updateTimer(self):
+        self.elapsedTime += time.time() - self.recentTime
+        self.recentTime = time.time()
+
+        self.ids.timer.text = game.parse_Timer_to_String(self.elapsedTime)
+        self.saveTime = [round(self.elapsedTime, 2), self.ids.timer.text]
+
+
 
     def on_leave(self):
         for i in self.ids.box1.children:

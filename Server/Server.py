@@ -10,11 +10,6 @@ port = 7777
 
 DATABASE = "Server\Sudoku_Online.db"
 
-class Account():
-     def __init__(self, client, username):
-            self.client = client
-            self.username = username
-            self.bestTimes = [None, None, None, None]
 
 
 class Queue():
