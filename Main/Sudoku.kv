@@ -52,7 +52,60 @@ MenuManager:
             root.manager.transition = FadeTransition()
             app.root.current = "MainMenu"
 
+<MainMenu>:
+    name : "MainMenu"
     
+    AnchorLayout:
+        size_hint : 0.9, 0.4
+        pos_hint : {"center_x": 0.5, "center_y":0.65}
+        BoxLayout:
+            orientation : "vertical"
+            BoxLayout:
+                size_hint : 1, 0.75
+                Label: 
+                    text: "Sudoku App"
+                    font_size: 50
+                    color: 0, 1, 0.6, 1
+                    
+            BoxLayout:
+                size_hint : 1, 0.25
+                Button:
+                    text: "Best Times"
+                    font_size : 30
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release:
+                        root.manager.transition = SlideTransition()
+                        root.manager.transition.direction = "right"
+                        root.manager.current = "BestTimes"
+
+                Button:
+                    text: "Classic"
+                    font_size : 30
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release: 
+                        root.manager.transition = WipeTransition()
+                        root.manager.current = "ClassicMenu"
+
+                Button:
+                    text: "Multiplayer"
+                    font_size : 30
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release:
+                        root.manager.transition = WipeTransition()
+                        root.manager.current = "MultiplayerMenu"
+
+                Button:
+                    text: "Account"
+                    font_size : 30
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release:
+                        root.manager.transition = SlideTransition()
+                        root.manager.transition.direction = "left"
+                        root.manager.current = "AccountMenu"
 
 
 <GameScreen>:
@@ -188,60 +241,7 @@ MenuManager:
         on_release: root.dismiss()
        
 
-<MainMenu>:
-    name : "MainMenu"
-    
-    AnchorLayout:
-        size_hint : 0.9, 0.4
-        pos_hint : {"center_x": 0.5, "center_y":0.65}
-        BoxLayout:
-            orientation : "vertical"
-            BoxLayout:
-                size_hint : 1, 0.75
-                Label: 
-                    text: "Sudoku App"
-                    font_size: 50
-                    color: 0, 1, 0.6, 1
-                    
-            BoxLayout:
-                size_hint : 1, 0.25
-                Button:
-                    text: "Best Times"
-                    font_size : 30
-                    color : 0.38, 0.13, 0.97, 1
-                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
-                    on_release:
-                        root.manager.transition = SlideTransition()
-                        root.manager.transition.direction = "right"
-                        root.manager.current = "BestTimes"
 
-                Button:
-                    text: "Classic"
-                    font_size : 30
-                    color : 0.38, 0.13, 0.97, 1
-                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
-                    on_release: 
-                        root.manager.transition = WipeTransition()
-                        root.manager.current = "ClassicMenu"
-
-                Button:
-                    text: "Multiplayer"
-                    font_size : 30
-                    color : 0.38, 0.13, 0.97, 1
-                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
-                    on_release:
-                        root.manager.transition = WipeTransition()
-                        root.manager.current = "MultiplayerMenu"
-
-                Button:
-                    text: "Account"
-                    font_size : 30
-                    color : 0.38, 0.13, 0.97, 1
-                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
-                    on_release:
-                        root.manager.transition = SlideTransition()
-                        root.manager.transition.direction = "left"
-                        root.manager.current = "AccountMenu"
 
 
 <ClassicMenu>:
@@ -418,25 +418,29 @@ MenuManager:
                 Label:
                     text: "Easy"
                 Label:
-                    text : root.get_topTime(0)
+                    id : easyTime
+                    text : ""
             BoxLayout:
                 orientation : "vertical"
                 Label:
                     text: "Normal"
                 Label:
-                    text :  root.get_topTime(1)
+                    id : normalTime
+                    text : ""
             BoxLayout:
                 orientation : "vertical"
                 Label:
                     text: "Hard"
                 Label:
-                    text :  root.get_topTime(2)
+                    id : hardTime
+                    text : ""
             BoxLayout:
                 orientation : "vertical"
                 Label:
                     text: "Extra Hard"
                 Label:
-                    text : root.get_topTime(3)
+                    id : extraHardTime
+                    text : ""
 
 
 

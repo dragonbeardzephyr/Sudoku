@@ -54,6 +54,7 @@ class Game:
             game.puzzleSolution.solve()
             
     def parse_Timer_to_String(self, timeFloat):
+        timeFloat =  float(timeFloat)
         hours = str(int(timeFloat // 3600))
         minutes = str(int(timeFloat % 3600 // 60))
         seconds = str(int(timeFloat % 60))
@@ -97,17 +98,14 @@ class SudokuApp(App):
 
     def load_Game_Data(self):
         with open("Main\Game Data.txt", "r") as file:
-            details = file.readlines()
-            #print(details)
-            if len(details) > 0:
-                self.username = details[0].replace("\n", "")
-                self.password = details[1].replace("\n", "")
-                self.topTimes = [deets.replace("\n", "") for deets in details[2:7]]
-            else:
-                self.username = ""
-                self.password = ""
-                self.topTimes = ["", "", "", ""]
 
+            self.username = file.readline().replace("\n", "")
+            self.password = file.readline().replace("\n", "")
+            self.topTimes = [file.readline().replace("\n", "") for i in range(4)]
+
+            print(self.username)
+            print(self.password)
+            print(self.topTimes)
 
     def save_Game_Data(self):
         with open("Main\Game Data.txt", "w") as file:
@@ -209,7 +207,7 @@ class Cell(Button):
             self.text = ""
             self.disabled = False
             self.background_color = NEUTRAL
-        NOTE FIX THIS LCOCK THING
+
         self.clock = Clock.schedule_interval(self.checkCell, 0.5)
 
     def checkCell(self, dt):
@@ -275,6 +273,7 @@ class GameScreen(BaseScreen):
         game.win = game.puzzle.grid == game.puzzleSolution.grid
         if game.win:#check win
             print("Player WINS!")
+            self.clock.cancel()
             game.timerOn = False
             game.finishTime = self.saveTime
 
@@ -286,9 +285,7 @@ class GameScreen(BaseScreen):
                 newRecord = True
                 app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
 
-            self.clock.cancel()
             game.win = False
-            game.puzzle, game.puzzleSolution = None, None
 
             p = Popup(title = "Congratulations", content = Label(text = f"{'New record!\n' if newRecord else ''}Complete Time: {game.finishTime[1]}"), size_hint = (0.6, 0.3))
             p.open()
@@ -395,6 +392,8 @@ class GameScreen(BaseScreen):
         for i in self.ids.box9.children:
             i.clock.cancel()
 
+        game.puzzle, game.puzzleSolution = None, None
+
         self.ids.box1.clear_widgets()
         self.ids.box2.clear_widgets()
         self.ids.box3.clear_widgets()
@@ -405,7 +404,7 @@ class GameScreen(BaseScreen):
         self.ids.box8.clear_widgets()
         self.ids.box9.clear_widgets()
         self.ids.numberGrid.clear_widgets()
-        self.clock.cancel()
+
 
     def pauseGame(self):
         pause = PauseScreen()
@@ -431,6 +430,9 @@ class OpponentGridCell(Button):
             self.background_color = (1, 1, 0, 1)
         else:
             self.background_color = NEUTRAL
+
+
+            
 class MultiplayerGame(GameScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -466,7 +468,7 @@ class MultiplayerGame(GameScreen):
 
             self.clock.cancel()
             game.win = False
-            game.puzzle, game.puzzleSolution, game.opponentGrid = None, None, None
+            
             self.manager.current = "MainMenu"
 
 
@@ -490,6 +492,7 @@ class MultiplayerGame(GameScreen):
         game.puzzle.show_grid()
 
         proceed = app.client.receive()
+
         if proceed == "proceed":
             pass
 
@@ -580,6 +583,8 @@ class MultiplayerGame(GameScreen):
         for i in self.ids.box9.children:
             i.clock.cancel()
         
+        game.puzzle, game.puzzleSolution, game.opponentGrid = None, None, None
+
         self.ids.box1.clear_widgets()
         self.ids.box2.clear_widgets()
         self.ids.box3.clear_widgets()
@@ -591,7 +596,7 @@ class MultiplayerGame(GameScreen):
         self.ids.box9.clear_widgets()
         self.ids.numberGrid.clear_widgets()
         self.ids.opponentGrid.clear_widgets()
-        self.clock.cancel()
+
 
     def pauseGame(self):
         pass
@@ -667,11 +672,15 @@ class Register(BaseScreen):
             p.open()
  
 class BestTimes(BaseScreen):
-    #easy, normal, hard, extra_hard = "", "", "", ""
+    def on_enter(self):
+        self.ids.easyTime.text = self.get_topTime(0)
+        self.ids.normalTime.text = self.get_topTime(1)
+        self.ids.hardTime.text = self.get_topTime(2)
+        self.ids.extraHardTime.text = self.get_topTime(3)
+
     def get_topTime(self, index):
-        print(app.topTimes)
         topTime = app.topTimes[index]
-        return topTime if len(topTime) > 0 else "N/A"
+        return game.parse_Timer_to_String(topTime) if len(topTime) > 0 else "N/A"
 
 class MenuManager(ScreenManager):
     pass

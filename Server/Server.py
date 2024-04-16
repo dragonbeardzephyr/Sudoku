@@ -2,7 +2,7 @@ import socket
 import threading
 import sqlite3
 import random
-import time
+
 from Generator.Generate import Puzzle
 
 host = "127.0.0.1"
@@ -271,6 +271,7 @@ class Client(threading.Thread):
     def play_Multiplayer(self):
         print("Doing multiplayer stuff onserver")
         self.client.send("proceed".encode())
+        
 
 #######################################################################
 
