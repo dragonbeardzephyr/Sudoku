@@ -12,7 +12,6 @@ import hashlib
 #close connection
 
 class Client:
-
     def __init__(self):
         self.__host = "127.0.0.1"
         self.__port = 7777
@@ -93,19 +92,19 @@ class Client:
             self.__client.send((f"{self.username}," + ",".join(times)).encode())
 
 
-    def match_Players(self, difficulty):
-        print("Doing login stuff on client")
-        self.__client.send("match_Players".encode())
-        proceed = self.__client.recv(1024).decode()
-        if proceed == "proceed":
-            self.__client.send(difficulty.encode())
-            message = self.__client.recv(1024).decode()
-            if message == "Enqueued":
-                return True
-            elif message == "Queue full":
-                return False
-        else:
-            return #connection no go
+def match_Players(self, difficulty):
+    print("Doing login stuff on client")
+    self.__client.send("match_Players".encode())
+    proceed = self.__client.recv(1024).decode()
+    if proceed == "proceed":
+        self.__client.send(difficulty.encode())
+        message = self.__client.recv(1024).decode()
+        if message == "Enqueued":
+            return True
+        elif message == "Queue full":
+            return False
+    else:
+        return #connection no go
     
     
     """

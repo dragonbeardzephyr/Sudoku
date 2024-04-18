@@ -360,7 +360,9 @@ class GameScreen(BaseScreen):
 
             game.win = False
 
-            p = Popup(title = "Congratulations", content = Label(text = f"{'New record!\n' if newRecord else ''}Complete Time: {game.finishTime[1]}"), size_hint = (0.6, 0.3))
+            p = Popup(title = "Congratulations", 
+                content = Label(text = f"{'New record!\n' if newRecord else ''}Complete Time: {game.finishTime[1]}"), 
+                size_hint = (0.6, 0.3))
             p.open()
 
             self.manager.current = "MainMenu"
@@ -376,6 +378,8 @@ class GameScreen(BaseScreen):
 
 
     def on_leave(self):
+        self.clock.cancel()
+        
         for i in self.ids.box1.children:
             i.clock.cancel()
         for i in self.ids.box2.children:
@@ -409,12 +413,10 @@ class GameScreen(BaseScreen):
         self.ids.numberGrid.clear_widgets()
 
 
+class ClassicGame(GameScreen):
     def pauseGame(self):
         pause = PauseScreen()
         pause.open()
-
-class ClassicGame(GameScreen):
-    pass
 
 
 class OpponentGridCell(Button):
@@ -459,6 +461,7 @@ class MultiplayerGame(GameScreen):
         game.win = game.puzzle.grid == game.puzzleSolution.grid
 
         if game.win:#check win
+            self.clock.cancel
             print("Player WINS!")
             game.timerOn = False
             game.finishTime = self.saveTime
@@ -469,7 +472,6 @@ class MultiplayerGame(GameScreen):
             if topTime == 0 or topTime > game.finishTime[0]:
                 app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
 
-            self.clock.cancel()
             game.win = False
             
             self.manager.current = "MainMenu"
@@ -567,6 +569,7 @@ class MultiplayerGame(GameScreen):
         game.timerOn = True
 
     def on_leave(self):
+        self.clock.cancel()
         for i in self.ids.box1.children:
             i.clock.cancel()
         for i in self.ids.box2.children:
