@@ -3,8 +3,7 @@ import time
 import copy
 
 class Puzzle:
-
-    def __init__(self, data = None):
+    def __init__(self, data : str | list | None = None):
         if type(data) == str:#For importing grids
             self.string_To_Grid(data) # Converts a string representation of a puzzle into a 2d array
             self.get_All_Candidates() # Sets candidates for all cells
@@ -15,24 +14,28 @@ class Puzzle:
         else: # Default
             self.generate()
 
+
     def show_grid(self):
         for row in self.grid:
             for item in row:
                 print(item, end = "  ")
-            print()
+            print()#newline
         print()
+
 
     def insert(self, row, col, n):
         self.grid[row][col] = n
         
-    def find_Empty_Space(self):
+
+    def find_Empty_Space(self) -> tuple | None:
         for row in range(9):
             for col in range(9):
                 if self.grid[row][col] == 0:
                     return (row, col)
         return None
 
-    def check(self, row, col, num):#return false if there are any mistakes
+
+    def check(self, row : int, col : int, num : int) -> bool:#return false if there are any mistakes
 
         if num in self.grid[row]:
             return False
@@ -40,10 +43,9 @@ class Puzzle:
         for i in range(9):
             if num == self.grid[i][col]:
                 return False
-            
-        #Reduces numbers to either 0, 3 or 6 the starting indexes for a cells respective box 
-        boxRow = row // 3 * 3
-        boxCol = col // 3 * 3
+        
+        boxRow = row // 3 * 3 #Reduces numbers to either 0, 3 or 6 the
+        boxCol = col // 3 * 3 #starting indexes for a cells respective box
 
         for i in range(boxRow, boxRow+3):
             for j in range(boxCol, boxCol+3):
@@ -51,6 +53,7 @@ class Puzzle:
                     return False
 
         return True
+
 
     """
     def solve(self):#Basic DFS Solve function
@@ -74,29 +77,33 @@ class Puzzle:
             return False
     """
 
+
     def get_All_Candidates(self):#
-        self.candidates = [[set() for i in range(9)]for j in range(9)]#All cells start with empty candidates set
-        #Cells that are already filled will have empty sets
+        self.candidates = [[set() for i in range(9)]for j in range(9)]
+        #All cells start with empty candidates set
         for row in range(9):
             for col in range(9):
-                if self.grid[row][col] == 0:#If cell is empty then it will get all possible candidates
+                if self.grid[row][col] == 0:
+                    #If cell is empty then it will get all possible candidates
                     candidates = set(range(1,10))
                 
                     candidates -= set(self.grid[row])
             
                     candidates -= set(self.grid[i][col] for i in range(9))
-    
+
                     boxRow = row // 3 * 3
                     boxCol = col // 3 * 3
                     
-                    candidates -= set(self.grid[i][j] for j in range(boxCol, boxCol+3) for i in range(boxRow, boxRow+3))
+                    candidates -= set(self.grid[i][j] 
+                                    for j in range(boxCol, boxCol+3) 
+                                    for i in range(boxRow, boxRow+3))
 
                     self.candidates[row][col] = candidates
-
+                #Cells that are already filled will have empty sets
 
 ###########################_EXPERIMENTAL_CODE_NOT_NECESSARY_############################################################################################
 
-    def update_Peers_Remove_Candidates(self, row, col):#When a number is inserted, the cells in the same row, column and box will have that number removed from their candidates
+    def update_Peers_Remove_Candidates(self, row : int, col : int):#When a number is inserted, the cells in the same row, column and box will have that number removed from their candidates
         for i in range(9):
             if n in self.candidates[row][i]:
                 self.candidates[row][i].remove(n)
@@ -113,7 +120,7 @@ class Puzzle:
                     self.candidates[i][j].remove(n)
 
 
-    def update_Peers_Insert_Candidates(self, row, col, n):
+    def update_Peers_Insert_Candidates(self, row : int, col : int, n : int):
         #For adding candidates back to a cell that was previously filled
         candidates = set(range(1,10))
     
@@ -149,17 +156,18 @@ class Puzzle:
         
         for row in range(9):
             for col in range(9):
-                if len(self.candidates[row][col]) == 1:#Meaning there is only one possible number that can be placed into the grid,
+                if len(self.candidates[row][col]) == 1:
+                    #Meaning there is only one possible number that can be placed into the grid,
                     self.insert(row, col, self.candidates[row][col].pop())
 
                 
-    def dfs(self):
-        #x = input()#used as next button as to slow down and inspect algorithm
+    def dfs(self) -> bool:#Named after Depth First Search, basic backtracking algorithm
         pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
-        if pos == None:#Meaning the grid is full and solved
+        if pos == None:
+            #Meaning the grid is full and solved
             return True
         
-        row, col = pos[0],pos[1]
+        row, col = pos
 
         for n in self.candidates[row][col]:
 
@@ -167,7 +175,8 @@ class Puzzle:
 
                 self.insert(row, col, n)
                 
-                if self.dfs(): #Causes all the recursion to unwind
+                if self.dfs():
+                    #Causes all the recursion to unwind
                     return True
 
                 self.insert(row, col, 0)
@@ -175,26 +184,27 @@ class Puzzle:
         return False
 
 
-    def solve(self):
+    def solve(self) -> bool:
         self.eliminate()
-        return self.dfs()#Return is used to just cehck for the true false part of statement
+        return self.dfs()
 
-##############################################################################################################################
+    ##############################################################################################################################
 
 
     def fill_Grid(self):
         print("Filling Grid")
-        solved = False#Initialises it for while loop
+        solved = False
 
         while solved == False:
             
-            self.grid = [[0 for col in range(9)] for row in range(9)]#Wipes grid clean
+            self.grid = [[0 for col in range(9)] for row in range(9)]
 
             count = {}
-            for i in range(1, 10):#Will be used to keep track of how many of each number is inserted
+            for i in range(1, 10):
+                #Will be used to keep track of how many of each number is inserted
                 count[i] = 0
 
-            numberOfCellsToInsert = random.randint(25, 35)#Not too low that it will take time to solve and not too high that it will take time to avoid duplicates
+            numberOfCellsToInsert = random.randint(25, 35)
 
             while numberOfCellsToInsert > 0 :
                 x = random.randint(1, 9)
@@ -202,7 +212,8 @@ class Puzzle:
                 col = random.randint(0, 8)
 
                 if self.grid[row][col] == 0:
-                    if count[x] < 9 and self.check(row, col, x):#Mkaes sure that no more than 9 copies of the same number are in the grid
+                    if count[x] < 9 and self.check(row, col, x):
+                        #Ensures that no more than 9 copies of the same number
                         self.insert(row, col, x)
                         count[x] += 1
 
@@ -211,16 +222,15 @@ class Puzzle:
             solved = self.solve()
 
 
-    def count_Solutions(self):#Copy of DFS solve function, but instead is designed to perform a full search for all solutions, however this version is capped to stop at two solutions
-        #print("Counting Solutions")
+    def count_Solutions(self):
         
         pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
 
         if pos == None:#Meaning the grid is full and solved
-            self.solutions += 1 #Just notes that it has reached a solotion and looks for others
+            self.solutions += 1 #Notes that it has found a solution
             return #Continues "EXPLORING" grid for more solutions
         
-        row, col = pos[0],pos[1]
+        row, col = pos
 
         for n in range(1, 10):
             if self.check(row, col, n):
@@ -229,20 +239,22 @@ class Puzzle:
 
                 self.count_Solutions()
 
-                if self.solutions > 1:#As soon as more than one solution is found we know the grid isnt unique and stops searching
+                if self.solutions > 1:
+                    #More than one solution is found so we stop searching
                     return
                 
                 self.insert(row, col, 0)
         
 
-    def remove_digits(self):
+    def remove_digits(self) -> int:
         print("Removing Digits")
         self.solutions = 0
-        digitsToRemove = int(random.triangular(36, 64, 50))#Randomly generates between 36 and 64 and is weighted to generate closer to 50.
+        digitsToRemove = int(random.triangular(36, 64, 50))# Weighted towards 50
         digitsRemoved = 0 #Used to count how many digits have been removed
-        change = copy.deepcopy(self.grid)#Will store up to date grid, as self.solve() affects self.grid
+        change = copy.deepcopy(self.grid)
 
-        cells = [(row, col) for col in range(9) for row in range(9)]*3 #All locations three times so that algortihm does not end too soon
+        cells = [(row, col) for col in range(9) for row in range(9)]*3 
+        #All locations are set three times so that algorithm does not end too soon
         random.shuffle(cells)
 
         for row, col in cells:#While all cells haven't been visited thrice
@@ -254,7 +266,8 @@ class Puzzle:
 
             self.count_Solutions()
 
-            if self.solutions > 1:#If more than one solutions are found, undo removal of digit
+            if self.solutions > 1:
+                #If more than one solutions are found, undo removal of digit
                 self.grid = copy.deepcopy(change)
                 self.insert(row, col, n)
                 self.solutions = 0
@@ -263,7 +276,8 @@ class Puzzle:
                 self.grid = copy.deepcopy(change)
                 digitsRemoved += 1
 
-            if digitsRemoved == digitsToRemove:#if all required number of cells to be removed have been removed
+            if digitsRemoved == digitsToRemove:
+                #if all required number of cells to be removed have been removed
                 break
 
         self.grid = copy.deepcopy(change)
@@ -277,22 +291,24 @@ class Puzzle:
 
 ##############################################################################################################################
 
-    def grid_To_String(self):#Will convert the grid into a string that can be saved on a file
-        return "".join( ["".join( [str(item) for item in row] ) for row in self.grid] )
+    def grid_To_String(self) -> str:
+        #Will convert the grid into a string that can be saved on a file
+        return "".join( ["".join([str(item) for item in row]) for row in self.grid] )
 
-    def string_To_Grid(self, string):
-        #the if statement accounts for some Sudoku grids that have a dot representing the empty space instead of 0
-        self.grid = [[int(item) if item != "." else 0 for item in string[9*row:9*(row+1)]] for row in range(len(string)//9)]
+    def string_To_Grid(self, string : str):
+        #the if statement accounts for grids that use a dot instead of 0
+        self.grid = [[int(item) if item != "." else 0 
+                    for item in string[9*row:9*(row+1)]] 
+                    for row in range(9)]
 
 ##############################################################################################################################
 
 class PuzzleFile:
-    def __init__(self, file, mode, data = []):
+    def __init__(self, file : str, mode : str, data : list = []):
         if mode == "read":
             self.file = open(file, "r")
             self.contents = self.file.readlines()
             self.file.close()
-
 
         elif mode == "append":
             self.file = open(file, "a+")
@@ -303,9 +319,6 @@ class PuzzleFile:
                     self.file.write(f"{puzzleString}\n")
             
             self.file.close()
-
-        else:
-            return ValueError
         
 ################################################################################################
 class Stack():
@@ -314,18 +327,22 @@ class Stack():
 		self.__top = -1
 		self.__maxSize = size
 
+
 	def isFull(self):
 		return True if self.__top == self.__maxSize - 1 else False
+
 
 	def isEmpty(self):
 		return True if self.__top == -1 else False
 		
+
 	def pushToStack(self, item):
 		if self.isFull():
 			print("Stack Full")
 		else:
 			self.__top += 1
 			self.__stack[self.__top] = item
+
 
 	def popFromStack(self):
 		if self.isEmpty():
@@ -336,8 +353,10 @@ class Stack():
 			self.__top -= 1
 			return item
 
+
 	def show(self):
 		print(self.__stack) 
+
 
 ###############################################################################################################################
 """puzzle1 = Puzzle()
@@ -362,13 +381,13 @@ print("2", y-x)
 print(puzzle3.solveH())
 puzzle3.show_grid()"""
 
-def flip_Vertical(grid):
+def flip_Vertical(grid : list) -> list:
     a = Stack(9)
     for row in grid:
         a.pushToStack(row)
     return [a.popFromStack() for i in range(9)]
 
-def rotate_90(grid):
+def rotate_90(grid : list) -> list:
     a = [[], [], [], [], [], [], [], [], []]
     for col in range(9):#for each column
          for row in range(8, -1, -1):#for each item in column, going down to up, this transposes the first column to frist row, with the bottom of the column aligned with the start of the row
@@ -376,7 +395,7 @@ def rotate_90(grid):
     return a
 
 
-def make_More(grid):
+def make_More(grid : list) -> list:
     a = []
     a.append(grid)
 
@@ -397,7 +416,7 @@ def make_More(grid):
 """MAIN PROGRAM"""
 if __name__ == "__main__":
     # n = Number of Puzzle to generate
-    n = 10 
+    n = 10
     easy = [] 
     normal = []
     hard = []

@@ -156,9 +156,11 @@ class MultiplayerMenu(Menu):
         game.difficulty = difficulty
 
     def match(self):
-        if app.online:
+        if app.client:
             if app.client.match_Players(game.difficulty):
-                pass
+                matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
+                matchingPopup.open()
+
             else:
                 pass
         else:
@@ -637,6 +639,7 @@ class Login(BaseScreen):
                 if app.rememberLogin is True:
                     app.username = un
                     app.password = app.client.hashPW(pw)
+                    app.save_Game_Data()
 
                 app.client.update_BestTimes(app.topTimes)
             
@@ -645,6 +648,7 @@ class Login(BaseScreen):
                 app.client = None
                 p = Popup(title = "Error", content = Label(text = "Invalid Username or Password"), size_hint = (0.6, 0.3))
                 p.open()
+
         else:
             app.client.disconnect()
             app.client = None

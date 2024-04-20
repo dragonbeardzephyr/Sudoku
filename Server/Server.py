@@ -29,33 +29,33 @@ class Queue():
 		return self.__size == 0
 		
 	def isEven(self):
-		with self.lock:
-			return self.__size % 2 == 0
+		#with self.lock:
+		return self.__size % 2 == 0
 				
 			
 	def enQueue(self, item):
-		with self.lock:
-			if self.isFull():
-				return item
-			else:
-				self.__rear = (self.__rear + 1) % self.__maxSize
-				self.__queue[self.__rear] = item
-				self.__size += 1
-				return True
-	
-			#print(self.__front, self.__rear)
+		#with self.lock:
+		if self.isFull():
+			return item
+		else:
+			self.__rear = (self.__rear + 1) % self.__maxSize
+			self.__queue[self.__rear] = item
+			self.__size += 1
+			return True
+
+		#print(self.__front, self.__rear)
 
 	def deQueue(self):
-		with self.lock:
-			if self.isEmpty():
-				return False
-			else:
-				data = self.__queue[self.__front]
-				self.__front = (self.__front + 1) % self.__maxSize
-				self.__size -= 1
-				return data
-	
-			#print(self.__front, self.__rear)
+		#with self.lock:
+		if self.isEmpty():
+			return False
+		else:
+			data = self.__queue[self.__front]
+			self.__front = (self.__front + 1) % self.__maxSize
+			self.__size -= 1
+			return data
+
+		#print(self.__front, self.__rear)
 	
 	def show(self):
 		return [self.__queue[(self.__front + i) % self.__maxSize]for i in range(self.__size)]
@@ -238,6 +238,9 @@ class Client(threading.Thread):
             print(f"Error updating best times {e}")
             self.client.send("invalid".encode())
 
+        self.username = times[0]
+        self.bestTimes = times[1:]
+
         conn.commit()
         conn.close()
         
@@ -247,9 +250,11 @@ class Client(threading.Thread):
         print("Doing matching stuff on server")
         self.client.send("proceed".encode())
         difficulty = self.client.recv(1024).decode()
+        print(difficulty)
+        print(queueDict[difficulty].show())
 
         if queueDict[difficulty].isEmpty():
-            pass
+            print("Empty Queue")
             #client.send("Queue empty".encode())
             #prompt use that queue is empty so they mayhave to wait a while
         
