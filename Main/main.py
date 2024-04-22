@@ -468,7 +468,19 @@ class MultiplayerGame(GameScreen):
     def checks(self, dt):
 
         #GET OPPONENT GRID SOMEHOW
-        game.opponentGrid = "".join([str(random.randint(0,1)) for i in range(81)])
+        app.client.send(game.puzzle.grid_To_String())
+
+        game.opponentGrid = app.client.receive()
+
+        if game.opponentGrid == "LOSE":
+            print("Opponent Wins!")
+            self.clock.cancel()
+            game.timerOn = False
+            
+            p = Popup(title = "Unlucky", content = Label(text = "Opponent Wins!"), size_hint = (0.4, 0.35))
+            p.open()
+            self.manager.current = "MainMenu"
+
 
         print(len(game.opponentGrid))
         if game.timerOn:
@@ -486,6 +498,9 @@ class MultiplayerGame(GameScreen):
         if game.win:#check win
             self.clock.cancel
             print("Player WINS!")
+
+            app.client.send("WIN".encode())
+
             game.timerOn = False
             game.finishTime = self.saveTime
 

@@ -76,13 +76,27 @@ class Game(threading.Thread):
 
     def run(self):
         finished = False
-        self.player1.send("Match Found")
-        self.player2.send("Match Found")
-        self.player1.send(self.puzzleString)
-        self.player2.send(self.puzzleString)
-        
+        self.player1.client.send("Match Found".encode())
+        self.player2.client.send("Match Found".encode())
+        self.player1.client.send(self.puzzleString.encode())
+        self.player2.client.send(self.puzzleString.encode())
+
         while not finished:
-            pass
+            p1Grid = self.player1.client.recv().decode()
+            p2Grid = self.player2.client.recv().decode()
+
+
+            if p1Grid == "WIN":
+                self.player2.client.send("LOSE".encode())
+                finished = True
+            elif p2Grid == "WIN":
+                self.player1.client.send("LOSE".encode())
+                finished = True
+            else:
+                self.player1.client.send(self.compare_Puzzles(p2Grid).encode())
+                self.player2.client.send(self.compare_Puzzles(p1Grid).encode())
+            
+            
 
     def import_Puzzle(self, difficulty):
         with open(f"Main\Generator\{difficulty}.txt", "r") as file:
