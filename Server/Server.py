@@ -78,6 +78,9 @@ class Game(threading.Thread):
         finished = False
         self.player1.send("Match Found")
         self.player2.send("Match Found")
+        self.player1.send(self.puzzleString)
+        self.player2.send(self.puzzleString)
+        
         while not finished:
             pass
 

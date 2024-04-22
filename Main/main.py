@@ -516,20 +516,15 @@ class MultiplayerGame(GameScreen):
         self.clock = Clock.schedule_interval(self.checks, 0.01)
 
     def load(self):#########Change this for multiplayer
-        game.import_Puzzle(game.difficulty)#assigns puzzle to game.puzzle
-        game.puzzle.show_grid()
+        
+        puzzleString = app.client.receive()
 
-        proceed = app.client.receive()
-
-        if proceed == "proceed":
-            pass
-
-        game.puzzle = Puzzle(p)
-        game.puzzleSolution = Puzzle(p)
+        game.puzzle = Puzzle(puzzleString)
+        game.puzzleSolution = Puzzle(puzzleString)
         game.puzzleSolution.solve()
 
         grid = self.ids.grid
-        game.opponentGrid = "".join([str(random.randint(0,1)) for i in range(81)]) # Will be revced by server as astring of 1s and 0s, 1s for cells that are complete and 0s for cells that arent
+        game.opponentGrid = "".join([str(0) for i in range(81)]) # Will be revced by server as astring of 1s and 0s, 1s for cells that are complete and 0s for cells that arent
 
         i = 0
         j = 0
