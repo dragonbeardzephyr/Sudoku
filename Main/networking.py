@@ -65,7 +65,7 @@ class Client:
         self.__client.send("login".encode())
 
         proceed = self.__client.recv(1024).decode()
-
+        print(proceed)
         valid = False
 
         if proceed == "proceed":
@@ -97,7 +97,7 @@ class Client:
         self.__client.send("match_Players".encode())
         proceed = self.__client.recv(1024).decode()
         print(proceed)
-        print(difficulty)
+        #print(difficulty)
         if proceed == "proceed":
             print("proceed = true sending difficulty")
             self.__client.send(difficulty.encode())

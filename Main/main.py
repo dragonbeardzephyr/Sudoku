@@ -42,6 +42,7 @@ class Game:
         self.timerOn = False
         
         self.opponentGrid = None
+        
 
     def import_Puzzle(self, difficulty):
 
@@ -78,6 +79,8 @@ class SudokuApp(App):
         self.client = None
         self.boot()
 
+        self.awaiting_Match = None
+
 
     def boot(self):
         self.load_Game_Data()
@@ -94,6 +97,22 @@ class SudokuApp(App):
                     self.client = None
 
             self.rememberLogin = True 
+
+    def set_Match_Finder(self):
+        self.awaiting_Match = Clock().schedule_interval(self, check_match_Found, 0.5)
+    
+    def check_match_Found(self, dt):
+        matchFound = app.client.receive()
+        if matchFound == "Match Found":
+            self.awaiting_Match.cancel()
+            self.manager.current = "MultiplayerGame"
+
+        elif matchFound == "Match Not Found":
+            self.awaiting_Match.cancel()
+            p = Popup(title = "Unsuccessful", content = Label(text = "No match found, retry"), size_hint = (0.6, 0.6))
+            p.open()
+
+        else:
 
 
     def load_Game_Data(self):
@@ -156,10 +175,12 @@ class MultiplayerMenu(Menu):
         game.difficulty = difficulty
 
     def match(self):
-        if app.client:
+        if app.client and app.online is True:
             if app.client.match_Players(game.difficulty):
                 matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
                 matchingPopup.open()
+                game.awaiting_Match = True
+                app.set_Match_Finder()
 
             else:
                 pass

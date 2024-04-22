@@ -2,6 +2,7 @@ import socket
 import threading
 import sqlite3
 import random
+import time
 
 from Generator.Generate import Puzzle
 
@@ -75,8 +76,8 @@ class Game(threading.Thread):
 
     def run(self):
         finished = False
-        self.player1.send("")
-        self.player2.send("")
+        self.player1.send("Match Found")
+        self.player2.send("Match Found")
         while not finished:
             pass
 
@@ -119,11 +120,26 @@ class Client(threading.Thread):
                     "match_Players": self.match_Players,
                     "update_BestTimes" : self.update_BestTimes,
                     "play_Multiplayer": self.play_Multiplayer}
+        
+        self.difficulty = None
+        self.matching = False
+        self.startMatchingTime = 0
 
     def run(self):    
         while True:
             print("Waiting for request")
             try:
+
+                if self.matching == True:
+                    if time.time() - self.startMatchingTime > 300:
+                        self.matching = False
+                        
+
+
+                        self.client.send("Match Not Found".encode())
+
+
+
                 request = self.client.recv(1024).decode()
 
                 print(request)
@@ -249,18 +265,19 @@ class Client(threading.Thread):
     def match_Players(self):
         print("Doing matching stuff on server")
         self.client.send("proceed".encode())
-        difficulty = self.client.recv(1024).decode()
-        print(difficulty)
-        print(queueDict[difficulty].show())
+        self.difficulty = self.client.recv(1024).decode()
+   
 
-        if queueDict[difficulty].isEmpty():
+        if queueDict[self.difficulty].isEmpty():
             print("Empty Queue")
             #client.send("Queue empty".encode())
             #prompt use that queue is empty so they mayhave to wait a while
         
-        if queueDict[difficulty].enQueue(self):
+        if queueDict[self.difficulty].enQueue(self):
             print("Enqueued")
             self.client.send("Enqueued".encode())
+            self.matching = True
+            self.startMatchingTime = time.time()
             #wait
         
         else:
