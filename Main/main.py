@@ -33,17 +33,15 @@ from networking import Client
 difficulties = ["easy", "normal", "hard", "extra_hard"]
 class Game:
     def __init__(self):
-
         self.difficulty = "normal" # dafault
         self.puzzle = None
         self.puzzleSolution = None
         self.holding_Number = 0
         self.finishTime = 0
         self.timerOn = False
-        
         self.opponentGrid = None
+        self.awaitingMatch = False
         
-
     def import_Puzzle(self, difficulty):
 
         with open(f"Main\Generator\{difficulty}.txt", "r") as file:
@@ -59,8 +57,9 @@ class Game:
         hours = str(int(timeFloat // 3600))
         minutes = str(int(timeFloat % 3600 // 60))
         seconds = str(int(timeFloat % 60))
+        #print(hours, minutes, seconds)
         #centiSeconds = str(int(round(self.elapsedTime % 60 - int(self.elapsedTime % 60), 2)*100))
-        return (f"{'0'*(2-len(hours))+hours}:" if int(minutes) > 59 else "" 
+        return ((f"{'0'*(2-len(hours))+hours}:" if int(hours) > 0 else "")
                 + 
                 f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}")
 
@@ -99,7 +98,7 @@ class SudokuApp(App):
             self.rememberLogin = True 
 
     def set_Match_Finder(self):
-        self.awaiting_Match = Clock().schedule_interval(self, check_match_Found, 0.5)
+        self.awaiting_Match = Clock.schedule_interval(self.check_match_Found, 0.5)
     
     def check_match_Found(self, dt):
         matchFound = app.client.receive()
@@ -113,6 +112,7 @@ class SudokuApp(App):
             p.open()
 
         else:
+            pass
 
 
     def load_Game_Data(self):
@@ -132,7 +132,7 @@ class SudokuApp(App):
                 data = f"{self.username}\n{self.password}\n"
             else:
                 data = ("\n\n")
-            data += "".join([time if len(time) > 0 else "\n" for time in self.topTimes])
+            data += "\n".join([time if len(time) > 0 else "\n" for time in self.topTimes])
             file.write(data)
     
     def on_stop(self):
@@ -176,16 +176,17 @@ class MultiplayerMenu(Menu):
 
     def match(self):
         if app.client and app.online is True:
+            print("About to match")
             if app.client.match_Players(game.difficulty):
+                print("matching good")
                 matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
                 matchingPopup.open()
-                game.awaiting_Match = True
+                game.awaitingMatch = True
                 app.set_Match_Finder()
 
             else:
-                pass
+                print("Matchign not good")
         else:
-            self.ids.matchButton.state = "normal"
             popup = Popup(title = "Error", content = Label(text = "You need to login"), size_hint = (0.5, 0.5))
             popup.open()
             

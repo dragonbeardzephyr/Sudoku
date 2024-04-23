@@ -90,13 +90,16 @@ class Client:
         proceed = self.__client.recv(1024).decode()
         if proceed == "proceed":
             self.__client.send((f"{self.username}," + ",".join(times)).encode())
-
+            if self.__client.recv(1024).decode() == "valid":
+                return True
+            else:
+                return False
 
     def match_Players(self, difficulty):
-        print("Doing login stuff on client")
+        print("Doing matchPLayers stuff on client")
         self.__client.send("match_Players".encode())
         proceed = self.__client.recv(1024).decode()
-        print(proceed)
+        print(proceed, "this should be proceed")
         #print(difficulty)
         if proceed == "proceed":
             print("proceed = true sending difficulty")

@@ -106,10 +106,10 @@ class Game(threading.Thread):
     def compare_Puzzles(self, puzzleString):#Makes a string of 1s and 0s, 1s showing correctly filled cells and 0s showing empty and incorrect cells
         return "".join(["1" if puzzleString[i] == self.solutionString[i] else "0" for i in range(81)])
            
-easyQ = Queue()
-normalQ = Queue()
-hardQ = Queue()
-extraHardQ = Queue()
+easyQ = Queue(25)
+normalQ = Queue(25)
+hardQ = Queue(25)
+extraHardQ = Queue(25)
 queueDict = {"easy": easyQ, "normal": normalQ, "hard": hardQ, "extraHard": extraHardQ}
 
 
@@ -280,10 +280,10 @@ class Client(threading.Thread):
 
 
     def match_Players(self):
-        print("Doing matching stuff on server")
+        print("Doing Ma_tching stuff on server")
         self.client.send("proceed".encode())
         self.difficulty = self.client.recv(1024).decode()
-   
+        print(self.difficulty)
 
         if queueDict[self.difficulty].isEmpty():
             print("Empty Queue")
