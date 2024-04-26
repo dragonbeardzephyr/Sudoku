@@ -1,4 +1,4 @@
-from email import message
+
 import socket
 import hashlib
 
@@ -17,6 +17,7 @@ class Client:
         self.__port = 7777
         self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connected = False
+        self.username = ""
 
     def connect(self):
         try:

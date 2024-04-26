@@ -126,6 +126,7 @@ class SudokuApp(App):
             print(self.password)
             print(self.topTimes)
 
+
     def save_Game_Data(self):
         with open("Main\Game Data.txt", "w") as file:
             if self.rememberLogin is True:
@@ -185,7 +186,7 @@ class MultiplayerMenu(Menu):
                 app.set_Match_Finder()
 
             else:
-                print("Matchign not good")
+                print("Matching not good")
         else:
             popup = Popup(title = "Error", content = Label(text = "You need to login"), size_hint = (0.5, 0.5))
             popup.open()
@@ -193,6 +194,9 @@ class MultiplayerMenu(Menu):
 
 
 class AccountMenu(Menu):
+    def get_Username(self):
+        return app.username
+    
     def clickLogout(self):
         if app.client and app.online is True:
             app.client.disconnect()
@@ -692,26 +696,35 @@ class Register(BaseScreen):
     def clickRegister(self):
         print("Butoon Clicked")
         un , pw1, pw2 = self.ids.username.text, self.ids.password1.text, self.ids.password2.text
-        if pw1 == pw2:
-            app.client = Client()
-            app.client.connect()
- 
-            if app.client.connected: 
-                if app.client.register(un, pw1):
-                    p = Popup(title = "Success", content = Label(text = "Account has been created"), size_hint = (0.6, 0.3))
-                    p.open()
-                else:
-                    p = Popup(title = "Error", content = Label(text = "Username already taken"), size_hint = (0.6, 0.3))
-                    p.open()
-            else:
-                app.client.disconnect()
-                app.client = None
-                p = Popup(title = "Error", content = Label(text = "Could not connect to server"), size_hint = (0.6, 0.3))
-                p.open()
 
-        else:
+        if len(pw1) < 7 or len(pw2) < 7:
+            p = Popup(title = "Error", content = Label(text = "Password must be at least 7 characters long"), size_hint = (0.6, 0.3))
+            p.open()
+            return
+        
+        if pw1 != pw2:
             p = Popup(title = "Error", content = Label(text = "Passwords do not match"), size_hint = (0.6, 0.3))
             p.open()
+            return
+        
+        app.client = Client()
+        app.client.connect()
+
+        if app.client.connected:
+            if app.client.register(un, pw1):
+                p = Popup(title = "Success", content = Label(text = "Account has been created"), size_hint = (0.6, 0.3))
+                p.open()
+            else:
+                p = Popup(title = "Error", content = Label(text = "Username already taken"), size_hint = (0.6, 0.3))
+                p.open()
+        else:
+            app.client.disconnect()
+            app.client = None
+            p = Popup(title = "Error", content = Label(text = "Could not connect to server"), size_hint = (0.6, 0.3))
+            p.open()
+
+        
+            
  
 class BestTimes(BaseScreen):
     def on_enter(self):

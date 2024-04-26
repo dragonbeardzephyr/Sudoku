@@ -316,7 +316,7 @@ MenuManager:
                     on_release:
                         root.setDifficulty("easy")
 
-                Button:
+                ToggleButton:
                     text: "Normal"
                     font_size : 25
                     color : 0.38, 0.13, 0.97, 1
@@ -363,36 +363,44 @@ MenuManager:
 <AccountMenu>:
     name : "AccountMenu"
     AnchorLayout:
-        size_hint : 0.9, 0.1
-        pos_hint : {"center_x": 0.5, "center_y":0.5}
+        size_hint : 0.9, 0.3
+        pos_hint : {"center_x": 0.5, "center_y":0.6}
 
         BoxLayout:
-
-            Button:
-                text: "Login"
+            orientation : "vertical"
+            Label:
+                text : root.get_Username()
                 font_size : 25
-                color : 0.38, 0.13, 0.97, 1
-                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
-                on_release: 
-                    root.manager.current = "Login"
-            
-            Button:
-                text: "Register"
-                font_size : 25
-                color : 0.38, 0.13, 0.97, 1
-                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
-                on_release: 
-                    root.manager.current = "Register"
+            Label:
+                text:""
 
+            BoxLayout:
 
-            Button:
-                text: "Logout"
-                font_size : 25
-                color : 0.38, 0.13, 0.97, 1
-                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
-                on_release: root.clickLogout()
+                Button:
+                    text: "Login"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release: 
+                        root.manager.current = "Login"
                 
-            
+                Button:
+                    text: "Register"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release: 
+                        root.manager.current = "Register"
+
+
+                Button:
+                    text: "Logout"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release: root.clickLogout()
+                    
+                
 
 <BestTimes>:
     name : "BestTimes"

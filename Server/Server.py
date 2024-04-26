@@ -118,6 +118,7 @@ def create_Match():
         if queueDict[difficulty].isEven() and not queueDict[difficulty].isEmpty():
             player1 = queueDict[difficulty].deQueue()
             player2 = queueDict[difficulty].deQueue()
+            print("Have matched some players")
             game = Game(player1, player2, difficulty)
             game.start()#--> This will start the game thread and execute game.run()
 
@@ -150,13 +151,11 @@ class Client(threading.Thread):
                 if self.matching == True:
                     if time.time() - self.startMatchingTime > 300:
                         self.matching = False
-                        
-
-
                         self.client.send("Match Not Found".encode())
+                    continue
 
-
-
+                
+                print("Waiting for request")
                 request = self.client.recv(1024).decode()
 
                 print(request)
