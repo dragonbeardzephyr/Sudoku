@@ -503,7 +503,7 @@ class MultiplayerGame(GameScreen):
             if game.opponentGrid is not None:
                 for i in range(81):
                     
-                    self.ids.opponentGrid.children[i].updateCell(game.opponentGrid[i])
+                    self.ids.opponentGrid.children[80-i].updateCell(game.opponentGrid[i])
         else:
             self.recentTime = time.time()
 
@@ -607,7 +607,6 @@ class MultiplayerGame(GameScreen):
             numGrid.add_widget(NumberInput(n))
 
         opponentGrid = self.ids.opponentGrid
-
         for i in range(81):
             opponentGrid.add_widget(OpponentGridCell(game.opponentGrid[i]))
 
