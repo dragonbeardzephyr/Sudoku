@@ -98,23 +98,17 @@ class SudokuApp(App):
                     self.client = None
 
             self.rememberLogin = True 
-
-    def set_Match_Finder(self):
-        self.awaiting_Match = threading.Thread(target = self.check_match_Found).start()
     
     def check_match_Found(self):
         print("Chekcing math recieve found")
         matchFound = app.client.receive()
         print(matchFound)
         if matchFound == "Match Found":
-            app.root.current = "MultiplayerGame"
+            return True
 
         elif matchFound == "Match Not Found":
-            p = Popup(title = "Unsuccessful", content = Label(text = "No match found, retry"), size_hint = (0.6, 0.6))
-            p.open()
+            return False
 
-        else:
-            pass
 
 
     def load_Game_Data(self):
@@ -183,10 +177,19 @@ class MultiplayerMenu(Menu):
             print("About to match")
             if app.client.match_Players(game.difficulty):
                 print("matching good")
-                app.set_Match_Finder()
-                matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
-                matchingPopup.open()
-                game.awaitingMatch = True
+                self.ids.returnButton.disabled = True
+                
+                if app.check_match_Found():   
+                    game.awaitingMatch = True
+                    matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
+                    matchingPopup.open()
+                    self.ids.returnButton.disabled = False
+                    self.manager.current = "MultiplayerGame"
+                    
+                else:
+                    p = Popup(title = "Unsuccessful", content = Label(text = "No match found, retry"), size_hint = (0.6, 0.6))
+                    p.open()
+                    print("Matching not good")
                 
                 
 
@@ -493,12 +496,13 @@ class MultiplayerGame(GameScreen):
 
 
         print(len(game.opponentGrid))
+        print(game.opponentGrid)
         if game.timerOn:
             self.updateTimer()
 
             if game.opponentGrid is not None:
                 for i in range(81):
-                    print(i)
+                    
                     self.ids.opponentGrid.children[i].updateCell(game.opponentGrid[i])
         else:
             self.recentTime = time.time()
