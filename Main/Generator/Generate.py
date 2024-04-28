@@ -416,7 +416,7 @@ def make_More(grid : list) -> list:
 """MAIN PROGRAM"""
 if __name__ == "__main__":
     # n = Number of Puzzle to generate
-    n = 10
+    n = 3
     easy = [] 
     normal = []
     hard = []
@@ -428,9 +428,8 @@ if __name__ == "__main__":
     for i in range(n):
         print(f"Puzzle {i+1}")
         listOfPuzzles.append(Puzzle())
-    endTime = time.perf_counter()
-
-    print(f"{endTime - startTime} seconds to generate {n} puzzles")
+    elapsedTime = time.perf_counter() - startTime
+    print(f"{elapsedTime // 60 + round((elapsedTime%60)/60, 2)} minutes to generate {n} puzzles")
 
     for puzzle in listOfPuzzles:
         if puzzle.clues in range(17, 28):

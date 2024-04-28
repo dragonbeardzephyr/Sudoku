@@ -15,7 +15,7 @@ def time_taken(func):
 
 
 
-##print(sys.getsizeof(""))
+
 
 #time_taken(lambda: print("Hello World!"))
 
@@ -26,5 +26,7 @@ for i in range(3):
             for y in range(j, j+3):
                 print(f"{x},{y}")
 
+string = "".join([str(i) for i in range(81)])
+print(sys.getsizeof(string))
 
                 

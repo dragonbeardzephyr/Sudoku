@@ -70,6 +70,7 @@ class Game(threading.Thread):
         
         self.puzzleString = self.import_Puzzle(difficulty)
         p = Puzzle(self.puzzleString)
+        p.show_grid()
         p.solve()
         self.solutionString = p.grid_To_String()
 
@@ -82,9 +83,11 @@ class Game(threading.Thread):
         self.player2.client.send(self.puzzleString.encode())
 
         while not finished:
-            p1Grid = self.player1.client.recv().decode()
-            p2Grid = self.player2.client.recv().decode()
-
+            p1Grid = self.player1.client.recv(1024).decode()
+            p2Grid = self.player2.client.recv(1024).decode()
+            print(p1Grid)
+            print(p2Grid)
+            print()
 
             if p1Grid == "WIN":
                 self.player2.client.send("LOSE".encode())
@@ -114,13 +117,15 @@ queueDict = {"easy": easyQ, "normal": normalQ, "hard": hardQ, "extraHard": extra
 
 
 def create_Match():
-    for difficulty in queueDict:
-        if queueDict[difficulty].isEven() and not queueDict[difficulty].isEmpty():
-            player1 = queueDict[difficulty].deQueue()
-            player2 = queueDict[difficulty].deQueue()
-            print("Have matched some players")
-            game = Game(player1, player2, difficulty)
-            game.start()#--> This will start the game thread and execute game.run()
+    while True:
+        time.sleep(1)
+        for difficulty in queueDict:
+            if queueDict[difficulty].isEven() and not queueDict[difficulty].isEmpty():
+                player1 = queueDict[difficulty].deQueue()
+                player2 = queueDict[difficulty].deQueue()
+                print(f"Have matched some players {player1.username} and {player2.username}")
+                Game(player1, player2, difficulty).start()
+                #--> This will start the game thread and execute game.run()
 
 
 ######################################################################
@@ -145,28 +150,27 @@ class Client(threading.Thread):
 
     def run(self):    
         while True:
-            print("Waiting for request")
             try:
 
                 if self.matching == True:
-                    if time.time() - self.startMatchingTime > 300:
+                    if time.time() - self.startMatchingTime > 300:#After 5 minutes removes player from match queue
                         self.matching = False
                         self.client.send("Match Not Found".encode())
                     continue
-
                 
-                print("Waiting for request")
-                request = self.client.recv(1024).decode()
+                else:
+                    print(f"Waiting for request from {self.username}")
+                    request = self.client.recv(1024).decode()
+                    print(request)
+                    
+                    if not request:
+                        print("not request")
 
-                print(request)
-                if not request:
-                    print("not request")
+                    if request == "Logout":
+                        break
 
-                if request == "Logout":
-                    break
-
-                elif request in self.options:
-                    self.options[request]()
+                    elif request in self.options:
+                        self.options[request]()
 
             except Exception as e :
                 print(f"Inavlid request {e}")
@@ -333,15 +337,14 @@ def main():
     server.bind((host, port))
     server.listen()
     
+    threading.Thread(target = create_Match).start()
+    
     while True:
         print("Waiting for connection")
         client, address = server.accept()
         print(f"Connection from {address}")
 
         Client(client, address).start()
-
-        
-        create_Match()
 
 
 if __name__ == "__main__":

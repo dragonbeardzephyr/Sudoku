@@ -1,4 +1,5 @@
 import random
+import threading
 
 from kivy.app import App
 from kivy.uix.label import Label
@@ -80,6 +81,7 @@ class SudokuApp(App):
 
         self.awaiting_Match = None
 
+        
 
     def boot(self):
         self.load_Game_Data()
@@ -98,16 +100,16 @@ class SudokuApp(App):
             self.rememberLogin = True 
 
     def set_Match_Finder(self):
-        self.awaiting_Match = Clock.schedule_interval(self.check_match_Found, 0.5)
+        self.awaiting_Match = threading.Thread(target = self.check_match_Found).start()
     
-    def check_match_Found(self, dt):
+    def check_match_Found(self):
+        print("Chekcing math recieve found")
         matchFound = app.client.receive()
+        print(matchFound)
         if matchFound == "Match Found":
-            self.awaiting_Match.cancel()
-            self.manager.current = "MultiplayerGame"
+            app.root.current = "MultiplayerGame"
 
         elif matchFound == "Match Not Found":
-            self.awaiting_Match.cancel()
             p = Popup(title = "Unsuccessful", content = Label(text = "No match found, retry"), size_hint = (0.6, 0.6))
             p.open()
 
@@ -140,7 +142,8 @@ class SudokuApp(App):
         self.save_Game_Data()
         print("Goodbye World")
 
-
+class MenuManager(ScreenManager):
+    pass
 
 class BaseScreen(Screen):
     borderFile = StringProperty("graphics\Sudoku_App_Border_Logged_Out.png")
@@ -180,10 +183,12 @@ class MultiplayerMenu(Menu):
             print("About to match")
             if app.client.match_Players(game.difficulty):
                 print("matching good")
+                app.set_Match_Finder()
                 matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
                 matchingPopup.open()
                 game.awaitingMatch = True
-                app.set_Match_Finder()
+                
+                
 
             else:
                 print("Matching not good")
@@ -737,8 +742,6 @@ class BestTimes(BaseScreen):
         topTime = app.topTimes[index]
         return game.parse_Timer_to_String(topTime) if len(topTime) > 0 else "N/A"
 
-class MenuManager(ScreenManager):
-    pass
 
 
 
