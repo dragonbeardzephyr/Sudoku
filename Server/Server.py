@@ -33,7 +33,6 @@ class Queue():
 		#with self.lock:
 		return self.__size % 2 == 0
 				
-			
 	def enQueue(self, item):
 		#with self.lock:
 		if self.isFull():
@@ -123,6 +122,8 @@ def create_Match():
             if queueDict[difficulty].isEven() and not queueDict[difficulty].isEmpty():
                 player1 = queueDict[difficulty].deQueue()
                 player2 = queueDict[difficulty].deQueue()
+                player1.matching, player2.matching = False, False
+                player1.inGame, player2.inGame = True, True
                 print(f"Have matched some players {player1.username} and {player2.username}")
                 Game(player1, player2, difficulty).start()
                 #--> This will start the game thread and execute game.run()
@@ -147,11 +148,13 @@ class Client(threading.Thread):
         self.difficulty = None
         self.matching = False
         self.startMatchingTime = 0
+        self.inGame = False
 
     def run(self):    
         while True:
             try:
-
+                if self.inGame:
+                    continue
                 if self.matching == True:
                     if time.time() - self.startMatchingTime > 300:#After 5 minutes removes player from match queue
                         self.matching = False

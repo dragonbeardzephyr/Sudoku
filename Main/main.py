@@ -99,7 +99,7 @@ class SudokuApp(App):
 
             self.rememberLogin = True 
     
-    def check_match_Found(self):
+    def check_match_Found(self, dt):
         print("Chekcing math recieve found")
         matchFound = app.client.receive()
         print(matchFound)
@@ -179,16 +179,20 @@ class MultiplayerMenu(Menu):
                 print("matching good")
                 self.ids.returnButton.disabled = True
                 
-                if app.check_match_Found():   
-                    game.awaitingMatch = True
-                    matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
-                    matchingPopup.open()
+                
+                game.awaitingMatch = True
+                matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
+                matchFound = Clock.schedule_once(app.check_match_Found, 0.1)
+                matchingPopup.open()
+                
+                if matchFound:
                     self.ids.returnButton.disabled = False
                     self.manager.current = "MultiplayerGame"
                     
                 else:
                     p = Popup(title = "Unsuccessful", content = Label(text = "No match found, retry"), size_hint = (0.6, 0.6))
                     p.open()
+                    self.ids.returnButton.disabled = False
                     print("Matching not good")
                 
                 
@@ -513,7 +517,7 @@ class MultiplayerGame(GameScreen):
             self.clock.cancel
             print("Player WINS!")
 
-            app.client.send("WIN".encode())
+            app.client.send("WIN")
 
             game.timerOn = False
             game.finishTime = self.saveTime
