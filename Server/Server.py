@@ -81,7 +81,7 @@ class Game(threading.Thread):
         self.player1.client.send(self.puzzleString.encode())
         self.player2.client.send(self.puzzleString.encode())
 
-        while not finished:
+        while finished is False:
             p1Grid = self.player1.client.recv(1024).decode()
             p2Grid = self.player2.client.recv(1024).decode()
             print(p1Grid)
@@ -91,9 +91,15 @@ class Game(threading.Thread):
             if p1Grid == "WIN":
                 self.player2.client.send("LOSE".encode())
                 finished = True
+                self.player1.inGame = False
+                self.player2.inGame = False
+                
             elif p2Grid == "WIN":
                 self.player1.client.send("LOSE".encode())
                 finished = True
+                self.player1.inGame = False
+                self.player2.inGame = False
+                
             else:
                 self.player1.client.send(self.compare_Puzzles(p2Grid).encode())
                 self.player2.client.send(self.compare_Puzzles(p1Grid).encode())
@@ -238,7 +244,7 @@ class Client(threading.Thread):
             self.client.send("valid".encode())
             conn.commit()
             conn.close()
-            print("INserted")
+            print("Inserted")
             return True
         
     def login(self):

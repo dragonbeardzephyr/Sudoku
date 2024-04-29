@@ -497,42 +497,46 @@ class MultiplayerGame(GameScreen):
             p = Popup(title = "Unlucky", content = Label(text = "Opponent Wins!"), size_hint = (0.4, 0.35))
             p.open()
             self.manager.current = "MainMenu"
+            
+        elif game.opponentGrid is not None:
+            for i in range(81):
+                self.ids.opponentGrid.children[80-i].updateCell(game.opponentGrid[i])
 
-
-        print(len(game.opponentGrid))
         print(game.opponentGrid)
+
         if game.timerOn:
             self.updateTimer()
-
-            if game.opponentGrid is not None:
-                for i in range(81):
-                    
-                    self.ids.opponentGrid.children[80-i].updateCell(game.opponentGrid[i])
         else:
             self.recentTime = time.time()
 
         game.win = game.puzzle.grid == game.puzzleSolution.grid
-
-        if game.win:#check win
+        if game.win or self.ids.timer.state == "down":#check win
+            app.client.send("WIN")
+            
             self.clock.cancel
             print("Player WINS!")
-
-            app.client.send("WIN")
-
             game.timerOn = False
             game.finishTime = self.saveTime
 
             topTime = app.topTimes[difficulties.index(game.difficulty)]
             topTime = float(topTime) if len(topTime) > 0 else 0
-
+            
+            newRecord = False
             if topTime == 0 or topTime > game.finishTime[0]:
+                newRecord = True
                 app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
 
             game.win = False
+
+            p = Popup(title = "Congratulations", 
+                content = Label(text = f"{'New record!\n' if newRecord else ''}You Win\nComplete Time: {game.finishTime[1]}"), 
+                size_hint = (0.6, 0.3))
             
+            p.open()
+
             self.manager.current = "MainMenu"
 
-
+    
     def updateTimer(self):
         self.elapsedTime += time.time() - self.recentTime
         self.recentTime = time.time()
