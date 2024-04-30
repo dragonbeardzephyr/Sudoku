@@ -510,14 +510,16 @@ class MultiplayerGame(GameScreen):
             self.recentTime = time.time()
 
         game.win = game.puzzle.grid == game.puzzleSolution.grid
+        
         if game.win or self.ids.timer.state == "down":#check win
             app.client.send("WIN")
             
-            self.clock.cancel
+            self.clock.cancel()
             print("Player WINS!")
             game.timerOn = False
             game.finishTime = self.saveTime
-
+            game.win = False
+            
             topTime = app.topTimes[difficulties.index(game.difficulty)]
             topTime = float(topTime) if len(topTime) > 0 else 0
             
@@ -525,16 +527,17 @@ class MultiplayerGame(GameScreen):
             if topTime == 0 or topTime > game.finishTime[0]:
                 newRecord = True
                 app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
-
-            game.win = False
-
+        
+        
             p = Popup(title = "Congratulations", 
-                content = Label(text = f"{'New record!\n' if newRecord else ''}You Win\nComplete Time: {game.finishTime[1]}"), 
-                size_hint = (0.6, 0.3))
-            
+                    content = Label(text = f"{'New record!\n' if newRecord else ''}You Win\nComplete Time: {game.finishTime[1]}"), 
+                    size_hint = (0.6, 0.3))
+                
             p.open()
 
             self.manager.current = "MainMenu"
+            print("Exit")
+
 
     
     def updateTimer(self):
@@ -728,8 +731,12 @@ class Register(BaseScreen):
 
         if app.client.connected:
             if app.client.register(un, pw1):
-                p = Popup(title = "Success", content = Label(text = "Account has been created"), size_hint = (0.6, 0.3))
+                loggedIn = app.client.login(un, pw1, False)
+                
+                p = Popup(title = "Success", content = Label(text = "Account has been created" + "\nAnd you have been logged in" if loggedIn else ""), size_hint = (0.6, 0.3))
                 p.open()
+
+                
             else:
                 p = Popup(title = "Error", content = Label(text = "Username already taken"), size_hint = (0.6, 0.3))
                 p.open()

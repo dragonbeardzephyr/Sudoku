@@ -28,6 +28,7 @@ class Client:
             return False
 
     def disconnect(self):
+        self.__client.send("Logout".encode())
         self.__client.close()
         self.connected  = False
 
