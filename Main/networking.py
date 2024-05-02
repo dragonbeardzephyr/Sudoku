@@ -15,7 +15,7 @@ class Client:
     def __init__(self):
         self.__host = "127.0.0.1"
         self.__port = 7777
-        self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__client = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # TCP connection
         self.connected = False
         self.username = ""
 
@@ -23,8 +23,9 @@ class Client:
         try:
             self.__client.connect((self.__host, self.__port))
             self.connected = True
-        except :
-            print("Connection could not be made")
+            print("[Connection with server established]")
+        except:
+            print("[Connection could not be made]")
             return False
 
     def disconnect(self):
@@ -35,22 +36,20 @@ class Client:
     def send(self, message):
         self.__client.send(message.encode())
 
-    def receive(self):
-        return self.__client.recv(1024).decode()
+    def receive(self, n = 1024):# n = bytes to receive
+        return self.__client.recv(n).decode()
     
-    def hashPW(self, password):
+    def hash_Password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
 
     def register(self, username, password):#Password going through here is here unproccessed
-        print("Doing register stuff on client")
-
         self.__client.send("register".encode())
         proceed = self.__client.recv(1024).decode()
 
         valid = False
 
         if proceed == "proceed":
-            self.__client.send((username+","+self.hashPW(password)).encode())
+            self.__client.send((username+","+self.hash_Password(password)).encode())
             if self.__client.recv(1024).decode() == "valid":
                     valid = True
 
@@ -61,8 +60,8 @@ class Client:
     
 
 
-    def login(self, username, password, hashed):
-        print("doing login stuff on client")
+    def login(self, username, password, hashed : bool):
+        print("[Login from client]")
         
         self.__client.send("login".encode())
 
@@ -74,7 +73,7 @@ class Client:
             if hashed is True:
                 self.__client.send((username+","+password).encode())
             else:
-                self.__client.send((username+","+self.hashPW(password)).encode())
+                self.__client.send((username+","+hash_Password(password)).encode())
 
             if self.__client.recv(1024).decode() == "valid":
                 valid = True
@@ -86,10 +85,12 @@ class Client:
 
         return valid
 
+
     def update_BestTimes(self, times):
-        print("Doing update best times stuff on client")
         self.__client.send("update_BestTimes".encode())
+        
         proceed = self.__client.recv(1024).decode()
+        
         if proceed == "proceed":
             self.__client.send((f"{self.username}," + ",".join(times)).encode())
             if self.__client.recv(1024).decode() == "valid":
@@ -97,12 +98,12 @@ class Client:
             else:
                 return False
 
-    def match_Players(self, difficulty):
-        print("Doing matchPLayers stuff on client")
+
+    def match_Players(self, difficulty): 
         self.__client.send("match_Players".encode())
+        
         proceed = self.__client.recv(1024).decode()
-        print(proceed, "this should be proceed")
-        #print(difficulty)
+
         if proceed == "proceed":
             print("proceed = true sending difficulty")
             self.__client.send(difficulty.encode())

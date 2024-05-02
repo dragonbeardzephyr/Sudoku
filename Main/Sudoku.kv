@@ -86,7 +86,8 @@ MenuManager:
                     color : 0.38, 0.13, 0.97, 1
                     background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
                     on_release: 
-                        root.manager.transition = WipeTransition()
+                        root.manager.transition = SlideTransition()
+                        root.manager.transition.direction = "up"
                         root.manager.current = "ClassicMenu"
 
                 Button:
@@ -95,7 +96,8 @@ MenuManager:
                     color : 0.38, 0.13, 0.97, 1
                     background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
                     on_release:
-                        root.manager.transition = WipeTransition()
+                        root.manager.transition = SlideTransition()
+                        root.manager.transition.direction = "down"
                         root.manager.current = "MultiplayerMenu"
 
                 Button:

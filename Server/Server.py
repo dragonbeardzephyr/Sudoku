@@ -3,18 +3,10 @@ import threading
 import sqlite3
 import random
 import time
-
 from Generator.Generate import Puzzle
-
-host = "127.0.0.1"
-port = 7777
-
-DATABASE = "Server\Sudoku_Online.db"
-
 
 
 class Queue():
-
 	def __init__(self, maxSize=10):
 		self.__queue = [None for i in range(maxSize)]
 		self.__front = 0
@@ -42,7 +34,6 @@ class Queue():
 			self.__queue[self.__rear] = item
 			self.__size += 1
 			return True
-
 		#print(self.__front, self.__rear)
 
 	def deQueue(self):
@@ -54,11 +45,25 @@ class Queue():
 			self.__front = (self.__front + 1) % self.__maxSize
 			self.__size -= 1
 			return data
-
 		#print(self.__front, self.__rear)
 	
 	def show(self):
 		return [self.__queue[(self.__front + i) % self.__maxSize]for i in range(self.__size)]
+
+
+
+def create_Match():
+    while True:
+        time.sleep(1)
+        for difficulty in queueDict:
+            if queueDict[difficulty].isEven() and not queueDict[difficulty].isEmpty():
+                player1 = queueDict[difficulty].deQueue()
+                player2 = queueDict[difficulty].deQueue()
+                player1.matching, player2.matching = False, False
+                player1.inGame, player2.inGame = True, True
+                print(f"[Have matched some players {player1.username} from {player1.address} and {player2.username} from {player2.address}]")
+                Game(player1, player2, difficulty).start()
+                #--> This will start the game thread and execute game.run()
 
 
 class Game(threading.Thread):
@@ -84,8 +89,8 @@ class Game(threading.Thread):
         while finished is False:
             p1Grid = self.player1.client.recv(1024).decode()
             p2Grid = self.player2.client.recv(1024).decode()
-            print(p1Grid)
-            print(p2Grid)
+            print(f"Player1's grid: [{p1Grid}]")
+            print(f"Player2's grid: [{p2Grid}]")
             print()
 
             if p1Grid == "WIN":
@@ -114,26 +119,6 @@ class Game(threading.Thread):
     def compare_Puzzles(self, puzzleString):#Makes a string of 1s and 0s, 1s showing correctly filled cells and 0s showing empty and incorrect cells
         return "".join(["1" if puzzleString[i] == self.solutionString[i] else "0" for i in range(81)])
            
-easyQ = Queue(25)
-normalQ = Queue(25)
-hardQ = Queue(25)
-extraHardQ = Queue(25)
-queueDict = {"easy": easyQ, "normal": normalQ, "hard": hardQ, "extraHard": extraHardQ}
-
-
-def create_Match():
-    while True:
-        time.sleep(1)
-        for difficulty in queueDict:
-            if queueDict[difficulty].isEven() and not queueDict[difficulty].isEmpty():
-                player1 = queueDict[difficulty].deQueue()
-                player2 = queueDict[difficulty].deQueue()
-                player1.matching, player2.matching = False, False
-                player1.inGame, player2.inGame = True, True
-                print(f"[Have matched some players {player1.username} from {player1.address} and {player2.username} from {player2.address}]")
-                Game(player1, player2, difficulty).start()
-                #--> This will start the game thread and execute game.run()
-
 
 ######################################################################
 
@@ -148,8 +133,7 @@ class Client(threading.Thread):
         self.options = { "login": self.login,
                     "register": self.register,
                     "match_Players": self.match_Players,
-                    "update_BestTimes" : self.update_BestTimes,
-                    "play_Multiplayer": self.play_Multiplayer}
+                    "update_BestTimes" : self.update_BestTimes}
         
         self.difficulty = None
         self.matching = False
@@ -211,7 +195,7 @@ class Client(threading.Thread):
                     return False
         else:
             return False
-    #######################################################################
+
 
     #######################################################################
     #Request Redirections
@@ -302,33 +286,24 @@ class Client(threading.Thread):
             print(f"[{self.difficulty} queue is full for {self.username} from {self.address}]")
             self.client.send("Queue full".encode())
             #return False
-
-    def play_Multiplayer(self):
-        print("Doing multiplayer stuff onserver")
-        self.client.send("proceed".encode())
+            
+        #######################################################################
         
 
-#######################################################################
+######################################################################################
+################___INITIALISATION___##################################################
 
-#######################################################################
+host = "127.0.0.1"
+port = 7777
+DATABASE = "Server\Sudoku_Online.db"
 
-#######################################################################
+easyQ = Queue(25)
+normalQ = Queue(25)
+hardQ = Queue(25)
+extraHardQ = Queue(25)
+queueDict = {"easy": easyQ, "normal": normalQ, "hard": hardQ, "extraHard": extraHardQ}
 
-
-
-#######################################################################
-#Handler
-#######################################################################
-
-#######################################################################
-
-
-#######################################################################
-#Main
-#######################################################################
-
-
-connections = []
+#######################################################################################
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -346,6 +321,7 @@ def main():
 
 
 if __name__ == "__main__":
-    print("SERVER STARTED")
+    print("__SERVER STARTED__")
     main()
+    
 
