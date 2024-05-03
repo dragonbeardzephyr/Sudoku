@@ -7,7 +7,7 @@ import hashlib
 #get added to queue of players
 #get put into a lobby
 #play against player win lose
-#continue 
+#continue
 #if dont continue exit mulitplayer
 #close connection
 
@@ -32,17 +32,19 @@ class Client:
         self.__client.send("Logout".encode())
         self.__client.close()
         self.connected  = False
+        print("[Connection with server closed]")
 
     def send(self, message):
         self.__client.send(message.encode())
 
     def receive(self, n = 1024):# n = bytes to receive
         return self.__client.recv(n).decode()
-    
+
     def hash_Password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
 
     def register(self, username, password):#Password going through here is here unproccessed
+        print("[Registering from client]")
         self.__client.send("register".encode())
         proceed = self.__client.recv(1024).decode()
 
@@ -57,40 +59,37 @@ class Client:
             print("No proceed")
 
         return valid
-    
+
 
 
     def login(self, username, password, hashed : bool):
         print("[Login from client]")
-        
-        self.__client.send("login".encode())
 
+        self.__client.send("login".encode())
         proceed = self.__client.recv(1024).decode()
-        print(proceed)
+
         valid = False
 
         if proceed == "proceed":
             if hashed is True:
                 self.__client.send((username+","+password).encode())
             else:
-                self.__client.send((username+","+hash_Password(password)).encode())
+                self.__client.send((username+","+self.hash_Password(password)).encode())
 
             if self.__client.recv(1024).decode() == "valid":
                 valid = True
                 self.username = username
                 print("Login success")
 
-        else:
-            print("No proceed")
-
         return valid
 
 
     def update_BestTimes(self, times):
+        print("[Updating best times from client]")
+
         self.__client.send("update_BestTimes".encode())
-        
         proceed = self.__client.recv(1024).decode()
-        
+
         if proceed == "proceed":
             self.__client.send((f"{self.username}," + ",".join(times)).encode())
             if self.__client.recv(1024).decode() == "valid":
@@ -99,9 +98,10 @@ class Client:
                 return False
 
 
-    def match_Players(self, difficulty): 
+    def match_Players(self, difficulty):
+        print("[Entering player for matchmaking from client]")
         self.__client.send("match_Players".encode())
-        
+
         proceed = self.__client.recv(1024).decode()
 
         if proceed == "proceed":
@@ -113,21 +113,6 @@ class Client:
                 return True
             elif message == "Queue full":
                 return False
-        else:
-            return #connection no go
-        
-    
-    """
-    def play_Multiplayer(self):
-        print("Doing login stuff on client")
-        self.__client.send("play_Multiplayer".encode())
-        proceed = self.__client.recv(1024).decode()
-
-        if proceed:
-            pass
-        else:
-            return #connection no go
-    """
 
 
 

@@ -11,7 +11,6 @@ from kivy.properties import StringProperty
 
 from kivy.config import Config
 
-
 Config.set("graphics", "width", "1024")
 Config.set("graphics", "height", "768")
 Config.set("graphics", "reszizable", False)
@@ -20,10 +19,10 @@ Config.set('input', 'mouse', 'mouse,disable_multitouch')# Without this red dot a
 """
 Inside box SIZE
 1008, 713 within border
-0.984, 0.928
+0.984, 0.928 ratio
 
 return button
-0.0078, 0.9375
+0.0078, 0.9375 ratio
 """
 
 import time
@@ -42,17 +41,17 @@ class Game:
         self.timerOn = False
         self.opponentGrid = None
         self.awaitingMatch = False
-        
+
     def import_Puzzle(self, difficulty):
 
-        with open(f"Main\Generator\{difficulty}.txt", "r") as file:
+        with open(f"Main/Generator/{difficulty}.txt", "r") as file:
             puzzles = file.readlines()
             puzzle = random.choice(puzzles)
             print(puzzle)
             game.puzzle = Puzzle(puzzle)
             game.puzzleSolution = Puzzle(puzzle)
             game.puzzleSolution.solve()
-            
+
     def parse_Timer_to_String(self, timeFloat):
         timeFloat =  float(timeFloat)
         hours = str(int(timeFloat // 3600))
@@ -61,8 +60,9 @@ class Game:
         #print(hours, minutes, seconds)
         #centiSeconds = str(int(round(self.elapsedTime % 60 - int(self.elapsedTime % 60), 2)*100))
         return ((f"{'0'*(2-len(hours))+hours}:" if int(hours) > 0 else "")
-                + 
+                +
                 f"{'0'*(2-len(minutes))+minutes}:{'0'*(2-len(seconds))+seconds}")
+
 
 ########################
 ########################
@@ -81,7 +81,7 @@ class SudokuApp(App):
 
         self.awaiting_Match = None
 
-        
+
 
     def boot(self):
         self.load_Game_Data()
@@ -97,8 +97,8 @@ class SudokuApp(App):
                     self.client.disconnect()
                     self.client = None
 
-            self.rememberLogin = True 
-    
+            self.rememberLogin = True
+
     def check_match_Found(self, dt):
         print("Chekcing math recieve found")
         matchFound = app.client.receive()
@@ -112,11 +112,11 @@ class SudokuApp(App):
 
 
     def load_Game_Data(self):
-        with open("Main\Game Data.txt", "r") as file:
+        with open("Main/Game Data.txt", "r") as file:
 
-            self.username = file.readline().replace("\n", "")
-            self.password = file.readline().replace("\n", "")
-            self.topTimes = [file.readline().replace("\n", "") for i in range(4)]
+            self.username = file.readline().replace("/n", "")
+            self.password = file.readline().replace("/n", "")
+            self.topTimes = [file.readline().replace("/n", "") for i in range(4)]
 
             print(self.username)
             print(self.password)
@@ -124,14 +124,14 @@ class SudokuApp(App):
 
 
     def save_Game_Data(self):
-        with open("Main\Game Data.txt", "w") as file:
+        with open("Main/Game Data.txt", "w") as file:
             if self.rememberLogin is True:
-                data = f"{self.username}\n{self.password}\n"
+                data = f"{self.username}/n{self.password}/n"
             else:
-                data = ("\n\n")
-            data += "\n".join([time if len(time) > 0 else "\n" for time in self.topTimes])
+                data = ("/n/n")
+            data += "/n".join([time if len(time) > 0 else "/n" for time in self.topTimes])
             file.write(data)
-    
+
     def on_stop(self):
         self.save_Game_Data()
         print("Goodbye World")
@@ -140,7 +140,7 @@ class MenuManager(ScreenManager):
     pass
 
 class BaseScreen(Screen):
-    borderFile = StringProperty("graphics\Sudoku_App_Border_Logged_Out.png")
+    borderFile = StringProperty("graphics/Sudoku_App_Border_Logged_Out.png")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -150,11 +150,11 @@ class BaseScreen(Screen):
 
     def set_Border(self):
         if app.online is True: # Ignore red underline code works
-            self.borderFile = "graphics\Sudoku_App_Border_Logged_In.png"
+            self.borderFile = "graphics/Sudoku_App_Border_Logged_In.png"
         else:
-            self.borderFile = "graphics\Sudoku_App_Border_Logged_Out.png"
-    
-    
+            self.borderFile = "graphics/Sudoku_App_Border_Logged_Out.png"
+
+
 class MainMenu(BaseScreen):
     pass
 
@@ -178,37 +178,37 @@ class MultiplayerMenu(Menu):
             if app.client.match_Players(game.difficulty):
                 print("matching good")
                 self.ids.returnButton.disabled = True
-                
-                
+
+
                 game.awaitingMatch = True
                 matchingPopup = Popup(title = "Matching", content = Label(text = "Waiting for opponent"), size_hint = (0.7, 0.7))
                 matchFound = Clock.schedule_once(app.check_match_Found, 0.1)
                 matchingPopup.open()
-                
+
                 if matchFound:
                     self.ids.returnButton.disabled = False
                     self.manager.current = "MultiplayerGame"
-                    
+
                 else:
                     p = Popup(title = "Unsuccessful", content = Label(text = "No match found, retry"), size_hint = (0.6, 0.6))
                     p.open()
                     self.ids.returnButton.disabled = False
                     print("Matching not good")
-                
-                
+
+
 
             else:
                 print("Matching not good")
         else:
             popup = Popup(title = "Error", content = Label(text = "You need to login"), size_hint = (0.5, 0.5))
             popup.open()
-            
+
 
 
 class AccountMenu(Menu):
     def get_Username(self):
         return app.username
-    
+
     def clickLogout(self):
         if app.client and app.online is True:
             app.client.disconnect()
@@ -247,7 +247,7 @@ class Cell(Button):
         else:
             self.text = ""
             self.disabled = False
-            
+
 
         self.clock = Clock.schedule_interval(self.checkCell, 0.5)
 
@@ -268,13 +268,13 @@ class Cell(Button):
 
         game.puzzle.insert(self.row, self.col, self.n)
 
-        
+
     def clearCell(self):
         self.n = 0
         self.text = ""
         game.puzzle.insert(self.row, self.col, 0)
         self.background_color = NEUTRAL
-        
+
 
     def on_press(self):
         if game.holding_Number > 0:
@@ -283,8 +283,8 @@ class Cell(Button):
 
         elif self.last_touch.button == "right":
             self.clearCell()
-    
-        
+
+
 class NumberInput(Button):
     def __init__(self, n, **kwargs):
         super().__init__(**kwargs)
@@ -292,7 +292,7 @@ class NumberInput(Button):
         self.height = 5
         self.n = n
         self.text = str(n)
-        
+
     def on_press(self):
         game.holding_Number = self.n
 
@@ -392,7 +392,7 @@ class GameScreen(BaseScreen):
 
             topTime = app.topTimes[difficulties.index(game.difficulty)]
             topTime = float(topTime) if len(topTime) > 0 else 0
-            
+
             newRecord = False
             if topTime == 0 or topTime > game.finishTime[0]:
                 newRecord = True
@@ -400,13 +400,13 @@ class GameScreen(BaseScreen):
 
             game.win = False
 
-            p = Popup(title = "Congratulations", 
-                content = Label(text = f"{'New record!\n' if newRecord else ''}Complete Time: {game.finishTime[1]}"), 
+            p = Popup(title = "Congratulations",
+                content = Label(text = f"{'New record!/n' if newRecord else ''}Complete Time: {game.finishTime[1]}"),
                 size_hint = (0.6, 0.3))
             p.open()
 
             self.manager.current = "MainMenu"
-        
+
 
     def updateTimer(self):
         self.elapsedTime += time.time() - self.recentTime
@@ -419,7 +419,7 @@ class GameScreen(BaseScreen):
 
     def on_leave(self):
         self.clock.cancel()
-        
+
         for i in self.ids.box1.children:
             i.clock.cancel()
         for i in self.ids.box2.children:
@@ -477,7 +477,7 @@ class OpponentGridCell(Button):
             self.background_color = NEUTRAL
 
 
-            
+
 class MultiplayerGame(GameScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -493,11 +493,11 @@ class MultiplayerGame(GameScreen):
             print("Opponent Wins!")
             self.clock.cancel()
             game.timerOn = False
-            
+
             p = Popup(title = "Unlucky", content = Label(text = "Opponent Wins!"), size_hint = (0.4, 0.35))
             p.open()
             self.manager.current = "MainMenu"
-            
+
         elif game.opponentGrid is not None:
             for i in range(81):
                 self.ids.opponentGrid.children[80-i].updateCell(game.opponentGrid[i])
@@ -510,36 +510,36 @@ class MultiplayerGame(GameScreen):
             self.recentTime = time.time()
 
         game.win = game.puzzle.grid == game.puzzleSolution.grid
-        
-        if game.win or self.ids.timer.state == "down":#check win
+
+        if game.win:#check win
             app.client.send("WIN")
-            
+
             self.clock.cancel()
             print("Player WINS!")
             game.timerOn = False
             game.finishTime = self.saveTime
             game.win = False
-            
+
             topTime = app.topTimes[difficulties.index(game.difficulty)]
             topTime = float(topTime) if len(topTime) > 0 else 0
-            
+
             newRecord = False
             if topTime == 0 or topTime > game.finishTime[0]:
                 newRecord = True
                 app.topTimes[difficulties.index(game.difficulty)] = str(game.finishTime[0])
-        
-        
-            p = Popup(title = "Congratulations", 
-                    content = Label(text = f"{'New record!\n' if newRecord else ''}You Win\nComplete Time: {game.finishTime[1]}"), 
+
+
+            p = Popup(title = "Congratulations",
+                    content = Label(text = f"{'New record!/n' if newRecord else ''}You Win/nComplete Time: {game.finishTime[1]}"),
                     size_hint = (0.6, 0.3))
-                
+
             p.open()
 
             self.manager.current = "MainMenu"
             print("Exit")
 
 
-    
+
     def updateTimer(self):
         self.elapsedTime += time.time() - self.recentTime
         self.recentTime = time.time()
@@ -556,7 +556,7 @@ class MultiplayerGame(GameScreen):
         self.clock = Clock.schedule_interval(self.checks, 0.01)
 
     def load(self):#########Change this for multiplayer
-        
+
         puzzleString = app.client.receive()
 
         game.puzzle = Puzzle(puzzleString)
@@ -645,7 +645,7 @@ class MultiplayerGame(GameScreen):
             i.clock.cancel()
         for i in self.ids.box9.children:
             i.clock.cancel()
-        
+
         game.puzzle, game.puzzleSolution, game.opponentGrid = None, None, None
 
         self.ids.box1.clear_widgets()
@@ -675,7 +675,7 @@ class PauseScreen(Popup):
 class Login(BaseScreen):
     def togglePW(self):
         self.ids.password.password = not(self.ids.password.password)
-    
+
     def toggleRememberLogin(self):
         app.rememberLogin = not(app.rememberLogin)
 
@@ -685,8 +685,8 @@ class Login(BaseScreen):
         print(un, pw)
         app.client = Client()
         app.client.connect()
- 
-        if app.client.connected:        
+
+        if app.client.connected:
             if app.client.login(un, pw, hashed = False):
                 app.online = True
                 self.set_Border()
@@ -697,7 +697,7 @@ class Login(BaseScreen):
                     app.save_Game_Data()
 
                 app.client.update_BestTimes(app.topTimes)
-            
+
             else:
                 app.client.disconnect()
                 app.client = None
@@ -709,7 +709,7 @@ class Login(BaseScreen):
             app.client = None
             p  = Popup(title = "Error", content = Label(text = "Could not connect to server, try again otherwise server must be offline"), size_hint = (0.6, 0.3))
             p.open()
-    
+
 
 class Register(BaseScreen):
     def clickRegister(self):
@@ -720,23 +720,23 @@ class Register(BaseScreen):
             p = Popup(title = "Error", content = Label(text = "Password must be at least 7 characters long"), size_hint = (0.6, 0.3))
             p.open()
             return
-        
+
         if pw1 != pw2:
             p = Popup(title = "Error", content = Label(text = "Passwords do not match"), size_hint = (0.6, 0.3))
             p.open()
             return
-        
+
         app.client = Client()
         app.client.connect()
 
         if app.client.connected:
             if app.client.register(un, pw1):
                 loggedIn = app.client.login(un, pw1, False)
-                
-                p = Popup(title = "Success", content = Label(text = "Account has been created" + "\nAnd you have been logged in" if loggedIn else ""), size_hint = (0.6, 0.3))
+
+                p = Popup(title = "Success", content = Label(text = "Account has been created" + "/nAnd you have been logged in" if loggedIn else ""), size_hint = (0.6, 0.3))
                 p.open()
 
-                
+
             else:
                 p = Popup(title = "Error", content = Label(text = "Username already taken"), size_hint = (0.6, 0.3))
                 p.open()
@@ -746,17 +746,17 @@ class Register(BaseScreen):
             p = Popup(title = "Error", content = Label(text = "Could not connect to server"), size_hint = (0.6, 0.3))
             p.open()
 
-        
-            
- 
+
+
+
 class BestTimes(BaseScreen):
     def on_enter(self):
-        self.ids.easyTime.text = self.get_topTime(0)
-        self.ids.normalTime.text = self.get_topTime(1)
-        self.ids.hardTime.text = self.get_topTime(2)
-        self.ids.extraHardTime.text = self.get_topTime(3)
+        self.ids.easyTime.text = self.get_Top_Time(0)
+        self.ids.normalTime.text = self.get_Top_Time(1)
+        self.ids.hardTime.text = self.get_Top_Time(2)
+        self.ids.extraHardTime.text = self.get_Top_Time(3)
 
-    def get_topTime(self, index):
+    def get_Top_Time(self, index):
         topTime = app.topTimes[index]
         return game.parse_Timer_to_String(topTime) if len(topTime) > 0 else "N/A"
 
