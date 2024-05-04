@@ -15,7 +15,7 @@ class Puzzle:
             self.generate()
 
 
-    def show_Grid(self):
+    def show_grid(self):
         for row in self.grid:
             for item in row:
                 print(item, end = "  ")
@@ -28,11 +28,10 @@ class Puzzle:
 
 
     def find_Empty_Space(self) -> tuple | None:
-        for row in range(9):
-            for col in range(9):
-                if self.grid[row][col] == 0:
-                    return (row, col)
-        return None
+        for emptySpace in self.sortedCandidates:
+            return emptySpace
+        else:
+            return None
 
 
     def check(self, row : int, col : int, num : int) -> bool:#return false if there are any mistakes
@@ -99,7 +98,9 @@ class Puzzle:
                                     for i in range(boxRow, boxRow+3))
 
                     self.candidates[row][col] = candidates
-                #Cells that are already filled will have empty sets
+                
+    def sort_Candidates(self):
+        self.sortedCandidates = sorted( [(self.candidates[row][col], row, col) for col in range(9) for row in range(9) if len(self.candidates[row][col]) > 0], key = lambda x: len(x[0]) )
 
 
 ###########################_EXPERIMENTAL_CODE_############################################################################################
@@ -152,16 +153,47 @@ class Puzzle:
 
 #############################################################################################################################
 
-    def eliminate(self):
+    def constraint_Propagation(self):
         self.get_All_Candidates()
+        self.sort_Candidates()
+        return self.eliminate()
 
+
+    def eliminate(self):
+
+        for emptySpace in self.sortedCandidates:
+            if len(emptySpace[0]) == 1:
+                #Meaning there is only one possible number that can be placed into the grid,
+                self.insert(emptySpace[1], emptySpace[2], self.candidates[emptySpace[1]][emptySpace[2]].pop())
+                self.update_Peers_Remove_Candidates(emptySpace[1], emptySpace[2], self.grid[emptySpace[1]][emptySpace[2]])
+                self.sortedCandidates.remove(emptySpace)
+                                
+                if self.find_Empty_Space() == None:
+                    return True
+            
+                return self.eliminate()
+                
+        return False
+                
+        
+        """
         for row in range(9):
             for col in range(9):
                 if len(self.candidates[row][col]) == 1:
                     #Meaning there is only one possible number that can be placed into the grid,
                     self.insert(row, col, self.candidates[row][col].pop())
-
-
+                    self.update_Peers_Remove_Candidates(row, col, self.grid[row][col])
+                    
+                    if self.find_Empty_Space() == None:
+                        return True
+                    else:
+                        return self.eliminate()
+        
+        return False
+        """
+        
+        
+    """
     def dfs(self) -> bool:#Named after Depth First Search, basic backtracking algorithm
         pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
         if pos == None:
@@ -169,25 +201,60 @@ class Puzzle:
             return True
 
         row, col = pos
-
         for n in self.candidates[row][col]:
-
+                        
             if self.check(row, col, n):
 
                 self.insert(row, col, n)
-
+                self.update_Peers_Remove_Candidates(row, col, n)
+                
                 if self.dfs():
                     #Causes all the recursion to unwind
                     return True
 
                 self.insert(row, col, 0)
+                #self.update_Peers_Insert_Candidates(row, col, n)
 
         return False
+    """
+    def dfs(self) -> bool:#Named after Depth First Search
+        emptySpace = self.find_Empty_Space()
+        
+        if emptySpace == None:
+            #Meaning the grid is full and solved
+            return True
+        
+        #emptySpace is given as a (candidates, row, col)
+        candidates, row, col = emptySpace
 
+        for n in candidates:
+            if self.check(row, col, n):
 
-    def solve(self) -> bool:
-        self.eliminate()
-        return self.dfs()
+                self.insert(row, col, n)
+                self.sortedCandidates.remove(emptySpace)
+                
+                if self.dfs():
+                    #Causes all the recursion to unwind
+                    return True
+                
+                self.insert(row, col, 0)
+                self.sortedCandidates.insert(0, emptySpace)
+
+        return False
+    
+
+    def solve(self):
+        if self.constraint_Propagation() == False:
+            if self.dfs() == True:
+                print("[Solved with DFS]")
+                return True
+            else:
+                print("[Unsolvable]")
+                return False
+        else:
+            print("[Solved with Constraint Propagation]")
+            return True
+        #return self.dfs()
 
     ##############################################################################################################################
 
@@ -220,24 +287,27 @@ class Puzzle:
 
                         numberOfCellsToInsert -= 1
 
-            solved = self.solve()
+            self.get_All_Candidates()
+            self.sort_Candidates()
+            solved = self.dfs()
 
 
     def count_Solutions(self):
         #print("[Counting Solutions]")
-        pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
+        emptySpace = self.find_Empty_Space()#pos is given as a tuple (row, col)
 
-        if pos == None:#Meaning the grid is full and solved
+        if emptySpace == None:#Meaning the grid is full and solved
             self.solutions += 1 #Notes that it has found a solution
             return #Continues "EXPLORING" grid for more solutions
 
-        row, col = pos
+        candidates, row, col = emptySpace
 
-        for n in range(1, 10):
+        for n in candidates:
             if self.check(row, col, n):
 
                 self.insert(row, col, n)
-
+                self.sortedCandidates.remove(emptySpace)
+                
                 self.count_Solutions()
 
                 if self.solutions > 1:
@@ -245,6 +315,7 @@ class Puzzle:
                     return
 
                 self.insert(row, col, 0)
+                self.sortedCandidates.insert(0, emptySpace)
 
 
     def remove_digits(self):
@@ -411,7 +482,7 @@ def make_More(grid : list) -> list:
 
 
 if __name__ == "__main__":
-    numberToGenerate = 5 #n*8 puzzles will be generated
+    numberToGenerate = 20 #n*8 puzzles will be generated
     easy = []
     normal = []
     hard = []

@@ -1,10 +1,9 @@
-from re import I
 import time
-import timeit
 import cProfile
 import random
 import copy
 import sys
+
 
 
 def time_taken(func):
@@ -52,11 +51,10 @@ class Puzzle:
 
 
     def find_Empty_Space(self) -> tuple | None:
-        for row in range(9):
-            for col in range(9):
-                if self.grid[row][col] == 0:
-                    return (row, col)
-        return None
+        for emptySpace in self.sortedCandidates:
+            return emptySpace
+        else:
+            return None
 
 
     def check(self, row : int, col : int, num : int) -> bool:#return false if there are any mistakes
@@ -123,14 +121,10 @@ class Puzzle:
                                     for i in range(boxRow, boxRow+3))
 
                     self.candidates[row][col] = candidates
-                #Cells that are already filled will have empty sets
                 
     def sort_Candidates(self):
         self.sortedCandidates = sorted( [(self.candidates[row][col], row, col) for col in range(9) for row in range(9) if len(self.candidates[row][col]) > 0], key = lambda x: len(x[0]) )
-        
-        #print(self.candidates)
 
-        print(self.sortedCandidates)
 
 ###########################_EXPERIMENTAL_CODE_############################################################################################
     #number is removed
@@ -190,17 +184,20 @@ class Puzzle:
 
     def eliminate(self):
 
-        for item in self.sortedCandidates:
-            if len(item[0]) == 1:
+        for emptySpace in self.sortedCandidates:
+            if len(emptySpace[0]) == 1:
                 #Meaning there is only one possible number that can be placed into the grid,
-                self.insert(item[1], item[2], self.candidates[item[1]][item[2]].pop())
-                self.update_Peers_Remove_Candidates(item[1], item[2], self.grid[item[1]][item[2]])
-                self.sortedCandidates.remove(item)
+                self.insert(emptySpace[1], emptySpace[2], self.candidates[emptySpace[1]][emptySpace[2]].pop())
+                self.update_Peers_Remove_Candidates(emptySpace[1], emptySpace[2], self.grid[emptySpace[1]][emptySpace[2]])
+                self.sortedCandidates.remove(emptySpace)
                                 
                 if self.find_Empty_Space() == None:
                     return True
-                else:
-                    return self.eliminate()
+            
+                return self.eliminate()
+                
+        return False
+                
         
         """
         for row in range(9):
@@ -243,25 +240,28 @@ class Puzzle:
 
         return False
     """
-    def dfs(self) -> bool:#Named after Depth First Search, basic backtracking algorithm
-        pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
-        if pos == None:
+    def dfs(self) -> bool:#Named after Depth First Search
+        emptySpace = self.find_Empty_Space()
+        
+        if emptySpace == None:
             #Meaning the grid is full and solved
             return True
+        
+        #emptySpace is given as a (candidates, row, col)
+        candidates, row, col = emptySpace
 
-        row, col = pos
+        for n in candidates:
+            if self.check(row, col, n):
 
-        for candidates, row, col in self.sortedCandidates:
-            for n in candidates:
-                if self.check(row, col, n):
-
-                    self.insert(row, col, n)
-
-                    if self.dfs():
-                        #Causes all the recursion to unwind
-                        return True
-
-                    self.insert(row, col, 0)
+                self.insert(row, col, n)
+                self.sortedCandidates.remove(emptySpace)
+                
+                if self.dfs():
+                    #Causes all the recursion to unwind
+                    return True
+                
+                self.insert(row, col, 0)
+                self.sortedCandidates.insert(0, emptySpace)
 
         return False
     
@@ -276,7 +276,7 @@ class Puzzle:
                 print("[Unsolvable]")
                 return False
         else:
-            print("[Solved with Constarint Propagation]")
+            print("[Solved with Constraint Propagation]")
             return True
         #return self.dfs()
 
@@ -503,8 +503,8 @@ def make_More(grid : list) -> list:
 
 """MAIN PROGRAM"""
 if __name__ == "__main__":
+    #p = Puzzle("870000605060900002200673014709105020612030000540720100000040001057091060900060540")
     p = Puzzle("8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4..")
-    #p = Puzzle("095401786000002000001678905027009000148750300060004800004000001710045069902060078")
     p.show_grid()
     st = time.perf_counter()
     p.solve()
