@@ -15,7 +15,7 @@ class Puzzle:
             self.generate()
 
 
-    def show_grid(self):
+    def show_Grid(self):
         for row in self.grid:
             for item in row:
                 print(item, end = "  ")
@@ -104,9 +104,9 @@ class Puzzle:
 
 ###########################_EXPERIMENTAL_CODE_############################################################################################
     #number is removed
-    def update_Peers_Remove_Candidates(self, row : int, col : int):#When a number is inserted, the cells in the same row, column and box will have that number removed from their candidates
+    def update_Peers_Remove_Candidates(self, row : int, col : int, n : int):#When a number is inserted, the cells in the same row, column and box will have that number removed from their candidates
         for i in range(9):
-            if n in self.candidates[row][i] and i != col:
+            if n in self.candidates[row][i]:
                 self.candidates[row][i].remove(n)
 
             if n in self.candidates[i][col]:
@@ -224,7 +224,7 @@ class Puzzle:
 
 
     def count_Solutions(self):
-        print("[Counting Solutions]")
+        #print("[Counting Solutions]")
         pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
 
         if pos == None:#Meaning the grid is full and solved
@@ -376,7 +376,7 @@ print("2", y-x)
 
 """puzzle3 = puzzle()
 print(puzzle3.solveH())
-puzzle3.show_grid()"""
+puzzle3.show_Grid()"""
 
 
 def flip_Vertical(grid : list) -> list:
@@ -410,9 +410,8 @@ def make_More(grid : list) -> list:
     return a
 
 
-"""MAIN PROGRAM"""
 if __name__ == "__main__":
-    n = 10 #n*8 puzzles will be generated
+    numberToGenerate = 5 #n*8 puzzles will be generated
     easy = []
     normal = []
     hard = []
@@ -421,12 +420,12 @@ if __name__ == "__main__":
     listOfPuzzles = []
 
     startTime = time.perf_counter()
-    for i in range(n):
+    for i in range(numberToGenerate):
         print(f"Puzzle {i+1}")
         listOfPuzzles.append(Puzzle())
     elapsedTime = time.perf_counter() - startTime
 
-    print(f"{elapsedTime // 60 + round((elapsedTime%60)/60, 2)} minutes to generate {n} puzzles")
+    print(f"{round(elapsedTime, 2)} seconds to generate {numberToGenerate} puzzles")
 
     for puzzle in listOfPuzzles:
         if puzzle.clues in range(17, 28):
@@ -458,14 +457,15 @@ if __name__ == "__main__":
     print(f"hard        {len(hard)}")
     print(f"extra hard  {len(extra_hard)}")
     print(f"outliers    {len(outliers)}")
-
+    print(f"Total       {numberToGenerate*8}")
+    
     easyFile = PuzzleFile("Main/Generator/easy.txt", "append", easy)
     normalFile = PuzzleFile("Main/Generator/normal.txt", "append", normal)
     hardFile = PuzzleFile("Main/Generator/hard.txt", "append", hard)
     extra_HardFile = PuzzleFile("Main/Generator/extra_hard.txt", "append", extra_hard)
 
     print(outliers)
-
+    print()
 
 
 
