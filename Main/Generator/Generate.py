@@ -482,7 +482,7 @@ def make_More(grid : list) -> list:
 
 
 if __name__ == "__main__":
-    numberToGenerate = 20 #n*8 puzzles will be generated
+    numberToGenerate = 10 #n*8 puzzles will be generated
     easy = []
     normal = []
     hard = []
