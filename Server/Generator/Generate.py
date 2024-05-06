@@ -1,7 +1,7 @@
 import random
 import time
-import copy
-import cProfile
+import copy  
+
 class Puzzle:
     def __init__(self, data : str | list | None = None):
         if type(data) == str:#For importing grids
@@ -28,11 +28,10 @@ class Puzzle:
 
 
     def find_Empty_Space(self) -> tuple | None:
-        for row in range(9):
-            for col in range(9):
-                if self.grid[row][col] == 0:
-                    return (row, col)
-        return None
+        for emptySpace in self.sortedCandidates:
+            return emptySpace
+        else:
+            return None
 
 
     def check(self, row : int, col : int, num : int) -> bool:#return false if there are any mistakes
@@ -99,12 +98,14 @@ class Puzzle:
                                     for i in range(boxRow, boxRow+3))
 
                     self.candidates[row][col] = candidates
-                #Cells that are already filled will have empty sets
+                
+    def sort_Candidates(self):
+        self.sortedCandidates = sorted( [(self.candidates[row][col], row, col) for col in range(9) for row in range(9) if len(self.candidates[row][col]) > 0], key = lambda x: len(x[0]) )
 
 
 ###########################_EXPERIMENTAL_CODE_############################################################################################
-
-    def update_Peers_Remove_Candidates(self, row : int, col : int):#When a number is inserted, the cells in the same row, column and box will have that number removed from their candidates
+    #number is removed
+    def update_Peers_Remove_Candidates(self, row : int, col : int, n : int):#When a number is inserted, the cells in the same row, column and box will have that number removed from their candidates
         for i in range(9):
             if n in self.candidates[row][i]:
                 self.candidates[row][i].remove(n)
@@ -152,16 +153,49 @@ class Puzzle:
 
 #############################################################################################################################
 
-    def eliminate(self):
+    def constraint_Propagation(self):
         self.get_All_Candidates()
+        self.sort_Candidates()
+        return self.eliminate()
 
+
+    def eliminate(self):
+        if self.find_Empty_Space() == None:
+            return True
+        
+        for emptySpace in self.sortedCandidates.copy():
+            if len(emptySpace[0]) == 1:
+                #Meaning there is only one possible number that can be placed into the grid,
+                self.insert(emptySpace[1], emptySpace[2], self.candidates[emptySpace[1]][emptySpace[2]].pop())
+                self.update_Peers_Remove_Candidates(emptySpace[1], emptySpace[2], self.grid[emptySpace[1]][emptySpace[2]])
+                
+                if self.find_Empty_Space() == None:
+                    return True
+                
+                self.sort_Candidates()
+                return self.eliminate()
+
+        return False
+    
+            
+        """
         for row in range(9):
             for col in range(9):
                 if len(self.candidates[row][col]) == 1:
                     #Meaning there is only one possible number that can be placed into the grid,
                     self.insert(row, col, self.candidates[row][col].pop())
-
-
+                    self.update_Peers_Remove_Candidates(row, col, self.grid[row][col])
+                    
+                    if self.find_Empty_Space() == None:
+                        return True
+                    else:
+                        return self.eliminate()
+        
+        return False
+        """
+        
+        
+    """
     def dfs(self) -> bool:#Named after Depth First Search, basic backtracking algorithm
         pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
         if pos == None:
@@ -169,25 +203,65 @@ class Puzzle:
             return True
 
         row, col = pos
-
         for n in self.candidates[row][col]:
-
+                        
             if self.check(row, col, n):
 
                 self.insert(row, col, n)
-
+                self.update_Peers_Remove_Candidates(row, col, n)
+                
                 if self.dfs():
                     #Causes all the recursion to unwind
                     return True
 
                 self.insert(row, col, 0)
+                #self.update_Peers_Insert_Candidates(row, col, n)
 
         return False
+    """
+    def dfs(self) -> bool:#Named after Depth First Search
+        emptySpace = self.find_Empty_Space()
+        
+        if emptySpace == None:
+            #Meaning the grid is full and solved
+            return True
+        
+        #emptySpace is given as a (candidates, row, col)
+        candidates, row, col = emptySpace
 
+        for n in candidates:
+            if self.check(row, col, n):
 
-    def solve(self) -> bool:
-        self.eliminate()
-        return self.dfs()
+                self.insert(row, col, n)
+                self.sortedCandidates.remove(emptySpace)
+                self.update_Peers_Remove_Candidates(row, col, n)
+                self.sort_Candidates()
+                
+                if self.dfs():
+                    #Causes all the recursion to unwind
+                    return True
+                
+                self.insert(row, col, 0)
+                self.sortedCandidates.insert(0, emptySpace)
+                self.update_Peers_Insert_Candidates(row, col, n)
+                
+
+        return False
+    
+
+    def solve(self):
+        if self.constraint_Propagation() == False:
+            self.show_grid()
+            if self.dfs() == True:
+                print("[Solved with DFS]")
+                return True
+            else:
+                print("[Unsolvable]")
+                return False
+        else:
+            print("[Solved with Constraint Propagation]")
+            return True
+        #return self.dfs()
 
     ##############################################################################################################################
 
@@ -220,24 +294,27 @@ class Puzzle:
 
                         numberOfCellsToInsert -= 1
 
-            solved = self.solve()
+            self.get_All_Candidates()
+            self.sort_Candidates()
+            solved = self.dfs()
 
 
     def count_Solutions(self):
-        print("[Counting Solutions]")
-        pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
+        #print("[Counting Solutions]")
+        emptySpace = self.find_Empty_Space()#pos is given as a tuple (row, col)
 
-        if pos == None:#Meaning the grid is full and solved
+        if emptySpace == None:#Meaning the grid is full and solved
             self.solutions += 1 #Notes that it has found a solution
             return #Continues "EXPLORING" grid for more solutions
 
-        row, col = pos
+        candidates, row, col = emptySpace
 
-        for n in range(1, 10):
+        for n in candidates:
             if self.check(row, col, n):
 
                 self.insert(row, col, n)
-
+                self.sortedCandidates.remove(emptySpace)
+                
                 self.count_Solutions()
 
                 if self.solutions > 1:
@@ -245,6 +322,7 @@ class Puzzle:
                     return
 
                 self.insert(row, col, 0)
+                self.sortedCandidates.insert(0, emptySpace)
 
 
     def remove_digits(self):
@@ -307,6 +385,8 @@ class Puzzle:
 
 class PuzzleFile:
     def __init__(self, file : str, mode : str, data : list = []):
+        self.duplicates = 0
+        
         if mode == "read":
             self.file = open(file, "r")
             self.contents = self.file.readlines()
@@ -317,10 +397,14 @@ class PuzzleFile:
             self.contents = self.file.readlines()
 
             for puzzleString in data:
-                if not puzzleString in self.contents:
+                if not f"{puzzleString}\n" in self.contents:
                     self.file.write(f"{puzzleString}\n")
+                else:
+                    self.duplicates += 1
 
             self.file.close()
+            
+        
 
 ################################################################################################
 class Stack():
@@ -376,7 +460,7 @@ print("2", y-x)
 
 """puzzle3 = puzzle()
 print(puzzle3.solveH())
-puzzle3.show_grid()"""
+puzzle3.show_Grid()"""
 
 
 def flip_Vertical(grid : list) -> list:
@@ -410,9 +494,8 @@ def make_More(grid : list) -> list:
     return a
 
 
-"""MAIN PROGRAM"""
 if __name__ == "__main__":
-    n = 10 #n*8 puzzles will be generated
+    numberToGenerate = 1000 #n*8 puzzles will be generated
     easy = []
     normal = []
     hard = []
@@ -421,12 +504,12 @@ if __name__ == "__main__":
     listOfPuzzles = []
 
     startTime = time.perf_counter()
-    for i in range(n):
+    for i in range(numberToGenerate):
         print(f"Puzzle {i+1}")
         listOfPuzzles.append(Puzzle())
     elapsedTime = time.perf_counter() - startTime
 
-    print(f"{elapsedTime // 60 + round((elapsedTime%60)/60, 2)} minutes to generate {n} puzzles")
+    print(f"{round(elapsedTime, 2)} seconds to generate {numberToGenerate} puzzles")
 
     for puzzle in listOfPuzzles:
         if puzzle.clues in range(17, 28):
@@ -452,21 +535,21 @@ if __name__ == "__main__":
         else:
             outliers.append(puzzle.grid_To_String())
 
+    easyFile = PuzzleFile("Main/Generator/easy.txt", "append", easy)
+    normalFile = PuzzleFile("Main/Generator/normal.txt", "append", normal)
+    hardFile = PuzzleFile("Main/Generator/hard.txt", "append", hard)
+    extra_HardFile = PuzzleFile("Main/Generator/extra_hard.txt", "append", extra_hard)
 
     print(f"easy        {len(easy)}")
     print(f"normal      {len(normal)}")
     print(f"hard        {len(hard)}")
     print(f"extra hard  {len(extra_hard)}")
     print(f"outliers    {len(outliers)}")
+    print(f"Total       {numberToGenerate*8}")
+    print(f"Duplicates  {easyFile.duplicates + normalFile.duplicates + 
+                        hardFile.duplicates + extra_HardFile.duplicates}")
 
-    easyFile = PuzzleFile("Main/Generator/easy.txt", "append", easy)
-    normalFile = PuzzleFile("Main/Generator/normal.txt", "append", normal)
-    hardFile = PuzzleFile("Main/Generator/hard.txt", "append", hard)
-    extra_HardFile = PuzzleFile("Main/Generator/extra_hard.txt", "append", extra_hard)
 
     print(outliers)
-
-
-
-
-
+    print()
+    

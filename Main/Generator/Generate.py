@@ -160,22 +160,24 @@ class Puzzle:
 
 
     def eliminate(self):
-
-        for emptySpace in self.sortedCandidates:
+        if self.find_Empty_Space() == None:
+            return True
+        
+        for emptySpace in self.sortedCandidates.copy():
             if len(emptySpace[0]) == 1:
                 #Meaning there is only one possible number that can be placed into the grid,
                 self.insert(emptySpace[1], emptySpace[2], self.candidates[emptySpace[1]][emptySpace[2]].pop())
                 self.update_Peers_Remove_Candidates(emptySpace[1], emptySpace[2], self.grid[emptySpace[1]][emptySpace[2]])
-                self.sortedCandidates.remove(emptySpace)
-                                
+                
                 if self.find_Empty_Space() == None:
                     return True
-            
+                
+                self.sort_Candidates()
                 return self.eliminate()
-                
+
         return False
-                
-        
+    
+            
         """
         for row in range(9):
             for col in range(9):
@@ -232,6 +234,8 @@ class Puzzle:
 
                 self.insert(row, col, n)
                 self.sortedCandidates.remove(emptySpace)
+                self.update_Peers_Remove_Candidates(row, col, n)
+                self.sort_Candidates()
                 
                 if self.dfs():
                     #Causes all the recursion to unwind
@@ -239,12 +243,15 @@ class Puzzle:
                 
                 self.insert(row, col, 0)
                 self.sortedCandidates.insert(0, emptySpace)
+                self.update_Peers_Insert_Candidates(row, col, n)
+                
 
         return False
     
 
     def solve(self):
         if self.constraint_Propagation() == False:
+            self.show_grid()
             if self.dfs() == True:
                 print("[Solved with DFS]")
                 return True
@@ -378,6 +385,8 @@ class Puzzle:
 
 class PuzzleFile:
     def __init__(self, file : str, mode : str, data : list = []):
+        self.duplicates = 0
+        
         if mode == "read":
             self.file = open(file, "r")
             self.contents = self.file.readlines()
@@ -388,10 +397,14 @@ class PuzzleFile:
             self.contents = self.file.readlines()
 
             for puzzleString in data:
-                if not puzzleString in self.contents:
+                if not f"{puzzleString}\n" in self.contents:
                     self.file.write(f"{puzzleString}\n")
+                else:
+                    self.duplicates += 1
 
             self.file.close()
+            
+        
 
 ################################################################################################
 class Stack():
@@ -482,7 +495,7 @@ def make_More(grid : list) -> list:
 
 
 if __name__ == "__main__":
-    numberToGenerate = 10 #n*8 puzzles will be generated
+    numberToGenerate = 1000 #n*8 puzzles will be generated
     easy = []
     normal = []
     hard = []
@@ -522,6 +535,10 @@ if __name__ == "__main__":
         else:
             outliers.append(puzzle.grid_To_String())
 
+    easyFile = PuzzleFile("Main/Generator/easy.txt", "append", easy)
+    normalFile = PuzzleFile("Main/Generator/normal.txt", "append", normal)
+    hardFile = PuzzleFile("Main/Generator/hard.txt", "append", hard)
+    extra_HardFile = PuzzleFile("Main/Generator/extra_hard.txt", "append", extra_hard)
 
     print(f"easy        {len(easy)}")
     print(f"normal      {len(normal)}")
@@ -529,15 +546,10 @@ if __name__ == "__main__":
     print(f"extra hard  {len(extra_hard)}")
     print(f"outliers    {len(outliers)}")
     print(f"Total       {numberToGenerate*8}")
-    
-    easyFile = PuzzleFile("Main/Generator/easy.txt", "append", easy)
-    normalFile = PuzzleFile("Main/Generator/normal.txt", "append", normal)
-    hardFile = PuzzleFile("Main/Generator/hard.txt", "append", hard)
-    extra_HardFile = PuzzleFile("Main/Generator/extra_hard.txt", "append", extra_hard)
+    print(f"Duplicates  {easyFile.duplicates + normalFile.duplicates + 
+                        hardFile.duplicates + extra_HardFile.duplicates}")
+
 
     print(outliers)
     print()
-
-
-
-
+    

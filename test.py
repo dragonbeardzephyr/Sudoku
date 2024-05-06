@@ -5,25 +5,12 @@ import copy
 import sys
 
 
-
 def time_taken(func):
     st = time.perf_counter()
     result = func()
     et = time.perf_counter()
     return et-st, result
 
-#time_taken(lambda: print("Hello World!"))
-
-
-"""
-string = "".join([str(i) for i in range(81)])
-print(sys.getsizeof(string))
-"""
-
-
-import random
-import time
-import copy  
 
 class Puzzle:
     def __init__(self, data : str | list | None = None):
@@ -183,22 +170,24 @@ class Puzzle:
 
 
     def eliminate(self):
-
-        for emptySpace in self.sortedCandidates:
+        if self.find_Empty_Space() == None:
+            return True
+        
+        for emptySpace in self.sortedCandidates.copy():
             if len(emptySpace[0]) == 1:
                 #Meaning there is only one possible number that can be placed into the grid,
                 self.insert(emptySpace[1], emptySpace[2], self.candidates[emptySpace[1]][emptySpace[2]].pop())
                 self.update_Peers_Remove_Candidates(emptySpace[1], emptySpace[2], self.grid[emptySpace[1]][emptySpace[2]])
-                self.sortedCandidates.remove(emptySpace)
-                                
+                
                 if self.find_Empty_Space() == None:
                     return True
-            
+                
+                self.sort_Candidates()
                 return self.eliminate()
-                
+
         return False
-                
-        
+    
+            
         """
         for row in range(9):
             for col in range(9):
@@ -255,6 +244,8 @@ class Puzzle:
 
                 self.insert(row, col, n)
                 self.sortedCandidates.remove(emptySpace)
+                self.update_Peers_Remove_Candidates(row, col, n)
+                self.sort_Candidates()
                 
                 if self.dfs():
                     #Causes all the recursion to unwind
@@ -262,6 +253,8 @@ class Puzzle:
                 
                 self.insert(row, col, 0)
                 self.sortedCandidates.insert(0, emptySpace)
+                self.update_Peers_Insert_Candidates(row, col, n)
+                
 
         return False
     
@@ -311,24 +304,27 @@ class Puzzle:
 
                         numberOfCellsToInsert -= 1
 
-            solved = self.solve()
+            self.get_All_Candidates()
+            self.sort_Candidates()
+            solved = self.dfs()
 
 
     def count_Solutions(self):
         #print("[Counting Solutions]")
-        pos = self.find_Empty_Space()#pos is given as a tuple (row, col)
+        emptySpace = self.find_Empty_Space()#pos is given as a tuple (row, col)
 
-        if pos == None:#Meaning the grid is full and solved
+        if emptySpace == None:#Meaning the grid is full and solved
             self.solutions += 1 #Notes that it has found a solution
             return #Continues "EXPLORING" grid for more solutions
 
-        row, col = pos
+        candidates, row, col = emptySpace
 
-        for n in range(1, 10):
+        for n in candidates:
             if self.check(row, col, n):
 
                 self.insert(row, col, n)
-
+                self.sortedCandidates.remove(emptySpace)
+                
                 self.count_Solutions()
 
                 if self.solutions > 1:
@@ -336,6 +332,7 @@ class Puzzle:
                     return
 
                 self.insert(row, col, 0)
+                self.sortedCandidates.insert(0, emptySpace)
 
 
     def remove_digits(self):
@@ -396,6 +393,7 @@ class Puzzle:
 
 ##############################################################################################################################
 
+
 class PuzzleFile:
     def __init__(self, file : str, mode : str, data : list = []):
         if mode == "read":
@@ -449,26 +447,6 @@ class Stack():
         print(self.__stack)
 
 
-###############################################################################################################################
-"""puzzle1 = Puzzle()
-#puzzle1.get_All_Candidates()
-#print(puzzle1.candidates)
-x = time.time()
-puzzle1.solve()
-y = time.time()
-print("1", y-x)
-
-puzzle2 = Puzzle()
-x = time.time()
-puzzle2.solve()
-y = time.time()
-print("2", y-x)
-"""
-
-"""puzzle3 = puzzle()
-print(puzzle3.solveH())
-puzzle3.show_grid()"""
-
 
 def flip_Vertical(grid : list) -> list:
     a = Stack(9)
@@ -500,17 +478,76 @@ def make_More(grid : list) -> list:
 
     return a
 
-
 """MAIN PROGRAM"""
 if __name__ == "__main__":
-    #p = Puzzle("870000605060900002200673014709105020612030000540720100000040001057091060900060540")
+    numberToGenerate = 10 #n*8 puzzles will be generated
+    easy = []
+    normal = []
+    hard = []
+    extra_hard = []
+    outliers = []
+    listOfPuzzles = []
+
+    startTime = time.perf_counter()
+    for i in range(numberToGenerate):
+        print(f"Puzzle {i+1}")
+        listOfPuzzles.append(Puzzle())
+    elapsedTime = time.perf_counter() - startTime
+
+    print(f"{round(elapsedTime, 2)} seconds to generate {numberToGenerate} puzzles")
+
+    for puzzle in listOfPuzzles:
+        if puzzle.clues in range(17, 28):
+            a = make_More(puzzle.grid)
+            for i in a:
+                extra_hard.append(Puzzle(i).grid_To_String())
+
+        elif puzzle.clues in range(28, 32):
+            a = make_More(puzzle.grid)
+            for i in a:
+                hard.append(Puzzle(i).grid_To_String())
+
+        elif puzzle.clues in range(32, 36):
+            a = make_More(puzzle.grid)
+            for i in a:
+                normal.append(Puzzle(i).grid_To_String())
+
+        elif puzzle.clues in range(36, 45):
+            a = make_More(puzzle.grid)
+            for i in a:
+                easy.append(Puzzle(i).grid_To_String())
+
+        else:
+            outliers.append(puzzle.grid_To_String())
+
+
+    print(f"easy        {len(easy)}")
+    print(f"normal      {len(normal)}")
+    print(f"hard        {len(hard)}")
+    print(f"extra hard  {len(extra_hard)}")
+    print(f"outliers    {len(outliers)}")
+    print(f"Total       {numberToGenerate*8}")
+    
+    easyFile = PuzzleFile("Main/Generator/easy.txt", "append", easy)
+    normalFile = PuzzleFile("Main/Generator/normal.txt", "append", normal)
+    hardFile = PuzzleFile("Main/Generator/hard.txt", "append", hard)
+    extra_HardFile = PuzzleFile("Main/Generator/extra_hard.txt", "append", extra_hard)
+
+    print(outliers)
+    print()
+
+
+
+
+"""
+    #p = Puzzle("309000070071534908600020000100247006700005020800000003502170890930402017017896230")
     p = Puzzle("8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4..")
     p.show_grid()
     st = time.perf_counter()
-    p.solve()
+    cProfile.run('p.solve()')
     et = time.perf_counter() - st
     print(et)
     p.show_grid()
-
+"""
 
 
