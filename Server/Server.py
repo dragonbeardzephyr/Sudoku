@@ -228,7 +228,7 @@ class Game(threading.Thread):
 
         self.puzzleString = self.import_Puzzle(difficulty)
         p = Puzzle(self.puzzleString)
-        p.show_grid()
+        p.show_Grid()
         p.solve()
         self.solutionString = p.grid_To_String()
 
@@ -255,6 +255,18 @@ class Game(threading.Thread):
 
             elif p2Grid == "WIN":
                 self.player1.client.send("LOSE".encode())
+                finished = True
+                self.player1.inGame = False
+                self.player2.inGame = False
+                
+            elif p1Grid == "QUIT":
+                self.player2.client.send("OPPONENT QUIT".encode())
+                finished = True
+                self.player1.inGame = False
+                self.player2.inGame = False
+                
+            elif p2Grid == "QUIT":
+                self.player1.client.send("OPPONENT QUIT".encode())
                 finished = True
                 self.player1.inGame = False
                 self.player2.inGame = False

@@ -100,7 +100,7 @@ class SudokuApp(App):
             self.rememberLogin = True
 
     def check_match_Found(self, dt):
-        print("Chekcing math recieve found")
+        print("[Chekcing math recieve found]")
         matchFound = app.client.receive()
         print(matchFound)
         if matchFound == "Match Found":
@@ -114,9 +114,9 @@ class SudokuApp(App):
     def load_Game_Data(self):
         with open("Main/Game Data.txt", "r") as file:
 
-            self.username = file.readline().replace("/n", "")
-            self.password = file.readline().replace("/n", "")
-            self.topTimes = [file.readline().replace("/n", "") for i in range(4)]
+            self.username = file.readline().replace("\n", "")
+            self.password = file.readline().replace("\n", "")
+            self.topTimes = [file.readline().replace("\n", "") for i in range(4)]
 
             print(self.username)
             print(self.password)
@@ -126,10 +126,10 @@ class SudokuApp(App):
     def save_Game_Data(self):
         with open("Main/Game Data.txt", "w") as file:
             if self.rememberLogin is True:
-                data = f"{self.username}/n{self.password}/n"
+                data = f"{self.username}\n{self.password}\n"
             else:
-                data = ("/n/n")
-            data += "/n".join([time if len(time) > 0 else "/n" for time in self.topTimes])
+                data = ("\n\n")
+            data += "\n".join([time if len(time) > 0 else "\n" for time in self.topTimes])
             file.write(data)
 
     def on_stop(self):
@@ -312,8 +312,8 @@ class GameScreen(BaseScreen):
 
     def load(self):
         game.import_Puzzle(game.difficulty)#assigns puzzle to game.puzzle
-        game.puzzle.show_grid()
-        grid = self.ids.grid
+        game.puzzle.show_Grid()
+        #grid = self.ids.grid
 
         i = 0
         j = 0
@@ -417,6 +417,7 @@ class GameScreen(BaseScreen):
 
 
 
+
     def on_leave(self):
         self.clock.cancel()
 
@@ -497,7 +498,15 @@ class MultiplayerGame(GameScreen):
             p = Popup(title = "Unlucky", content = Label(text = "Opponent Wins!"), size_hint = (0.4, 0.35))
             p.open()
             self.manager.current = "MainMenu"
+            
+        elif game.opponentGrid == "OPPONENT QUIT":
+            self.clock.cancel()
+            game.timerOn = False
 
+            p = Popup(title = "Unlucky", content = Label(text = "Opponent Quit!"), size_hint = (0.4, 0.35))
+            p.open()
+            self.manager.current = "MainMenu"
+            
         elif game.opponentGrid is not None:
             for i in range(81):
                 self.ids.opponentGrid.children[80-i].updateCell(game.opponentGrid[i])
@@ -625,6 +634,13 @@ class MultiplayerGame(GameScreen):
         self.elapsedTime = 0
         game.timerOn = True
 
+    def clickExit(self):
+        self.clock.cancel()
+        game.timerOn = False
+        app.client.send("QUIT")
+        self.manager.transition.direction = "down"
+        self.manager.current = "MultiplayerMenu"
+
     def on_leave(self):
         self.clock.cancel()
         for i in self.ids.box1.children:
@@ -693,7 +709,7 @@ class Login(BaseScreen):
 
                 if app.rememberLogin is True:
                     app.username = un
-                    app.password = app.client.hashPW(pw)
+                    app.password = app.client.hash_Password(pw)
                     app.save_Game_Data()
 
                 app.client.update_BestTimes(app.topTimes)
