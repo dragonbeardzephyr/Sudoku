@@ -1,3 +1,4 @@
+from multiprocessing.spawn import prepare
 import random
 import time
 import copy
@@ -226,7 +227,7 @@ class Puzzle:
 
 
     def fill_Grid(self):
-        #print("[Filling Grid]")
+        print("[Filling Grid]")
         solved = False
 
         while solved == False:
@@ -281,7 +282,7 @@ class Puzzle:
         
 
     def remove_digits(self) -> int:
-        #print("[Removing Digits]")
+        print("[Removing Digits]")
         self.solutions = 0
         digitsToRemove = int(random.triangular(36, 64, 50))# Weighted towards 50
         digitsRemoved = 0 #Used to count how many digits have been removed
@@ -468,7 +469,7 @@ if __name__ == "__main__":
 
     for i in range(numberToGenerate):
         print(f"[Puzzle {i+1}]")
-        
+        print()
         listOfPuzzles.append(Puzzle())
 
     elapsedTime = time.perf_counter() - startTime
@@ -508,7 +509,7 @@ if __name__ == "__main__":
     print(f"easy        {len(easy)}")
     print(f"normal      {len(normal)}")
     print(f"hard        {len(hard)}")
-    print(f"extra hard  {len(extra_hard)}")
+    print(f"extra hard  {len(extraHard)}")
     print("------------------------------")
     print(f"Total       {numberToGenerate*8}")
     print("------------------------------")

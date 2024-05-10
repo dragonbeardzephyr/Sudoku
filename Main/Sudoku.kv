@@ -19,6 +19,8 @@ MenuManager:
 
     BestTimes:
 
+    HowToPlayScreen:
+
 
 <BaseScreen>:
     name : "BaseScreen"
@@ -29,7 +31,7 @@ MenuManager:
             size: self.size
             source : None
             
-    
+
     canvas.after:
         Rectangle:
             size: self.size
@@ -87,7 +89,7 @@ MenuManager:
                     background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
                     on_release: 
                         root.manager.transition = SlideTransition()
-                        root.manager.transition.direction = "up"
+                        root.manager.transition.direction = "right"
                         root.manager.current = "ClassicMenu"
 
                 Button:
@@ -97,7 +99,7 @@ MenuManager:
                     background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
                     on_release:
                         root.manager.transition = SlideTransition()
-                        root.manager.transition.direction = "down"
+                        root.manager.transition.direction = "left"
                         root.manager.current = "MultiplayerMenu"
 
                 Button:
@@ -109,6 +111,50 @@ MenuManager:
                         root.manager.transition = SlideTransition()
                         root.manager.transition.direction = "left"
                         root.manager.current = "AccountMenu"
+
+    BoxLayout:
+        size_hint : 0.225, 0.1
+        pos_hint : {"center_x": 0.5, "center_y":0.25}
+        Button:
+            text: "Help"
+            font_size : 30
+            color : 0.38, 0.13, 0.97, 1
+            background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+            on_release:
+                root.manager.transition = SlideTransition()
+                root.manager.transition.direction = "up"
+                root.manager.current = "HowToPlayScreen"
+
+
+<HowToPlayScreen>:
+    name : "HowToPlayScreen"
+
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = SlideTransition()
+            root.manager.transition.direction = "down"
+            app.root.current = "MainMenu"
+
+    AnchorLayout:
+        size_hint : 1, 0.96
+        pos_hint : {"center_x": 0.5, "center_y":0.47}
+
+        ScrollView:
+            size_hint : 1, 1
+            do_scroll_x : False
+            do_scroll_y : True
+            Image:
+                source: "Main\graphics\Sudoku_App_Help.png"
+                size_hint: None, None
+                size : self.texture_size
+
+
+
+
+    
 
 
 <GameScreen>:
@@ -372,6 +418,7 @@ MenuManager:
         BoxLayout:
             orientation : "vertical"
             Label:
+                id : usernameLabel
                 text : root.get_Username()
                 font_size : 25
             Label:

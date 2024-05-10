@@ -17,7 +17,7 @@ Config.set("graphics", "reszizable", False)
 Config.set('input', 'mouse', 'mouse,disable_multitouch')# Without this red dot appears at right click
 
 """
-Inside box SIZE
+Inside box SIZe
 1008, 713 within border
 0.984, 0.928 ratio
 
@@ -132,6 +132,7 @@ class SudokuApp(App):
             data += "\n".join([time if len(time) > 0 else "\n" for time in self.topTimes])
             file.write(data)
 
+
     def on_stop(self):
         self.save_Game_Data()
         print("Goodbye World")
@@ -160,6 +161,10 @@ class MainMenu(BaseScreen):
 
 class Menu(BaseScreen):
     pass
+
+class HowToPlayScreen(BaseScreen):
+    pass
+
 
 
 class ClassicMenu(Menu):
@@ -206,6 +211,9 @@ class MultiplayerMenu(Menu):
 
 
 class AccountMenu(Menu):
+    def on_enter(self):
+        self.ids.usernameLabel.text = self.get_Username()
+        
     def get_Username(self):
         return app.username
 
@@ -216,8 +224,6 @@ class AccountMenu(Menu):
             app.online = False
             self.set_Border()
             app.rememberLogin = False
-
-
 
 
 #############################
@@ -748,8 +754,15 @@ class Register(BaseScreen):
         if app.client.connected:
             if app.client.register(un, pw1):
                 loggedIn = app.client.login(un, pw1, False)
-
-                p = Popup(title = "Success", content = Label(text = "Account has been created" + "/nAnd you have been logged in" if loggedIn else ""), size_hint = (0.6, 0.3))
+                
+                
+                if loggedIn:
+                    app.online = True
+                    self.set_Border()
+                    app.username = un
+                    app.password = app.client.hash_Password(pw1)
+                    
+                p = Popup(title = "Success", content = Label(text = "Account has been created" + "\nAnd you have been logged in" if loggedIn else ""), size_hint = (0.6, 0.3))
                 p.open()
 
 
@@ -775,8 +788,6 @@ class BestTimes(BaseScreen):
     def get_Top_Time(self, index):
         topTime = app.topTimes[index]
         return game.parse_Timer_to_String(topTime) if len(topTime) > 0 else "N/A"
-
-
 
 
 #############################

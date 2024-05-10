@@ -1,6 +1,5 @@
-
 import socket
-import hashlib
+#import hashlib
 
 #Make connection with server
 #Select if you want to play against a random
@@ -10,6 +9,17 @@ import hashlib
 #continue
 #if dont continue exit mulitplayer
 #close connection
+
+def gaviHash(data):
+    hash_value = 0
+    x = len(data)
+    for i, char in enumerate(data):
+        # Mix operations: XOR, multiplication, bit-shifting
+        hash_value ^= (ord(char) * (x**i))
+        hash_value ^= (ord(char) << ((x-i) % 3)) ** ((x-i))
+        
+    return hex(hash_value)[2:]
+
 
 class Client:
     def __init__(self):
@@ -41,7 +51,7 @@ class Client:
         return self.__client.recv(n).decode()
 
     def hash_Password(self, password):
-        return hashlib.sha256(password.encode()).hexdigest()
+        return gaviHash(password)
 
     def register(self, username, password):#Password going through here is here unproccessed
         print("[Registering from client]")
@@ -117,3 +127,10 @@ class Client:
 
 
 
+
+    
+    
+    
+if __name__ == "__main__":
+    while True:
+        print(gaviHash(input(">")))

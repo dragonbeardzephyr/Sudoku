@@ -508,7 +508,7 @@ if __name__ == "__main__":
     print(f"easy        {len(easy)}")
     print(f"normal      {len(normal)}")
     print(f"hard        {len(hard)}")
-    print(f"extra hard  {len(extra_hard)}")
+    print(f"extra hard  {len(extraHard)}")
     print("------------------------------")
     print(f"Total       {numberToGenerate*8}")
     print("------------------------------")

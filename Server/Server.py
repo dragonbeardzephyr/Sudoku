@@ -59,7 +59,6 @@ class Client(threading.Thread):
         self.address = address
         self.username = None
         self.bestTimes = [None, None, None, None]
-        self.lock = threading.Lock()
         self.options = { "login": self.login,
                     "register": self.register,
                     "match_Players": self.match_Players,
@@ -71,7 +70,7 @@ class Client(threading.Thread):
         self.inGame = False
 
     def run(self):
-        while True:
+        while self.client:
             try:
                 if self.inGame:
                     continue
@@ -81,7 +80,6 @@ class Client(threading.Thread):
                         self.matching = False
                         self.client.send("Match Not Found".encode())
                         print(f"[Matchmaking timed out for {self.username} from {self.address}]")
-                    continue
 
                 else:
                     print(f"[Waiting for request from {self.username}, {self.address}]")
@@ -179,7 +177,8 @@ class Client(threading.Thread):
         cursor = conn.cursor()
 
         try:
-            cursor.execute("UPDATE BestTimes SET Easy = ?, Normal = ?, Hard = ?, 'Extra Hard' = ? WHERE Username = ?", (times[1], times[2], times[3], times[4], times[0]))
+            cursor.execute("UPDATE BestTimes SET Easy = ?, Normal = ?, Hard = ?, 'Extra Hard' = ? WHERE Username = ?", 
+                           (times[1], times[2], times[3], times[4], times[0]))
             self.client.send("valid".encode())
             print(f"[Succesfully updated best times from {self.address}]")
 
@@ -292,7 +291,7 @@ def create_Match():
     while True:
         time.sleep(1)
         for difficulty in queueDict:
-            if queueDict[difficulty].isEven() and not queueDict[difficulty].isEmpty():
+            if not queueDict[difficulty].isEmpty() and queueDict[difficulty].isEven():
                 player1 = queueDict[difficulty].deQueue()
                 player2 = queueDict[difficulty].deQueue()
 
