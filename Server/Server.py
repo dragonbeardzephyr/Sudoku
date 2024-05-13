@@ -236,8 +236,12 @@ class Game(threading.Thread):
         finished = False
         self.player1.client.send("Match Found".encode())
         self.player2.client.send("Match Found".encode())
+        
         self.player1.client.send(self.puzzleString.encode())
         self.player2.client.send(self.puzzleString.encode())
+
+        self.player1.client.send(self.player2.username.encode())
+        self.player2.client.send(self.player1.username.encode())
 
         while finished is False:
             p1Grid = self.player1.client.recv(1024).decode()

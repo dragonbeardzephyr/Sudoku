@@ -102,7 +102,6 @@ class SudokuApp(App):
     def check_match_Found(self, dt):
         print("[Chekcing math recieve found]")
         matchFound = app.client.receive()
-        print(matchFound)
         if matchFound == "Match Found":
             return True
 
@@ -161,11 +160,6 @@ class MainMenu(BaseScreen):
 
 class Menu(BaseScreen):
     pass
-
-class HowToPlayScreen(BaseScreen):
-    pass
-
-
 
 class ClassicMenu(Menu):
     def setDifficulty(self, difficulty):
@@ -489,6 +483,14 @@ class MultiplayerGame(GameScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def on_enter(self):
+        self.set_Border()
+
+        #RECEIVE GRID
+        #initilaize stuff
+        self.load()
+        self.clock = Clock.schedule_interval(self.checks, 0.01)
+
     def checks(self, dt):
 
         #GET OPPONENT GRID SOMEHOW
@@ -562,23 +564,17 @@ class MultiplayerGame(GameScreen):
         self.ids.timer.text = game.parse_Timer_to_String(self.elapsedTime)
         self.saveTime = [round(self.elapsedTime, 2), self.ids.timer.text]
 
-    def on_enter(self):
-        self.set_Border()
-
-        #RECEIVE GRID
-        #initilaize stuff
-        self.load()
-        self.clock = Clock.schedule_interval(self.checks, 0.01)
+    
 
     def load(self):#########Change this for multiplayer
 
         puzzleString = app.client.receive()
-
+        self.opponentUsername = app.client.receive()
+        
         game.puzzle = Puzzle(puzzleString)
         game.puzzleSolution = Puzzle(puzzleString)
         game.puzzleSolution.solve()
 
-        grid = self.ids.grid
         game.opponentGrid = "".join([str(0) for i in range(81)]) # Will be revced by server as astring of 1s and 0s, 1s for cells that are complete and 0s for cells that arent
 
         i = 0
@@ -735,7 +731,7 @@ class Login(BaseScreen):
 
 class Register(BaseScreen):
     def clickRegister(self):
-        print("Butoon Clicked")
+        print("Buton Clicked")
         un , pw1, pw2 = self.ids.username.text, self.ids.password1.text, self.ids.password2.text
 
         if len(pw1) < 7 or len(pw2) < 7:
@@ -789,6 +785,9 @@ class BestTimes(BaseScreen):
         topTime = app.topTimes[index]
         return game.parse_Timer_to_String(topTime) if len(topTime) > 0 else "N/A"
 
+
+class HowToPlayScreen(BaseScreen):
+    pass
 
 #############################
 

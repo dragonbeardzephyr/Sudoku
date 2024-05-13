@@ -527,6 +527,11 @@ MenuManager:
         pos_hint : {"x":0.005, "top": 0.99}
         on_release:
             root.clickExit()
+    Label:
+        id: opponentLabel
+        text : root.opponentUsername
+        size_hint : 0.3, 0.3
+        pos_hint : {"x":0.1, "top": 0.5}
 
     GridLayout:
         id : opponentGrid
