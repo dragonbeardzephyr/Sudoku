@@ -482,6 +482,10 @@ class OpponentGridCell(Button):
 class MultiplayerGame(GameScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.opponentUsername = ""
+
+    def get_Opponent_Username(self):
+        return self.opponentUsername
 
     def on_enter(self):
         self.set_Border()
@@ -551,11 +555,11 @@ class MultiplayerGame(GameScreen):
                     size_hint = (0.6, 0.3))
 
             p.open()
+            
+            self.finish()
 
-            self.manager.current = "MainMenu"
-            print("Exit")
-
-
+    def finish(self):
+        self.mananger.current = "MainMenu"
 
     def updateTimer(self):
         self.elapsedTime += time.time() - self.recentTime
@@ -569,7 +573,7 @@ class MultiplayerGame(GameScreen):
     def load(self):#########Change this for multiplayer
 
         puzzleString = app.client.receive()
-        self.opponentUsername = app.client.receive()
+        self.opponentUsername = StringProperty(app.client.receive())
         
         game.puzzle = Puzzle(puzzleString)
         game.puzzleSolution = Puzzle(puzzleString)
@@ -723,7 +727,6 @@ class Login(BaseScreen):
                 p.open()
 
         else:
-            app.client.disconnect()
             app.client = None
             p  = Popup(title = "Error", content = Label(text = "Could not connect to server, try again otherwise server must be offline"), size_hint = (0.6, 0.3))
             p.open()
