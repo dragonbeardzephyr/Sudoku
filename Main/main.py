@@ -194,8 +194,6 @@ class MultiplayerMenu(Menu):
                     self.ids.returnButton.disabled = False
                     print("Matching not good")
 
-
-
             else:
                 print("Matching not good")
         else:
@@ -206,6 +204,7 @@ class MultiplayerMenu(Menu):
 
 class AccountMenu(Menu):
     def on_enter(self):
+        super().on_enter()
         self.ids.usernameLabel.text = self.get_Username()
         
     def get_Username(self):
@@ -385,6 +384,7 @@ class GameScreen(BaseScreen):
 
         game.win = game.puzzle.grid == game.puzzleSolution.grid
         if game.win:#check win
+            game.puzzleSolution.show_Grid()
             print("Player WINS!")
             self.clock.cancel()
             game.timerOn = False
@@ -556,10 +556,9 @@ class MultiplayerGame(GameScreen):
 
             p.open()
             
-            self.finish()
+            self.manager.current = "MainMenu"
 
-    def finish(self):
-        self.mananger.current = "MainMenu"
+
 
     def updateTimer(self):
         self.elapsedTime += time.time() - self.recentTime
@@ -704,10 +703,12 @@ class Login(BaseScreen):
     def clickLogin(self):
         print("button clicked")
         un, pw = self.ids.username.text, self.ids.password.text
-        print(un, pw)
-        app.client = Client()
-        app.client.connect()
-
+        print(un, pw)   
+        
+        if not(app.client.connected):
+            app.client = Client()
+            app.client.connect()
+            
         if app.client.connected:
             if app.client.login(un, pw, hashed = False):
                 app.online = True
@@ -746,11 +747,13 @@ class Register(BaseScreen):
             p = Popup(title = "Error", content = Label(text = "Passwords do not match"), size_hint = (0.6, 0.3))
             p.open()
             return
-
-        app.client = Client()
-        app.client.connect()
+        
+        if not(app.client.connected):
+            app.client = Client()
+            app.client.connect()
 
         if app.client.connected:
+            
             if app.client.register(un, pw1):
                 loggedIn = app.client.login(un, pw1, False)
                 
@@ -790,7 +793,8 @@ class BestTimes(BaseScreen):
 
 
 class HowToPlayScreen(BaseScreen):
-    pass
+    def on_enter(self):
+        return super().on_enter()
 
 #############################
 
