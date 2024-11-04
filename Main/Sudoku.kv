@@ -1,0 +1,695 @@
+#: import WipeTransition kivy.uix.screenmanager.WipeTransition
+#: import SwapTransition kivy.uix.screenmanager.SwapTransition
+#: import SlideTransition kivy.uix.screenmanager.SlideTransition
+#: import FadeTransition kivy.uix.screenmanager.FadeTransition
+
+
+MenuManager:
+    MainMenu:
+
+    ClassicMenu:
+    ClassicGame:
+
+    MultiplayerMenu:
+    MultiplayerGame:
+
+    AccountMenu:
+    Login:
+    Register:
+
+    BestTimes:
+
+    HowToPlayScreen:
+
+
+<BaseScreen>:
+    name : "BaseScreen"
+    canvas.before:
+        Color : 
+            rgba : 1, 1, 1, 0.07
+        Rectangle:
+            size: self.size
+            source : None
+            
+
+    canvas.after:
+        Rectangle:
+            size: self.size
+            source : root.borderFile
+
+<DefaultButton>:
+    size_hint : 0.1, 0.1
+    pos_hint : {"center_x": 0.5, "center_y":0.5}
+    text : "Default Button"
+    on_release: print("Default Button Pressed")
+    source : "Main\graphics\DefaultButton.png"
+
+<Menu>:
+    Button:
+        name : "ReturnToMainMenu"
+        text: "Return"
+        id: returnButton
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = FadeTransition()
+            root.manager.current = "MainMenu"
+
+<MainMenu>:
+    name : "MainMenu"
+    
+    AnchorLayout:
+        size_hint : 0.9, 0.4
+        pos_hint : {"center_x": 0.5, "center_y":0.65}
+        BoxLayout:
+            orientation : "vertical"
+            BoxLayout:
+                size_hint : 1, 0.75
+                Label: 
+                    text: "Sudoku App"
+                    font_size: 50
+                    color: 0, 1, 0.6, 1
+                    
+            BoxLayout:
+                size_hint : 1, 0.25
+                Button:
+                    text: "Best Times"
+                    font_size : 30
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release:
+                        root.manager.transition = SlideTransition()
+                        root.manager.transition.direction = "right"
+                        root.manager.current = "BestTimes"
+
+                Button:
+                    text: "Classic"
+                    font_size : 30
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release: 
+                        root.manager.transition = SlideTransition()
+                        root.manager.transition.direction = "right"
+                        root.manager.current = "ClassicMenu"
+
+                Button:
+                    text: "Multiplayer"
+                    font_size : 30
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release:
+                        root.manager.transition = SlideTransition()
+                        root.manager.transition.direction = "left"
+                        root.manager.current = "MultiplayerMenu"
+
+                Button:
+                    text: "Account"
+                    font_size : 30
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release:
+                        root.manager.transition = SlideTransition()
+                        root.manager.transition.direction = "left"
+                        root.manager.current = "AccountMenu"
+
+    BoxLayout:
+        size_hint : 0.225, 0.1
+        pos_hint : {"center_x": 0.5, "center_y":0.25}
+        Button:
+            text: "Help"
+            font_size : 30
+            color : 0.38, 0.13, 0.97, 1
+            background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+            on_release:
+                root.manager.transition = SlideTransition()
+                root.manager.transition.direction = "up"
+                root.manager.current = "HowToPlayScreen"
+
+
+<HowToPlayScreen>:
+    name : "HowToPlayScreen"
+
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = SlideTransition()
+            root.manager.transition.direction = "down"
+            app.root.current = "MainMenu"
+
+    AnchorLayout:
+        size_hint : 1, 0.96
+        pos_hint : {"center_x": 0.5, "center_y":0.47}
+
+        ScrollView:
+            size_hint : 1, 1
+            do_scroll_x : False
+            do_scroll_y : True
+            Image:
+                source: "Main\graphics\Sudoku_App_Help.png"
+                size_hint: None, None
+                size : self.texture_size
+
+
+
+
+    
+
+
+<GameScreen>:
+    name : "GameScreen"
+    canvas.before:
+        #Color : 
+            #rgba : 1, 1, 1, 0.07
+        Rectangle:
+            size: self.size
+            source : "Main\graphics\Sudoku_App_Background.png"
+
+    Button:
+        id : timer
+        text: "00:00"
+        background_color : 0, 1, 0.5, 1
+        size_hint : 0.1, 0.07
+        pos_hint : {"center_x" : 0.5, "top": 0.99}
+        on_release: root.pauseGame()
+
+    AnchorLayout:
+        anchor_x: "center"
+        anchor_y: "center"
+        GridLayout:
+            size_hint_x : None
+            size_hint_y : None
+            width : "600dp"
+            height : "600dp"
+            id : grid
+            cols: 3 
+            rows: 3
+            spacing : 8
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box1
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box2
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box3
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box4
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box5
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box6
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box7
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box8
+                cols: 3 
+                rows: 3
+                spacing : 2
+            GridLayout:
+                size_hint_x : None
+                size_hint_y : None
+                width : 200
+                height : 200
+                id : box9
+                cols: 3 
+                rows: 3
+                spacing : 2
+
+
+            
+    GridLayout:
+        width: 175
+        height: 175
+        size_hint_x : None
+        size_hint_y : None
+        pos_hint : {"center_x": 0.9, "center_y":0.5}
+        id : numberGrid
+        cols : 3
+        rows : 3
+        spacing : 0.5
+        
+    
+<PauseScreen>:
+    title : "Pause"
+    size_hint : 0.4, 0.6
+    Button:
+        text: "Resume"
+        on_release: root.dismiss()
+       
+
+
+
+
+<ClassicMenu>:
+    name : "ClassicMenu"
+    
+    AnchorLayout:
+        size_hint : 0.9, 0.1
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+
+        BoxLayout:
+
+            Button:
+                text: "Easy"
+                font_size : 25
+                color : 0.38, 0.13, 0.97, 1
+                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                on_release:
+                    root.setDifficulty("easy")
+                    root.manager.transition = FadeTransition()
+                    root.manager.current = "ClassicGame"
+                    root.manager.transition.direction = "right"
+            
+            Button:
+                text: "Normal"
+                font_size : 25
+                color : 0.38, 0.13, 0.97, 1
+                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                on_release:
+                    root.setDifficulty("normal")
+                    root.manager.transition = FadeTransition()
+                    root.manager.current = "ClassicGame"
+                    root.manager.transition.direction = "right"
+
+            Button:
+                text: "Hard"
+                font_size : 25
+                color : 0.38, 0.13, 0.97, 1
+                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                on_release:
+                    root.setDifficulty("hard")
+                    root.manager.transition = FadeTransition()
+                    root.manager.current = "ClassicGame"
+                    root.manager.transition.direction = "right"
+            
+            Button:
+                text: "Extra Hard"
+                font_size : 25
+                color : 0.38, 0.13, 0.97, 1
+                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                on_release:
+                    root.setDifficulty("extra_hard")
+                    root.manager.transition = FadeTransition()
+                    root.manager.current = "ClassicGame"
+                    root.manager.transition.direction = "right"
+
+<MultiplayerMenu>:
+    name : "MultiplayerMenu"
+    AnchorLayout:
+        size_hint : 0.9, 0.3
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+
+        BoxLayout:
+            orientation : "vertical"
+            BoxLayout:
+                ToggleButton:
+                    text: "Easy"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    group : "difficulty"
+                    state : "down"
+                    on_release:
+                        root.setDifficulty("easy")
+
+                ToggleButton:
+                    text: "Normal"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    group : "difficulty"
+                    on_release:
+                        root.setDifficulty("normal")
+
+
+                ToggleButton:
+                    text: "Hard"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    group : "difficulty"
+                    on_release:
+                        root.setDifficulty("hard")
+
+
+                ToggleButton:
+                    text: "Extra Hard"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    group : "difficulty"
+                    on_release:
+                        root.setDifficulty("extra_hard")
+
+            Label:
+                text : ""
+
+            Button:
+                text: "Match"
+                font_size : 25
+                color : 0.38, 0.13, 0.97, 1
+                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                id : matchButton
+                size_hint : 0.5, 1
+                pos_hint : {"center_x": 0.5}
+                on_release: root.match()
+           
+
+
+<AccountMenu>:
+    name : "AccountMenu"
+    AnchorLayout:
+        size_hint : 0.9, 0.3
+        pos_hint : {"center_x": 0.5, "center_y":0.6}
+
+        BoxLayout:
+            orientation : "vertical"
+            Label:
+                id : usernameLabel
+                text : root.get_Username()
+                font_size : 25
+            Label:
+                text:""
+
+            BoxLayout:
+
+                Button:
+                    text: "Login"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release: 
+                        root.manager.current = "Login"
+                
+                Button:
+                    text: "Register"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release: 
+                        root.manager.current = "Register"
+
+
+                Button:
+                    text: "Logout"
+                    font_size : 25
+                    color : 0.38, 0.13, 0.97, 1
+                    background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                    on_release: root.clickLogout()
+                    
+                
+
+<BestTimes>:
+    name : "BestTimes"
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = FadeTransition()
+            app.root.current = "MainMenu"
+            
+    AnchorLayout:
+        size_hint : 0.8, 0.5
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+        
+        #orientation : "horizontal"
+        BoxLayout:
+            background_color : 0, 0, 0, 0.5
+            spacing : 5
+            BoxLayout:
+                color: 1, 0, 0, 1
+                orientation : "vertical"
+                Label:
+                    text: "Easy"
+                Label:
+                    id : easyTime
+                    text : ""
+            BoxLayout:
+                orientation : "vertical"
+                Label:
+                    text: "Normal"
+                Label:
+                    id : normalTime
+                    text : ""
+            BoxLayout:
+                orientation : "vertical"
+                Label:
+                    text: "Hard"
+                Label:
+                    id : hardTime
+                    text : ""
+            BoxLayout:
+                orientation : "vertical"
+                Label:
+                    text: "Extra Hard"
+                Label:
+                    id : extraHardTime
+                    text : ""
+
+
+
+
+
+<ClassicGame>:
+    name : "ClassicGame"
+    Button:
+        text: "Exit Game"
+        size_hint : 0.08, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release: 
+            root.manager.transition.direction = "down"
+            root.manager.current = "ClassicMenu"
+
+    
+
+    
+
+<MultiplayerGame>:
+    name : "MultiplayerGame"
+    Button:
+        id : exitButton
+        text: "Exit Game"
+        size_hint : 0.08, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.clickExit()
+    Label:
+        id: opponentLabel
+        text : root.get_Opponent_Username()
+        size_hint : 0.3, 0.3
+        pos_hint : {"x":0.1, "top": 0.5}
+
+    GridLayout:
+        id : opponentGrid
+        width: 175
+        height: 175
+        size_hint_x : None
+        size_hint_y : None
+        pos_hint : {"center_x": 0.9, "center_y":0.77}
+        cols : 9
+        rows : 9
+        spacing : 0.1
+
+    
+
+            
+<Login>:
+    name : "Login"
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = FadeTransition()
+            app.root.current = "AccountMenu"
+
+    AnchorLayout:
+
+        size_hint : 0.6, 0.4
+        pos_hint : {"center_x": 0.5, "center_y":0.45}
+        BoxLayout:
+            orientation : "vertical"
+            BoxLayout:
+                Label:
+                    size_hint : 0.25, 1
+                    text : "Username"
+                    color : 0, 1, 1, 1
+
+                TextInput:
+                    size_hint : 0.75, 1
+                    id: username
+                    hint_text : "username"
+                    multiline : False
+
+            BoxLayout:
+                Label:
+                    size_hint : 0.25, 1
+                    text : "Password"
+                    color : 0, 1, 1, 1
+
+                TextInput:
+                    size_hint : 0.5, 1
+                    id : password
+                    hint_text : "password"
+                    multiline : False
+                    password : True
+
+                ToggleButton:
+                    size_hint : 0.25, 1
+                    text : "toggle mask"
+                    on_press: root.togglePW()
+
+            Label:
+                text : ""
+
+            Button:
+                text:"Login"
+                font_size : 25
+                color : 0.38, 0.13, 0.97, 1
+                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                pos_hint: {"center_x" : 0.5}
+                size_hint : 0.3, 0.8
+                on_release : root.clickLogin()
+
+            Label:
+                text : ""
+            Label:
+                text : ""
+
+            ToggleButton:
+                text:"Remember Login"
+                font_size : 20
+                color : 0.38, 0.13, 0.97, 1
+                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                pos_hint: {"center_x" : 0.5}
+                size_hint : 0.3, 0.8
+                on_release : root.toggleRememberLogin()
+
+
+<Register>:
+    name : "Register"
+    Button:
+        text: "Return"
+        size_hint : 0.07, 0.04
+        pos_hint : {"x":0.005, "top": 0.99}
+        on_release:
+            root.manager.transition = FadeTransition()
+            app.root.current = "AccountMenu"
+
+    AnchorLayout:
+        size_hint : 0.6, 0.3
+        pos_hint : {"center_x": 0.5, "center_y":0.5}
+
+        BoxLayout:
+            orientation : "vertical"
+            BoxLayout:
+                Label:
+                    size_hint : 0.25, 1
+                    text : "Username"
+                    color : 0, 1, 1, 1
+
+                TextInput:
+                    size_hint : 0.75, 1
+                    id: username
+                    hint_text : "username"
+                    multiline : False
+
+            BoxLayout:
+                Label:
+                    size_hint : 0.25, 1
+                    text : "Password"
+                    color : 0, 1, 1, 1
+
+                TextInput:
+                    size_hint : 0.75, 1
+                    id : password1
+                    hint_text : "password"
+                    multiline : False
+                    
+
+            BoxLayout:
+                Label:
+                    size_hint : 0.25, 1
+                    text : "Re-Enter Password"
+                    color : 0, 1, 1, 1
+
+                TextInput:
+                    size_hint : 0.75, 1
+                    id : password2
+                    hint_text : "password"
+                    multiline : False
+                    
+
+        
+            Label:
+                text : ""
+
+            Button:
+                text:"Create Account"
+                font_size : 25
+                color : 0.38, 0.13, 0.97, 1
+                background_normal : "Main\graphics\Sudoku_App_Deafult_Button.png"
+                pos_hint: {"center_x" : 0.5}
+                size_hint : 0.3, 0.8
+                on_release : root.clickRegister()
+
+    
+
+
+
+
+   

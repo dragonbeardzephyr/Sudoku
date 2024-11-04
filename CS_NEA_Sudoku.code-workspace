@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"dataworkspace.excludedProjects": [
+			"Sudoku_Server/Sudoku_Server.sqlproj"
+		]
+	}
+}
