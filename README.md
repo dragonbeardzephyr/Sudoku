@@ -8,4 +8,4 @@ Used:
   Threading
   Kivy
   SQLite3
-  
+
