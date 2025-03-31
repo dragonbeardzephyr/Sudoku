@@ -1,12 +1,7 @@
-A-Level Computer Science Project
+A-Level Computer Science Project (Completed May 2024)
 
 Features a classic Sudoku mode and an online multiplayer mode.
-In the multiplayer mode two opponents will race to see who can finish the puzzle the fastest.
+In multiplayer mode, two opponents race to see who can finish the puzzle the fastest.
 
-Used:
-  Python
-  Sockets
-  Threading
-  Kivy
-  SQLite3
+Used: Python, Sockets, Threading, Kivy, SQLite3
 
