@@ -5,7 +5,7 @@ Next steps:
 [] Revamp user interface, add animations + sound effects
 [] Security improvements
 
-A-Level Computer Science Project (Completed May 2024)
+A-Level Computer Science Project (Completed for submission May 2024)
 
 Features a classic Sudoku mode and an online multiplayer mode.
 In multiplayer mode, two opponents race to see who can finish the puzzle the fastest.
