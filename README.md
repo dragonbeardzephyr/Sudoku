@@ -1,9 +1,9 @@
 **Under Construction**
 Next steps:
-[] Use WebSockets instead
-[] Set up capabilities to host a server program and enable multiplayer over the internet.
-[] Revamp user interface, add animations + sound effects
-[] Security improvements
+- Use WebSockets instead
+-  Set up capabilities to host a server program and enable multiplayer over the internet.
+-   Revamp user interface, add animations + sound effects
+-   Security improvements
 
 A-Level Computer Science Project (Completed for submission May 2024)
 
